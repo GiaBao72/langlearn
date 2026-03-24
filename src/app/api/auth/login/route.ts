@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json({ success: true, user: { id: user.id, email: user.email, role: user.role, name: user.name } })
 
+    // secure: false because VPS runs HTTP (no HTTPS yet)
     response.cookies.set('access_token', accessToken, {
       httpOnly: true,
       secure: false,
