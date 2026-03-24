@@ -12,8 +12,8 @@ export default async function LessonEditPage({ params }: { params: Promise<{ id:
   const lesson = await prisma.lesson.findUnique({
     where: { id },
     include: {
-      course: { select: { id: true, title: true } },
       exercises: { orderBy: { order: 'asc' } },
+      course: { select: { id: true, title: true } },
     },
   })
 
