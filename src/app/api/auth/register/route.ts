@@ -41,14 +41,14 @@ export async function POST(req: NextRequest) {
 
     response.cookies.set('access_token', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false,
       sameSite: 'lax',
       maxAge: 15 * 60,
       path: '/',
     })
     response.cookies.set('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
       path: '/',

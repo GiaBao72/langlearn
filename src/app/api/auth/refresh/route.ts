@@ -37,8 +37,8 @@ export async function POST() {
   })
 
   const response = NextResponse.json({ success: true })
-  response.cookies.set('access_token', newAccessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 15 * 60, path: '/' })
-  response.cookies.set('refresh_token', newRefreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 7 * 24 * 60 * 60, path: '/' })
+  response.cookies.set('access_token', newAccessToken, { httpOnly: true, secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false, sameSite: 'lax', maxAge: 15 * 60, path: '/' })
+  response.cookies.set('refresh_token', newRefreshToken, { httpOnly: true, secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60, path: '/' })
   return response
 }
 
