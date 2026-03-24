@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyAccessToken } from '@/lib/auth'
+import { jwtVerify } from 'jose'
 
 const PUBLIC_PATHS = ['/', '/login', '/register', '/blog', '/api/auth']
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Allow public paths
@@ -15,18 +15,24 @@ export function middleware(request: NextRequest) {
 
   // Check access token
   const token = request.cookies.get('access_token')?.value
-  const payload = token ? verifyAccessToken(token) : null
 
-  if (!payload) {
+  if (!token) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Admin guard
-  if (pathname.startsWith('/admin') && payload.role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!)
+    const { payload } = await jwtVerify(token, secret)
 
-  return NextResponse.next()
+    // Admin guard
+    if (pathname.startsWith('/admin') && payload.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    return NextResponse.next()
+  } catch {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 }
 
 export const config = {
