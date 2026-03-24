@@ -15,10 +15,8 @@ function Heatmap({ data }: { data: Record<string, number> }) {
   const weeks: { date: string; count: number }[][] = []
   const today = new Date()
 
-  // Build 52 weeks grid
   const startDate = new Date(today)
   startDate.setDate(startDate.getDate() - 364)
-  // Align to Monday
   startDate.setDate(startDate.getDate() - startDate.getDay() + 1)
 
   let week: { date: string; count: number }[] = []
@@ -33,10 +31,10 @@ function Heatmap({ data }: { data: Record<string, number> }) {
   if (week.length) weeks.push(week)
 
   function getColor(count: number) {
-    if (count === 0) return 'bg-white/5'
-    if (count < 3) return 'bg-[#FFB000]/30'
-    if (count < 6) return 'bg-[#FFB000]/60'
-    return 'bg-[#FFB000]'
+    if (count === 0) return 'bg-slate-100'
+    if (count < 3) return 'bg-indigo-200'
+    if (count < 6) return 'bg-indigo-400'
+    return 'bg-indigo-600'
   }
 
   return (
@@ -58,56 +56,74 @@ function Heatmap({ data }: { data: Record<string, number> }) {
 
 export default function DashboardClient({ user, heatmapData, streak, totalExercises, courses }: Props) {
   return (
-    <div className="min-h-screen bg-[#111111]">
+    <div className="min-h-screen bg-slate-50">
       {/* Nav */}
-      <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <Link href="/" className="font-bold text-lg tracking-tight">LangLearn</Link>
-        <div className="flex items-center gap-4 text-sm text-white/60">
-          <Link href="/practice" className="hover:text-white transition-colors">Luyện tập</Link>
-          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-          <span className="text-white/30">|</span>
-          <span className="text-white/80">{user.name}</span>
+      <nav className="bg-white border-b border-slate-100 px-6 py-4">
+        <div className="flex items-center justify-between max-w-5xl mx-auto">
+          <Link href="/" className="font-bold text-lg tracking-tight text-slate-900">LangLearn</Link>
+          <div className="flex items-center gap-5 text-sm">
+            <Link href="/practice" className="text-slate-500 hover:text-slate-900 transition-colors font-medium">Luyện tập</Link>
+            <Link href="/blog" className="text-slate-500 hover:text-slate-900 transition-colors font-medium">Blog</Link>
+            <span className="text-slate-200">|</span>
+            <span className="text-slate-700 font-semibold">{user.name}</span>
+          </div>
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold mb-1">Chào, {user.name} 👋</h1>
-          <p className="text-white/40">Hôm nay học gì nào?</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-1">Chào, {user.name} 👋</h1>
+          <p className="text-slate-500">Hôm nay học gì nào?</p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { icon: Flame, label: 'Streak', value: `${streak} ngày`, color: 'text-orange-400' },
-            { icon: Target, label: 'Đã hoàn thành', value: `${totalExercises} bài`, color: 'text-[#FFB000]' },
-            { icon: Trophy, label: 'Mục tiêu hôm nay', value: '5 phút', color: 'text-green-400' },
-            { icon: BookOpen, label: 'Khóa học', value: `${courses.length} khóa`, color: 'text-blue-400' },
+            { icon: Flame, label: 'Streak', value: `${streak} ngày`, color: 'text-orange-500', bg: 'bg-orange-50' },
+            { icon: Target, label: 'Đã hoàn thành', value: `${totalExercises} bài`, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { icon: Trophy, label: 'Mục tiêu hôm nay', value: '5 phút', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { icon: BookOpen, label: 'Khóa học', value: `${courses.length} khóa`, color: 'text-sky-600', bg: 'bg-sky-50' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <stat.icon className={`w-5 h-5 ${stat.color} mb-3`} />
-              <div className="text-2xl font-bold mb-0.5">{stat.value}</div>
-              <div className="text-white/40 text-sm">{stat.label}</div>
+            <div key={stat.label} className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm">
+              <div className={`w-9 h-9 ${stat.bg} rounded-lg flex items-center justify-center mb-3`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              </div>
+              <div className="text-2xl font-bold text-slate-900 mb-0.5">{stat.value}</div>
+              <div className="text-slate-400 text-sm">{stat.label}</div>
             </div>
           ))}
         </div>
 
+        {/* Quick practice CTA */}
+        <Link
+          href="/practice"
+          className="block bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-5 mb-8 shadow-sm transition-colors group"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-lg">Tiếp tục luyện tập</p>
+              <p className="text-indigo-200 text-sm mt-0.5">Chỉ cần 5 phút mỗi ngày</p>
+            </div>
+            <span className="text-indigo-300 text-2xl group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+        </Link>
+
         {/* Heatmap */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-10">
-          <h2 className="font-semibold mb-4 text-white/80">Hoạt động học tập</h2>
+        <div className="bg-white border border-slate-100 rounded-xl p-6 mb-8 shadow-sm">
+          <h2 className="font-semibold text-slate-800 mb-4">Hoạt động học tập</h2>
           <Heatmap data={heatmapData} />
-          <p className="text-white/30 text-xs mt-3">Mỗi ô = 1 ngày · Màu càng đậm = học càng nhiều</p>
+          <p className="text-slate-400 text-xs mt-3">Mỗi ô = 1 ngày · Màu càng đậm = học càng nhiều</p>
         </div>
 
-        {/* Quick start */}
+        {/* Courses */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold">Khóa học</h2>
-          <Link href="/courses" className="text-[#FFB000] text-sm hover:underline">Xem tất cả →</Link>
+          <h2 className="font-semibold text-slate-800">Khóa học</h2>
+          <Link href="/courses" className="text-indigo-600 text-sm hover:underline font-medium">Xem tất cả →</Link>
         </div>
 
         {courses.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-10 text-center text-white/40">
+          <div className="bg-white border border-slate-100 rounded-xl p-10 text-center text-slate-400 shadow-sm">
             Chưa có khóa học nào. Admin sẽ thêm sớm!
           </div>
         ) : (
@@ -116,13 +132,13 @@ export default function DashboardClient({ user, heatmapData, streak, totalExerci
               <Link
                 key={c.id}
                 href={`/courses/${c.id}`}
-                className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-[#FFB000]/40 transition-colors group"
+                className="bg-white border border-slate-100 rounded-xl p-6 hover:border-indigo-300 hover:shadow-md transition-all group shadow-sm"
               >
-                <div className="text-xs text-white/40 uppercase tracking-widest mb-3">
+                <div className="text-xs text-slate-400 uppercase tracking-widest mb-3 font-medium">
                   {c.language} · {c.level}
                 </div>
-                <h3 className="font-semibold group-hover:text-[#FFB000] transition-colors mb-2">{c.title}</h3>
-                <p className="text-white/40 text-sm">{c.lessonCount} bài học</p>
+                <h3 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors mb-2">{c.title}</h3>
+                <p className="text-slate-400 text-sm">{c.lessonCount} bài học</p>
               </Link>
             ))}
           </div>
