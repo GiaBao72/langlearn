@@ -37,7 +37,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
         {/* Content */}
         <div
-          className="prose max-w-none prose-headings:text-[#334155] prose-p:text-[#334155] prose-a:text-[#2563EB] prose-strong:text-[#334155]"
+          className="blog-content text-[#334155] text-base sm:text-[17px] leading-relaxed"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
