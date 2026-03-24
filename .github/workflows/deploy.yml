@@ -1,0 +1,26 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 118.70.49.57
+          username: tmc
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: 38393
+          script: |
+            cd /home/tmc/projects/langlearn
+            git pull origin main
+            npm install --production
+            npx prisma migrate deploy
+            npm run build
+            pm2 restart langlearn || pm2 start npm --name "langlearn" -- start
+            echo "Deploy done ✅"
