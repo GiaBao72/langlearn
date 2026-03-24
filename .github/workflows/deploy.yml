@@ -11,21 +11,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install & Build
-        run: |
-          npm ci
-          npm run build
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET }}
-          JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -36,7 +21,7 @@ jobs:
           script: |
             cd ~/langlearn
             git pull origin main
-            npm ci --production
+            npm ci
             npx prisma migrate deploy
             npm run build
             pm2 restart langlearn || pm2 start npm --name langlearn -- start
