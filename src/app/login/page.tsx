@@ -26,6 +26,7 @@ export default function LoginPage() {
         setError(data.error || 'Đăng nhập thất bại')
         return
       }
+      router.refresh()
       router.push('/dashboard')
     } catch {
       setError('Lỗi kết nối, thử lại sau')
