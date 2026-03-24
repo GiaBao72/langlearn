@@ -12,7 +12,7 @@ async function main() {
     create: {
       email: 'admin@langlearn.vn',
       name: 'Admin',
-      password: hash,
+      passwordHash: hash,
       role: 'ADMIN',
     },
   })
@@ -23,12 +23,11 @@ async function main() {
     create: {
       email: 'test@langlearn.vn',
       name: 'Test User',
-      password: hash,
+      passwordHash: hash,
       role: 'USER',
     },
   })
 
-  // Seed 1 course + 2 lessons
   const course = await prisma.course.upsert({
     where: { id: 'seed-course-1' },
     update: {},
@@ -37,7 +36,7 @@ async function main() {
       title: 'Tiếng Đức cho người mới bắt đầu',
       language: 'Tiếng Đức',
       level: 'A1',
-      description: 'Khóa học dành cho người bắt đầu từ con số 0. Học cách chào hỏi, giới thiệu bản thân và giao tiếp cơ bản.',
+      description: 'Khóa học dành cho người bắt đầu từ con số 0.',
       published: true,
     },
   })
@@ -66,7 +65,6 @@ async function main() {
     },
   })
 
-  // Seed exercises for lesson 1
   await prisma.exercise.createMany({
     skipDuplicates: true,
     data: [
@@ -74,36 +72,34 @@ async function main() {
         id: 'seed-ex-1',
         lessonId: lesson1.id,
         type: 'MULTIPLE_CHOICE',
-        question: '"Guten Morgen" có nghĩa là gì?',
-        options: JSON.stringify(['Chào buổi sáng', 'Chào buổi tối', 'Tạm biệt', 'Cảm ơn']),
-        answer: 'Chào buổi sáng',
+        question: '"Guten Morgen" co nghia la gi?',
+        data: { options: ['Chao buoi sang', 'Chao buoi toi', 'Tam biet', 'Cam on'], answer: 'Chao buoi sang' },
         order: 1,
       },
       {
         id: 'seed-ex-2',
         lessonId: lesson1.id,
         type: 'MULTIPLE_CHOICE',
-        question: 'Cách nói "Xin chào" trong tiếng Đức là?',
-        options: JSON.stringify(['Hallo', 'Danke', 'Bitte', 'Ja']),
-        answer: 'Hallo',
+        question: 'Cach noi "Xin chao" trong tieng Duc la?',
+        data: { options: ['Hallo', 'Danke', 'Bitte', 'Ja'], answer: 'Hallo' },
         order: 2,
       },
       {
         id: 'seed-ex-3',
         lessonId: lesson1.id,
         type: 'MULTIPLE_CHOICE',
-        question: '"Auf Wiedersehen" có nghĩa là gì?',
-        options: JSON.stringify(['Tạm biệt', 'Xin lỗi', 'Vâng', 'Không']),
-        answer: 'Tạm biệt',
+        question: '"Auf Wiedersehen" co nghia la gi?',
+        data: { options: ['Tam biet', 'Xin loi', 'Vang', 'Khong'], answer: 'Tam biet' },
         order: 3,
       },
     ],
   })
 
-  console.log('✅ Seed done!')
+  console.log('Seed done!')
   console.log('Admin:', admin.email, '/ admin123')
   console.log('User:', user.email, '/ admin123')
   console.log('Course:', course.title)
+  console.log('Lessons:', lesson1.title, lesson2.title)
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect())
