@@ -11,6 +11,8 @@ export default function Navbar() {
         {/* Desktop */}
         <div className="hidden sm:flex items-center gap-4 text-sm">
           <Link href="/courses" className="text-[#64748B] hover:text-[#2563EB] font-medium">Khóa học</Link>
+          <Link href="/roadmap" className="text-[#64748B] hover:text-[#2563EB] font-medium">Lộ trình</Link>
+          <Link href="/store" className="text-[#64748B] hover:text-[#2563EB] font-medium">Sách</Link>
           <Link href="/blog" className="text-[#64748B] hover:text-[#2563EB] font-medium">Blog</Link>
           <Link href="/login" className="text-[#64748B] hover:text-[#2563EB] font-medium">Đăng nhập</Link>
           <Link href="/register" className="bg-[#2563EB] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors">Bắt đầu</Link>
@@ -29,6 +31,8 @@ export default function Navbar() {
       {open && (
         <div className="sm:hidden mt-2 pb-3 border-t border-[#E2E8F0] pt-3 flex flex-col gap-1 max-w-6xl mx-auto">
           <Link href="/courses" onClick={() => setOpen(false)} className="py-2.5 px-2 text-sm font-medium text-[#334155] hover:text-[#2563EB] rounded-lg hover:bg-slate-50">Khóa học</Link>
+          <Link href="/roadmap" onClick={() => setOpen(false)} className="py-2.5 px-2 text-sm font-medium text-[#334155] hover:text-[#2563EB] rounded-lg hover:bg-slate-50">Lộ trình</Link>
+          <Link href="/store" onClick={() => setOpen(false)} className="py-2.5 px-2 text-sm font-medium text-[#334155] hover:text-[#2563EB] rounded-lg hover:bg-slate-50">Sách</Link>
           <Link href="/blog" onClick={() => setOpen(false)} className="py-2.5 px-2 text-sm font-medium text-[#334155] hover:text-[#2563EB] rounded-lg hover:bg-slate-50">Blog</Link>
           <Link href="/register" onClick={() => setOpen(false)} className="bg-[#2563EB] text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-700 text-sm text-center mt-1">Bắt đầu miễn phí →</Link>
         </div>
