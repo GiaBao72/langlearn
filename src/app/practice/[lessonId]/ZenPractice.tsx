@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 type ExerciseType = 'FLASHCARD' | 'FILL_BLANK' | 'MULTIPLE_CHOICE' | 'DICTATION' | 'SORT_WORDS'
@@ -90,12 +90,14 @@ function FillBlank({ question, data, onAnswer }: { question: string; data: Recor
 
 function MultipleChoice({ question, data, onAnswer }: { question: string; data: Record<string, unknown>; onAnswer: (correct: boolean) => void }) {
   const [selected, setSelected] = useState<number | null>(null)
+  const selectedRef = useRef<number | null>(null)
   const options = data.options as string[]
   const answer = data.answer as string
   const correctIdx = options.indexOf(answer)
 
   function pick(idx: number) {
-    if (selected !== null) return
+    if (selectedRef.current !== null) return
+    selectedRef.current = idx
     setSelected(idx)
     setTimeout(() => onAnswer(idx === correctIdx), 1000)
   }
@@ -107,7 +109,8 @@ function MultipleChoice({ question, data, onAnswer }: { question: string; data: 
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="max-w-lg mx-auto">
