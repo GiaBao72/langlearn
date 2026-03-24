@@ -31,12 +31,12 @@ export default function NewCoursePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111111]">
-      <nav className="border-b border-white/10 px-6 py-4 flex items-center gap-3 text-sm max-w-3xl mx-auto">
-        <Link href="/admin" className="text-white/40 hover:text-white transition-colors">Admin</Link>
-        <span className="text-white/20">/</span>
-        <Link href="/admin/courses" className="text-white/40 hover:text-white transition-colors">Khóa học</Link>
-        <span className="text-white/20">/</span>
+    <div className="min-h-screen bg-slate-50">
+      <nav className="border-b border-slate-200 px-6 py-4 flex items-center gap-3 text-sm max-w-3xl mx-auto">
+        <Link href="/admin" className="text-slate-400 hover:text-white transition-colors">Admin</Link>
+        <span className="text-slate-300">/</span>
+        <Link href="/admin/courses" className="text-slate-400 hover:text-white transition-colors">Khóa học</Link>
+        <span className="text-slate-300">/</span>
         <span>Tạo mới</span>
       </nav>
 
@@ -48,42 +48,42 @@ export default function NewCoursePage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm text-white/60 mb-1.5">Tên khóa học *</label>
+              <label className="block text-sm text-slate-600 mb-1.5">Tên khóa học *</label>
               <input
                 type="text" required value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFB000] transition-colors"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-400 transition-colors"
                 placeholder="VD: Tiếng Đức A1 cho người mới"
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1.5">Ngôn ngữ *</label>
+              <label className="block text-sm text-slate-600 mb-1.5">Ngôn ngữ *</label>
               <input
                 type="text" required value={form.language}
                 onChange={e => setForm({ ...form, language: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFB000] transition-colors"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-400 transition-colors"
                 placeholder="VD: Tiếng Đức"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Cấp độ</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Cấp độ</label>
             <select
               value={form.level}
               onChange={e => setForm({ ...form, level: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFB000] transition-colors"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-400 transition-colors"
             >
               {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Mô tả</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Mô tả</label>
             <textarea
               value={form.description} rows={4}
               onChange={e => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FFB000] transition-colors resize-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-400 transition-colors resize-none"
               placeholder="Mô tả ngắn về khóa học..."
             />
           </div>
@@ -92,17 +92,17 @@ export default function NewCoursePage() {
             <input
               type="checkbox" checked={form.published}
               onChange={e => setForm({ ...form, published: e.target.checked })}
-              className="w-4 h-4 accent-[#FFB000]"
+              className="w-4 h-4 accent-indigo-600"
             />
-            <span className="text-sm text-white/60">Đăng công khai ngay</span>
+            <span className="text-sm text-slate-600">Đăng công khai ngay</span>
           </label>
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={loading}
-              className="bg-[#FFB000] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#FFB000]/90 transition-colors disabled:opacity-50">
+              className="bg-indigo-600 text-black px-6 py-3 rounded-lg font-semibold hover:bg-indigo-600/90 transition-colors disabled:opacity-50">
               {loading ? 'Đang tạo...' : 'Tạo khóa học'}
             </button>
-            <Link href="/admin/courses" className="px-6 py-3 border border-white/20 rounded-lg hover:bg-white/5 transition-colors text-sm">
+            <Link href="/admin/courses" className="px-6 py-3 border border-white/20 rounded-lg hover:bg-slate-50 transition-colors text-sm">
               Hủy
             </Link>
           </div>

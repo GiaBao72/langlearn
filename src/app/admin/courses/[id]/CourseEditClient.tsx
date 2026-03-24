@@ -68,18 +68,18 @@ export default function CourseEditClient({ course }: { course: Course }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#111111]">
-      <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
+    <div className="min-h-screen bg-slate-50">
+      <nav className="border-b border-slate-200 px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
         <div className="flex items-center gap-3 text-sm">
-          <Link href="/admin" className="text-white/40 hover:text-white transition-colors">Admin</Link>
-          <span className="text-white/20">/</span>
-          <Link href="/admin/courses" className="text-white/40 hover:text-white transition-colors">Khóa học</Link>
-          <span className="text-white/20">/</span>
+          <Link href="/admin" className="text-slate-400 hover:text-white transition-colors">Admin</Link>
+          <span className="text-slate-300">/</span>
+          <Link href="/admin/courses" className="text-slate-400 hover:text-white transition-colors">Khóa học</Link>
+          <span className="text-slate-300">/</span>
           <span className="truncate max-w-xs">{course.title}</span>
         </div>
         <div className="flex gap-2">
           <button onClick={saveChanges} disabled={saving}
-            className="bg-[#FFB000] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#FFB000]/90 transition-colors disabled:opacity-50">
+            className="bg-indigo-600 text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-600/90 transition-colors disabled:opacity-50">
             {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : 'Lưu'}
           </button>
           <button onClick={deleteCourse} className="border border-red-500/30 text-red-400 px-4 py-2 rounded-lg text-sm hover:bg-red-500/10 transition-colors">
@@ -91,54 +91,54 @@ export default function CourseEditClient({ course }: { course: Course }) {
       <div className="max-w-5xl mx-auto px-6 py-10 grid md:grid-cols-5 gap-8">
         {/* Left: course info */}
         <div className="md:col-span-2 space-y-5">
-          <h2 className="font-semibold text-white/60 text-sm uppercase tracking-wider">Thông tin khóa học</h2>
+          <h2 className="font-semibold text-slate-600 text-sm uppercase tracking-wider">Thông tin khóa học</h2>
 
           <div>
-            <label className="block text-sm text-white/50 mb-1.5">Tên khóa học</label>
+            <label className="block text-sm text-slate-500 mb-1.5">Tên khóa học</label>
             <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#FFB000] transition-colors text-sm" />
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition-colors text-sm" />
           </div>
           <div>
-            <label className="block text-sm text-white/50 mb-1.5">Ngôn ngữ</label>
+            <label className="block text-sm text-slate-500 mb-1.5">Ngôn ngữ</label>
             <input type="text" value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#FFB000] transition-colors text-sm" />
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition-colors text-sm" />
           </div>
           <div>
-            <label className="block text-sm text-white/50 mb-1.5">Cấp độ</label>
+            <label className="block text-sm text-slate-500 mb-1.5">Cấp độ</label>
             <select value={form.level} onChange={e => setForm({ ...form, level: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#FFB000] transition-colors text-sm">
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition-colors text-sm">
               {['A1','A2','B1','B2','C1','C2'].map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm text-white/50 mb-1.5">Mô tả</label>
+            <label className="block text-sm text-slate-500 mb-1.5">Mô tả</label>
             <textarea rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#FFB000] transition-colors text-sm resize-none" />
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition-colors text-sm resize-none" />
           </div>
           <label className="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" checked={form.published} onChange={e => setForm({ ...form, published: e.target.checked })}
-              className="w-4 h-4 accent-[#FFB000]" />
-            <span className="text-sm text-white/60">Công khai</span>
+              className="w-4 h-4 accent-indigo-600" />
+            <span className="text-sm text-slate-600">Công khai</span>
           </label>
         </div>
 
         {/* Right: lessons */}
         <div className="md:col-span-3">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-white/60 text-sm uppercase tracking-wider">Bài học ({course.lessons.length})</h2>
+            <h2 className="font-semibold text-slate-600 text-sm uppercase tracking-wider">Bài học ({course.lessons.length})</h2>
           </div>
 
           <div className="space-y-2 mb-4">
             {course.lessons.map(lesson => (
               <Link key={lesson.id} href={`/admin/lessons/${lesson.id}`}
-                className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-5 py-4 hover:border-[#FFB000]/30 transition-colors group">
+                className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 hover:border-indigo-200 transition-colors group">
                 <div>
-                  <span className="text-white/30 text-xs mr-2">{lesson.order}.</span>
-                  <span className="text-sm group-hover:text-[#FFB000] transition-colors">{lesson.title}</span>
+                  <span className="text-slate-400 text-xs mr-2">{lesson.order}.</span>
+                  <span className="text-sm group-hover:text-indigo-600 transition-colors">{lesson.title}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-white/30 text-xs">{lesson._count.exercises} bài tập</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${lesson.published ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/30'}`}>
+                  <span className="text-slate-400 text-xs">{lesson._count.exercises} bài tập</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${lesson.published ? 'bg-green-500/20 text-green-400' : 'bg-white text-slate-400'}`}>
                     {lesson.published ? 'Live' : 'Nháp'}
                   </span>
                 </div>
@@ -151,9 +151,9 @@ export default function CourseEditClient({ course }: { course: Course }) {
             <input type="text" value={newLesson} onChange={e => setNewLesson(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addLesson()}
               placeholder="Tên bài học mới..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#FFB000] transition-colors" />
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400 transition-colors" />
             <button onClick={addLesson} disabled={addingLesson || !newLesson.trim()}
-              className="bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-lg text-sm transition-colors disabled:opacity-40">
+              className="bg-white hover:bg-white/20 px-4 py-2.5 rounded-lg text-sm transition-colors disabled:opacity-40">
               + Thêm
             </button>
           </div>

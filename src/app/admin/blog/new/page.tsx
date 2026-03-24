@@ -57,9 +57,9 @@ export default function NewBlogPostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111111] px-4 py-10">
+    <div className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="max-w-3xl mx-auto">
-        <nav className="text-white/40 text-sm mb-6">
+        <nav className="text-slate-400 text-sm mb-6">
           <a href="/admin" className="hover:text-white">Admin</a> /{' '}
           <a href="/admin/blog" className="hover:text-white">Blog</a> / Bài mới
         </nav>
@@ -73,32 +73,32 @@ export default function NewBlogPostPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Tiêu đề *</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Tiêu đề *</label>
             <input
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
               required
               placeholder="Tiêu đề bài viết..."
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#FFB000] transition-colors"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-indigo-400 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Tóm tắt (hiện ngoài danh sách)</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Tóm tắt (hiện ngoài danh sách)</label>
             <textarea
               value={excerpt}
               onChange={e => setExcerpt(e.target.value)}
               rows={2}
               placeholder="Một vài câu tóm tắt nội dung..."
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#FFB000] transition-colors resize-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-indigo-400 transition-colors resize-none"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm text-white/60">Nội dung *</label>
-              <label className="cursor-pointer text-xs text-[#FFB000] hover:underline">
+              <label className="text-sm text-slate-600">Nội dung *</label>
+              <label className="cursor-pointer text-xs text-indigo-600 hover:underline">
                 {importing ? 'Đang nhập...' : '📄 Import từ Word'}
                 <input
                   type="file"
@@ -115,9 +115,9 @@ export default function NewBlogPostPage() {
               required
               rows={16}
               placeholder="Nội dung bài viết... (hỗ trợ HTML cơ bản)"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#FFB000] transition-colors resize-none font-mono text-sm"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-indigo-400 transition-colors resize-none font-mono text-sm"
             />
-            <p className="text-xs text-white/30 mt-1">Hỗ trợ HTML: &lt;h2&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;a&gt;</p>
+            <p className="text-xs text-slate-400 mt-1">Hỗ trợ HTML: &lt;h2&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;a&gt;</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -126,20 +126,20 @@ export default function NewBlogPostPage() {
               id="publish"
               checked={publish}
               onChange={e => setPublish(e.target.checked)}
-              className="w-4 h-4 accent-[#FFB000]"
+              className="w-4 h-4 accent-indigo-600"
             />
-            <label htmlFor="publish" className="text-sm text-white/70">Đăng công khai ngay</label>
+            <label htmlFor="publish" className="text-sm text-slate-700">Đăng công khai ngay</label>
           </div>
 
           <div className="flex gap-3">
             <button
               type="submit"
               disabled={loading}
-              className="bg-[#FFB000] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#FFB000]/90 transition-colors disabled:opacity-50"
+              className="bg-indigo-600 text-black px-6 py-3 rounded-lg font-semibold hover:bg-indigo-600/90 transition-colors disabled:opacity-50"
             >
               {loading ? 'Đang lưu...' : publish ? 'Đăng bài' : 'Lưu nháp'}
             </button>
-            <a href="/admin/blog" className="px-6 py-3 border border-white/10 rounded-lg text-white/60 hover:text-white transition-colors text-sm">
+            <a href="/admin/blog" className="px-6 py-3 border border-slate-200 rounded-lg text-slate-600 hover:text-white transition-colors text-sm">
               Hủy
             </a>
           </div>
