@@ -26,7 +26,7 @@ export default function LoginPage() {
         setError(data.error || 'Đăng nhập thất bại')
         return
       }
-      window.location.href = '/dashboard'
+      window.location.replace('/dashboard')
     } catch {
       setError('Lỗi kết nối, thử lại sau')
     } finally {
