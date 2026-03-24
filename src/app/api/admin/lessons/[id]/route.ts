@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/admin/courses/[id] — single course with lessons
+// GET /api/admin/lessons/[id]
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -11,35 +11,41 @@ export async function GET(
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const course = await prisma.course.findUnique({
+  const lesson = await prisma.lesson.findUnique({
     where: { id },
     include: {
-      lessons: {
-        orderBy: { order: 'asc' },
-        include: { _count: { select: { exercises: true } } },
-      },
+      exercises: { orderBy: { order: 'asc' } },
+      course: { select: { id: true, title: true } },
     },
   })
 
-  if (!course) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(course)
+  if (!lesson) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json(lesson)
 }
 
-// PATCH /api/admin/courses/[id] — update course
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+// PATCH /api/admin/lessons/[id]
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { id } = await params
   const data = await req.json()
-  const course = await prisma.course.update({ where: { id }, data })
-  return NextResponse.json(course)
+  const lesson = await prisma.lesson.update({ where: { id }, data })
+  return NextResponse.json(lesson)
 }
 
-// DELETE /api/admin/courses/[id] — delete course (cascades to lessons + exercises)
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+// DELETE /api/admin/lessons/[id]
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { id } = await params
-  await prisma.course.delete({ where: { id } })
+  await prisma.lesson.delete({ where: { id } })
   return NextResponse.json({ ok: true })
 }
