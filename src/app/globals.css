@@ -2,6 +2,18 @@
 
 :root {
   color-scheme: light only;
+
+  /* Modern Academic Palette */
+  --color-primary: #2563EB;
+  --color-accent: #F5A623;
+  --color-bg-app: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-text-main: #334155;
+  --color-text-muted: #64748B;
+  --color-border: #E2E8F0;
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --color-warning: #F97316;
 }
 
 *, *::before, *::after {
@@ -13,6 +25,6 @@ html {
 }
 
 body {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+  background-color: var(--color-bg-app) !important;
+  color: var(--color-text-main) !important;
 }

@@ -25,12 +25,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Nav */}
-      <nav className="border-b border-slate-200 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
+      <nav className="border-b border-[#E2E8F0] px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <span className="font-bold text-lg tracking-tight">LangLearn</span>
-        <div className="flex items-center gap-4 text-sm text-slate-600">
+        <div className="flex items-center gap-4 text-sm text-[#334155]">
           <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
           <Link href="/login" className="hover:text-white transition-colors">Đăng nhập</Link>
-          <Link href="/register" className="bg-indigo-600 text-black px-4 py-1.5 rounded-full font-medium hover:bg-indigo-600/90 transition-colors">
+          <Link href="/register" className="bg-[#2563EB] text-black px-4 py-1.5 rounded-full font-medium hover:bg-[#2563EB]/90 transition-colors">
             Bắt đầu miễn phí
           </Link>
         </div>
@@ -38,26 +38,26 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-16 text-center">
-        <p className="text-indigo-600 text-sm font-medium tracking-widest uppercase mb-6">
+        <p className="text-[#2563EB] text-sm font-medium tracking-widest uppercase mb-6">
           Hack não bộ để học ngoại ngữ
         </p>
         <h1 className="text-6xl md:text-7xl font-bold tracking-tight leading-none mb-6">
           5 phút mỗi ngày.<br />
-          <span className="text-slate-400">Kết quả thật.</span>
+          <span className="text-[#64748B]">Kết quả thật.</span>
         </h1>
-        <p className="text-slate-500 text-xl max-w-xl mx-auto mb-16">
+        <p className="text-[#64748B] text-xl max-w-xl mx-auto mb-16">
           Phương pháp Spaced Repetition giúp não bộ ghi nhớ tự nhiên — không nhồi nhét, không quên.
         </p>
 
         {/* Interactive Demo */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 max-w-lg mx-auto">
+        <div className="bg-slate-50 border border-[#E2E8F0] rounded-2xl p-8 max-w-lg mx-auto">
           {!showCTA ? (
             <>
-              <p className="text-slate-400 text-xs uppercase tracking-widest mb-4">Thử ngay — không cần đăng ký</p>
-              <p className="text-lg font-medium mb-6 text-slate-800">
+              <p className="text-[#64748B] text-xs uppercase tracking-widest mb-4">Thử ngay — không cần đăng ký</p>
+              <p className="text-lg font-medium mb-6 text-[#334155]">
                 {DEMO_QUESTION.sentence.replace('___', '______')}
               </p>
-              <p className="text-slate-400 text-sm mb-4">{DEMO_QUESTION.hint}</p>
+              <p className="text-[#64748B] text-sm mb-4">{DEMO_QUESTION.hint}</p>
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -65,11 +65,11 @@ export default function HomePage() {
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && checkAnswer()}
                   placeholder="Điền từ vào đây..."
-                  className="flex-1 bg-white border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-400 transition-colors"
+                  className="flex-1 bg-white border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-blue-400 transition-colors"
                 />
                 <button
                   onClick={checkAnswer}
-                  className="bg-indigo-600 text-black px-5 py-3 rounded-lg font-semibold hover:bg-indigo-600/90 transition-colors"
+                  className="bg-[#2563EB] text-black px-5 py-3 rounded-lg font-semibold hover:bg-[#2563EB]/90 transition-colors"
                 >
                   Check
                 </button>
@@ -83,10 +83,10 @@ export default function HomePage() {
           ) : (
             <div className="text-center">
               <p className="text-2xl mb-2">🔥 Bạn có tố chất đấy!</p>
-              <p className="text-slate-500 mb-6">Tạo tài khoản để lưu tiến độ và học tiếp.</p>
+              <p className="text-[#64748B] mb-6">Tạo tài khoản để lưu tiến độ và học tiếp.</p>
               <Link
                 href="/register"
-                className="inline-block bg-indigo-600 text-black px-8 py-3 rounded-full font-bold hover:bg-indigo-600/90 transition-colors"
+                className="inline-block bg-[#2563EB] text-black px-8 py-3 rounded-full font-bold hover:bg-[#2563EB]/90 transition-colors"
               >
                 Bắt đầu chuỗi 5 phút mỗi ngày →
               </Link>
@@ -102,16 +102,16 @@ export default function HomePage() {
           { icon: '⚡', title: 'Zen Mode', desc: 'Luyện tập không phân tâm — giao diện tối giản, tập trung tuyệt đối.' },
           { icon: '📊', title: 'Theo dõi tiến độ', desc: 'Heatmap trực quan giúp bạn thấy rõ hành trình học mỗi ngày.' },
         ].map(f => (
-          <div key={f.title} className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+          <div key={f.title} className="bg-slate-50 border border-[#E2E8F0] rounded-xl p-6">
             <div className="text-3xl mb-4">{f.icon}</div>
             <h3 className="font-semibold mb-2">{f.title}</h3>
-            <p className="text-slate-500 text-sm">{f.desc}</p>
+            <p className="text-[#64748B] text-sm">{f.desc}</p>
           </div>
         ))}
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 py-8 text-center text-slate-400 text-sm">
+      <footer className="border-t border-[#E2E8F0] py-8 text-center text-[#64748B] text-sm">
         © 2026 LangLearn. Học ngoại ngữ mỗi ngày.
       </footer>
     </div>

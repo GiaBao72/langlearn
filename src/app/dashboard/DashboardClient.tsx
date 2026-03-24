@@ -32,9 +32,9 @@ function Heatmap({ data }: { data: Record<string, number> }) {
 
   function getColor(count: number) {
     if (count === 0) return 'bg-slate-100'
-    if (count < 3) return 'bg-indigo-200'
-    if (count < 6) return 'bg-indigo-400'
-    return 'bg-indigo-600'
+    if (count < 3) return 'bg-blue-200'
+    if (count < 6) return 'bg-blue-400'
+    return 'bg-[#2563EB]'
   }
 
   return (
@@ -58,14 +58,14 @@ export default function DashboardClient({ user, heatmapData, streak, totalExerci
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Nav */}
-      <nav className="bg-white border-b border-slate-100 px-6 py-4">
+      <nav className="bg-white border-b border-[#E2E8F0] px-6 py-4">
         <div className="flex items-center justify-between max-w-5xl mx-auto">
-          <Link href="/" className="font-bold text-lg tracking-tight text-slate-900">LangLearn</Link>
+          <Link href="/" className="font-bold text-lg tracking-tight text-[#334155]">LangLearn</Link>
           <div className="flex items-center gap-5 text-sm">
-            <Link href="/practice" className="text-slate-500 hover:text-slate-900 transition-colors font-medium">Luyện tập</Link>
-            <Link href="/blog" className="text-slate-500 hover:text-slate-900 transition-colors font-medium">Blog</Link>
-            <span className="text-slate-200">|</span>
-            <span className="text-slate-700 font-semibold">{user.name}</span>
+            <Link href="/practice" className="text-[#64748B] hover:text-[#334155] transition-colors font-medium">Luyện tập</Link>
+            <Link href="/blog" className="text-[#64748B] hover:text-[#334155] transition-colors font-medium">Blog</Link>
+            <span className="text-[#64748B]">|</span>
+            <span className="text-[#334155] font-semibold">{user.name}</span>
           </div>
         </div>
       </nav>
@@ -73,24 +73,24 @@ export default function DashboardClient({ user, heatmapData, streak, totalExerci
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">Chào, {user.name} 👋</h1>
-          <p className="text-slate-500">Hôm nay học gì nào?</p>
+          <h1 className="text-3xl font-bold text-[#334155] mb-1">Chào, {user.name} 👋</h1>
+          <p className="text-[#64748B]">Hôm nay học gì nào?</p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
             { icon: Flame, label: 'Streak', value: `${streak} ngày`, color: 'text-orange-500', bg: 'bg-orange-50' },
-            { icon: Target, label: 'Đã hoàn thành', value: `${totalExercises} bài`, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { icon: Target, label: 'Đã hoàn thành', value: `${totalExercises} bài`, color: 'text-[#2563EB]', bg: 'bg-blue-50' },
             { icon: Trophy, label: 'Mục tiêu hôm nay', value: '5 phút', color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { icon: BookOpen, label: 'Khóa học', value: `${courses.length} khóa`, color: 'text-sky-600', bg: 'bg-sky-50' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm">
+            <div key={stat.label} className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-sm">
               <div className={`w-9 h-9 ${stat.bg} rounded-lg flex items-center justify-center mb-3`}>
                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
               </div>
-              <div className="text-2xl font-bold text-slate-900 mb-0.5">{stat.value}</div>
-              <div className="text-slate-400 text-sm">{stat.label}</div>
+              <div className="text-2xl font-bold text-[#334155] mb-0.5">{stat.value}</div>
+              <div className="text-[#64748B] text-sm">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -98,32 +98,32 @@ export default function DashboardClient({ user, heatmapData, streak, totalExerci
         {/* Quick practice CTA */}
         <Link
           href="/practice"
-          className="block bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-5 mb-8 shadow-sm transition-colors group"
+          className="block bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl p-5 mb-8 shadow-sm transition-colors group"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold text-lg">Tiếp tục luyện tập</p>
-              <p className="text-indigo-200 text-sm mt-0.5">Chỉ cần 5 phút mỗi ngày</p>
+              <p className="text-blue-200 text-sm mt-0.5">Chỉ cần 5 phút mỗi ngày</p>
             </div>
-            <span className="text-indigo-300 text-2xl group-hover:translate-x-1 transition-transform">→</span>
+            <span className="text-blue-300 text-2xl group-hover:translate-x-1 transition-transform">→</span>
           </div>
         </Link>
 
         {/* Heatmap */}
-        <div className="bg-white border border-slate-100 rounded-xl p-6 mb-8 shadow-sm">
-          <h2 className="font-semibold text-slate-800 mb-4">Hoạt động học tập</h2>
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 mb-8 shadow-sm">
+          <h2 className="font-semibold text-[#334155] mb-4">Hoạt động học tập</h2>
           <Heatmap data={heatmapData} />
-          <p className="text-slate-400 text-xs mt-3">Mỗi ô = 1 ngày · Màu càng đậm = học càng nhiều</p>
+          <p className="text-[#64748B] text-xs mt-3">Mỗi ô = 1 ngày · Màu càng đậm = học càng nhiều</p>
         </div>
 
         {/* Courses */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold text-slate-800">Khóa học</h2>
-          <Link href="/courses" className="text-indigo-600 text-sm hover:underline font-medium">Xem tất cả →</Link>
+          <h2 className="font-semibold text-[#334155]">Khóa học</h2>
+          <Link href="/courses" className="text-[#2563EB] text-sm hover:underline font-medium">Xem tất cả →</Link>
         </div>
 
         {courses.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-xl p-10 text-center text-slate-400 shadow-sm">
+          <div className="bg-white border border-[#E2E8F0] rounded-xl p-10 text-center text-[#64748B] shadow-sm">
             Chưa có khóa học nào. Admin sẽ thêm sớm!
           </div>
         ) : (
@@ -132,13 +132,13 @@ export default function DashboardClient({ user, heatmapData, streak, totalExerci
               <Link
                 key={c.id}
                 href={`/courses/${c.id}`}
-                className="bg-white border border-slate-100 rounded-xl p-6 hover:border-indigo-300 hover:shadow-md transition-all group shadow-sm"
+                className="bg-white border border-[#E2E8F0] rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all group shadow-sm"
               >
-                <div className="text-xs text-slate-400 uppercase tracking-widest mb-3 font-medium">
+                <div className="text-xs text-[#64748B] uppercase tracking-widest mb-3 font-medium">
                   {c.language} · {c.level}
                 </div>
-                <h3 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors mb-2">{c.title}</h3>
-                <p className="text-slate-400 text-sm">{c.lessonCount} bài học</p>
+                <h3 className="font-semibold text-[#334155] group-hover:text-[#2563EB] transition-colors mb-2">{c.title}</h3>
+                <p className="text-[#64748B] text-sm">{c.lessonCount} bài học</p>
               </Link>
             ))}
           </div>

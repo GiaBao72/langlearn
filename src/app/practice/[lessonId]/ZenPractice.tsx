@@ -25,11 +25,11 @@ function FlashCard({ data, onAnswer }: { data: Record<string, unknown>; onAnswer
     <div className="text-center">
       <div
         onClick={() => setFlipped(!flipped)}
-        className="w-80 h-48 mx-auto mb-8 cursor-pointer bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center text-2xl font-semibold text-slate-800 hover:border-indigo-400 hover:shadow-lg transition-all select-none shadow-sm"
+        className="w-80 h-48 mx-auto mb-8 cursor-pointer bg-white border-2 border-[#E2E8F0] rounded-2xl flex items-center justify-center text-2xl font-semibold text-[#334155] hover:border-blue-400 hover:shadow-lg transition-all select-none shadow-sm"
       >
         {flipped ? String(data.back) : String(data.front)}
       </div>
-      <p className="text-slate-400 text-sm mb-8">{flipped ? 'Lật lại' : 'Bấm để xem nghĩa'}</p>
+      <p className="text-[#64748B] text-sm mb-8">{flipped ? 'Lật lại' : 'Bấm để xem nghĩa'}</p>
       {flipped && (
         <div className="flex gap-4 justify-center">
           <button onClick={() => onAnswer(false)} className="px-8 py-3 rounded-xl border-2 border-red-200 text-red-500 bg-red-50 hover:bg-red-100 font-medium transition-colors">
@@ -57,7 +57,7 @@ function FillBlank({ question, data, onAnswer }: { question: string; data: Recor
 
   return (
     <div className="text-center max-w-lg mx-auto">
-      <p className="text-2xl mb-8 text-slate-800 font-medium leading-relaxed">{question}</p>
+      <p className="text-2xl mb-8 text-[#334155] font-medium leading-relaxed">{question}</p>
       <input
         autoFocus
         type="text"
@@ -71,16 +71,16 @@ function FillBlank({ question, data, onAnswer }: { question: string; data: Recor
             ? correct
               ? 'border-emerald-400 text-emerald-600 bg-emerald-50'
               : 'border-red-400 text-red-600 bg-red-50'
-            : 'border-slate-200 focus:border-indigo-400 text-slate-800'
+            : 'border-[#E2E8F0] focus:border-blue-400 text-[#334155]'
         }`}
       />
       {submitted && (
-        <p className="mt-4 text-sm text-slate-500">
+        <p className="mt-4 text-sm text-[#64748B]">
           {correct ? '🎉 Chính xác!' : `Đáp án đúng: ${String(data.answer)}`}
         </p>
       )}
       {!submitted && (
-        <button onClick={submit} className="mt-6 px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-sm">
+        <button onClick={submit} className="mt-6 px-8 py-3 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm">
           Kiểm tra (Enter)
         </button>
       )}
@@ -114,7 +114,7 @@ function MultipleChoice({ question, data, onAnswer }: { question: string; data: 
 
   return (
     <div className="max-w-lg mx-auto">
-      <p className="text-2xl mb-8 text-slate-800 font-semibold text-center leading-relaxed">{question}</p>
+      <p className="text-2xl mb-8 text-[#334155] font-semibold text-center leading-relaxed">{question}</p>
       <div className="space-y-3">
         {options.map((opt, i) => (
           <button
@@ -122,21 +122,21 @@ function MultipleChoice({ question, data, onAnswer }: { question: string; data: 
             onClick={() => pick(i)}
             className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all font-medium ${
               selected === null
-                ? 'border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 shadow-sm'
+                ? 'border-[#E2E8F0] bg-white hover:border-blue-400 hover:bg-blue-50 text-[#334155] shadow-sm'
                 : selected === i
                   ? i === correctIdx
                     ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
                     : 'border-red-400 bg-red-50 text-red-700'
                   : i === correctIdx && selected !== null
                     ? 'border-emerald-300 bg-emerald-50/60 text-emerald-600'
-                    : 'border-slate-100 bg-slate-50 text-slate-400 opacity-60'
+                    : 'border-[#E2E8F0] bg-slate-50 text-[#64748B] opacity-60'
             }`}
           >
-            <span className="text-slate-400 font-normal mr-3">{i + 1}.</span> {opt}
+            <span className="text-[#64748B] font-normal mr-3">{i + 1}.</span> {opt}
           </button>
         ))}
       </div>
-      <p className="text-center text-slate-400 text-xs mt-5">Bấm phím 1–{options.length} để chọn</p>
+      <p className="text-center text-[#64748B] text-xs mt-5">Bấm phím 1–{options.length} để chọn</p>
     </div>
   )
 }
@@ -168,19 +168,19 @@ export default function ZenPractice({ exercises, lessonTitle }: Props) {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center bg-white rounded-2xl shadow-lg p-12 max-w-sm w-full mx-4">
           <div className="text-6xl mb-5">{pct >= 80 ? '🏆' : pct >= 50 ? '💪' : '📚'}</div>
-          <h2 className="text-3xl font-bold mb-1 text-slate-800">{pct}%</h2>
-          <p className="text-slate-400 mb-2 text-sm">chính xác</p>
-          <p className="text-slate-500 text-sm mb-8">{score}/{total} điểm · {exercises.length} bài tập</p>
+          <h2 className="text-3xl font-bold mb-1 text-[#334155]">{pct}%</h2>
+          <p className="text-[#64748B] mb-2 text-sm">chính xác</p>
+          <p className="text-[#64748B] text-sm mb-8">{score}/{total} điểm · {exercises.length} bài tập</p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => { setCurrent(0); setScore(0); setDone(false) }}
-              className="px-5 py-2.5 border-2 border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-medium transition-colors text-sm"
+              className="px-5 py-2.5 border-2 border-[#E2E8F0] rounded-xl text-[#334155] hover:bg-slate-50 font-medium transition-colors text-sm"
             >
               Làm lại
             </button>
             <button
               onClick={() => router.push('/dashboard')}
-              className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors text-sm shadow-sm"
+              className="px-5 py-2.5 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm shadow-sm"
             >
               Về Dashboard
             </button>
@@ -196,18 +196,18 @@ export default function ZenPractice({ exercises, lessonTitle }: Props) {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Minimal header */}
-      <div className="flex items-center justify-between px-8 py-4 bg-white border-b border-slate-100">
-        <button onClick={() => router.back()} className="text-slate-400 hover:text-slate-600 text-sm transition-colors flex items-center gap-1">
+      <div className="flex items-center justify-between px-8 py-4 bg-white border-b border-[#E2E8F0]">
+        <button onClick={() => router.back()} className="text-[#64748B] hover:text-[#334155] text-sm transition-colors flex items-center gap-1">
           ← Thoát
         </button>
-        <span className="text-slate-600 text-sm font-medium">{lessonTitle}</span>
-        <span className="text-slate-400 text-sm">{current + 1}<span className="text-slate-300">/</span>{exercises.length}</span>
+        <span className="text-[#334155] text-sm font-medium">{lessonTitle}</span>
+        <span className="text-[#64748B] text-sm">{current + 1}<span className="text-[#64748B]">/</span>{exercises.length}</span>
       </div>
 
       {/* Progress bar */}
       <div className="h-1 bg-slate-100">
         <div
-          className="h-full bg-indigo-500 transition-all duration-500 rounded-full"
+          className="h-full bg-blue-500 transition-all duration-500 rounded-full"
           style={{ width: `${pct}%` }}
         />
       </div>
