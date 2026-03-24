@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 
 export default async function BlogPage() {
   const posts = await prisma.blogPost.findMany({
@@ -11,16 +12,7 @@ export default async function BlogPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <nav className="border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <Link href="/" className="font-bold text-lg tracking-tight text-[#334155]">LangLearn</Link>
-          <div className="flex gap-3 sm:gap-4 text-sm text-[#64748B]">
-            <Link href="/courses" className="hover:text-[#2563EB] transition-colors hidden sm:inline">Khóa học</Link>
-            <Link href="/login" className="hover:text-[#2563EB] transition-colors">Đăng nhập</Link>
-            <Link href="/register" className="text-[#2563EB] hover:text-blue-700 transition-colors font-medium">Bắt đầu</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#334155]">Blog</h1>

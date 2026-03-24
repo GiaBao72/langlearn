@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -19,12 +20,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <nav className="border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <Link href="/" className="font-bold text-lg tracking-tight text-[#334155]">LangLearn</Link>
-          <Link href="/blog" className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors">← Blog</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Article */}
       <article className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
@@ -49,7 +45,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <p className="text-[#334155] text-sm mb-4">Tải bộ tổng hợp từ vựng và cấu trúc ngữ pháp PDF — hoàn toàn miễn phí.</p>
           <Link
             href="/register"
-            className="inline-block bg-[#2563EB] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors h-10 flex items-center"
+            className="inline-flex bg-[#2563EB] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors h-10 items-center"
           >
             Tạo tài khoản để nhận →
           </Link>
