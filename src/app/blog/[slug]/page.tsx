@@ -18,38 +18,47 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   if (!post) notFound()
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <nav className="border-b border-[#E2E8F0] px-6 py-4 flex items-center justify-between max-w-4xl mx-auto">
-        <Link href="/" className="font-bold text-lg tracking-tight">LangLearn</Link>
-        <Link href="/blog" className="text-[#64748B] text-sm hover:text-white transition-colors">← Blog</Link>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <nav className="border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <Link href="/" className="font-bold text-lg tracking-tight text-[#334155]">LangLearn</Link>
+          <Link href="/blog" className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors">← Blog</Link>
+        </div>
       </nav>
 
       {/* Article */}
-      <article className="max-w-2xl mx-auto px-6 py-16">
-        <header className="mb-12">
-          <time className="text-xs text-[#64748B] uppercase tracking-widest mb-4 block">
+      <article className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        <header className="mb-8 sm:mb-12">
+          <time className="text-xs text-[#64748B] uppercase tracking-widest mb-3 sm:mb-4 block">
             {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
           </time>
-          <h1 className="text-4xl font-bold leading-tight mb-6">{post.title}</h1>
-          {post.excerpt && <p className="text-[#64748B] text-lg leading-relaxed">{post.excerpt}</p>}
-          <div className="border-t border-[#E2E8F0] mt-8" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-4 sm:mb-6 text-[#334155]">{post.title}</h1>
+          {post.excerpt && <p className="text-[#64748B] text-base sm:text-lg leading-relaxed">{post.excerpt}</p>}
+          <div className="border-t border-[#E2E8F0] mt-6 sm:mt-8" />
         </header>
 
         {/* Content */}
         <div
-          className="prose prose-invert prose-p:text-[#334155] prose-headings:text-white prose-a:text-[#2563EB] prose-strong:text-white max-w-none"
+          className="prose max-w-none prose-headings:text-[#334155] prose-p:text-[#334155] prose-a:text-[#2563EB] prose-strong:text-[#334155]"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
         {/* Inline Lead Magnet */}
-        <div className="mt-16 border border-blue-200 rounded-xl p-6 bg-[#2563EB]/5">
+        <div className="mt-12 sm:mt-16 border border-blue-200 rounded-xl p-5 sm:p-6 bg-blue-50">
           <p className="text-sm text-[#2563EB] font-medium mb-1">📚 Tài liệu miễn phí</p>
           <p className="text-[#334155] text-sm mb-4">Tải bộ tổng hợp từ vựng và cấu trúc ngữ pháp PDF — hoàn toàn miễn phí.</p>
           <Link
             href="/register"
-            className="inline-block bg-[#2563EB] text-black px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#2563EB]/90 transition-colors"
+            className="inline-block bg-[#2563EB] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors h-10 flex items-center"
           >
             Tạo tài khoản để nhận →
+          </Link>
+        </div>
+
+        {/* Back link */}
+        <div className="mt-8 sm:mt-12 pt-6 border-t border-[#E2E8F0]">
+          <Link href="/blog" className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors">
+            ← Xem tất cả bài viết
           </Link>
         </div>
       </article>
