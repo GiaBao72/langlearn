@@ -28,7 +28,12 @@ jobs:
             npm run build
             pm2 restart langlearn || pm2 start npm --name langlearn -- start
             pm2 save
-        continue-on-error: true
-
-      - name: Check deploy result
-        run: echo "Deploy step completed (may have skipped if secrets not configured)"
+      - name: Verify deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd ~/langlearn && git log --oneline -1 && pm2 list | grep langlearn
