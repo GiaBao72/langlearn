@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { cookies } from 'next/headers'
-import { randomUUID } from 'crypto'
+import crypto from 'crypto'
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!
@@ -16,7 +16,11 @@ export function signAccessToken(payload: JWTPayload) {
 }
 
 export function signRefreshToken(payload: JWTPayload) {
-  return jwt.sign({ ...payload, jti: randomUUID() }, REFRESH_SECRET, { expiresIn: '7d' })
+  return jwt.sign(
+    { ...payload, jti: crypto.randomUUID() },
+    REFRESH_SECRET,
+    { expiresIn: '7d' }
+  )
 }
 
 export function verifyAccessToken(token: string): JWTPayload | null {
