@@ -3,6 +3,8 @@ import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser()
   if (!user) redirect('/login')

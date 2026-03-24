@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 
+export const dynamic = 'force-dynamic'
+
 export default async function BlogPage() {
   const posts = await prisma.blogPost.findMany({
     where: { published: true },

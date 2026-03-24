@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Users, BookOpen, FileText, BarChart3 } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPage() {
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') redirect('/dashboard')

@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   const post = await prisma.blogPost.findUnique({ where: { slug }, select: { title: true, excerpt: true } })
