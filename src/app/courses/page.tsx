@@ -1,3 +1,4 @@
+import Navbar from '@/components/Navbar'
 import { prisma } from '@/lib/prisma'
 import CoursesClient from './CoursesClient'
 
@@ -10,5 +11,5 @@ export default async function CoursesPage() {
     include: { _count: { select: { lessons: true } } },
   })
 
-  return <CoursesClient courses={courses} />
+  return <><Navbar /><CoursesClient courses={courses} /></>
 }

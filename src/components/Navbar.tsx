@@ -1,12 +1,23 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
-import { verifyAccessToken } from '@/lib/auth'
+import { jwtVerify } from 'jose'
 import NavbarClient from './NavbarClient'
 
+async function getUserFromCookie() {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('access_token')?.value
+    if (!token) return null
+    const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!)
+    const { payload } = await jwtVerify(token, secret)
+    return payload as { userId: string; email: string; role: string }
+  } catch {
+    return null
+  }
+}
+
 export default async function Navbar() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('access_token')?.value
-  const user = token ? verifyAccessToken(token) : null
+  const user = await getUserFromCookie()
 
   return (
     <nav className="border-b border-[#E2E8F0] bg-white sticky top-0 z-50">

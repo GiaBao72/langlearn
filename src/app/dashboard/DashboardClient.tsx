@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BookOpen, Flame, Target, Trophy, ArrowRight } from 'lucide-react'
-import Navbar from '@/components/Navbar'
 
 interface HeatmapDay {
   date: string
@@ -63,7 +62,6 @@ export default function DashboardClient() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Navbar />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {loading && (
           <div className="flex items-center justify-center h-64 text-[#64748B]">
