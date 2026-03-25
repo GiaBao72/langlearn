@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 
 interface NavbarClientProps {
   user: { name: string; email: string; role: string } | null
@@ -24,17 +26,21 @@ export default function NavbarClient({ user }: NavbarClientProps) {
           Dashboard
         </Link>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-xs font-bold">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
+          <Avatar className="w-8 h-8">
+            <AvatarFallback className="bg-[#2563EB] text-white text-xs font-bold">
+              {user.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
           <span className="text-sm text-[#334155] hidden md:block">{user.name}</span>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleLogout}
           className="text-sm text-[#64748B] hover:text-red-500 transition-colors"
         >
           Đăng xuất
-        </button>
+        </Button>
       </div>
     )
   }

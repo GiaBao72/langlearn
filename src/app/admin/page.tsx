@@ -3,6 +3,16 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Users, BookOpen, FileText, BarChart3 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,10 +59,14 @@ export default async function AdminPage() {
             { icon: FileText, label: 'Bài blog', value: blogCount, href: '/admin/blog', color: 'text-green-500' },
             { icon: BarChart3, label: 'Bài đã hoàn thành', value: progressCount, href: '#', color: 'text-purple-500' },
           ].map(stat => (
-            <Link key={stat.label} href={stat.href} className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 hover:border-blue-200 transition-colors group shadow-sm">
-              <stat.icon className={`w-5 h-5 ${stat.color} mb-2 sm:mb-3`} />
-              <div className="text-2xl sm:text-3xl font-bold mb-0.5 text-[#334155]">{stat.value.toLocaleString()}</div>
-              <div className="text-[#64748B] text-xs sm:text-sm group-hover:text-[#334155] transition-colors">{stat.label}</div>
+            <Link key={stat.label} href={stat.href}>
+              <Card className="border border-[#E2E8F0] rounded-xl shadow-sm hover:border-blue-200 transition-colors group">
+                <CardContent className="p-4 sm:p-5">
+                  <stat.icon className={`w-5 h-5 ${stat.color} mb-2 sm:mb-3`} />
+                  <div className="text-2xl sm:text-3xl font-bold mb-0.5 text-[#334155]">{stat.value.toLocaleString()}</div>
+                  <div className="text-[#64748B] text-xs sm:text-sm group-hover:text-[#334155] transition-colors">{stat.label}</div>
+                </CardContent>
+              </Card>
             </Link>
           ))}
         </div>
@@ -64,19 +78,19 @@ export default async function AdminPage() {
             { label: 'Viết bài blog', href: '/admin/blog/new', desc: 'Soạn bài hoặc import từ Word' },
             { label: 'Quản lý học viên', href: '/admin/users', desc: 'Xem, phân quyền, xóa users' },
           ].map(action => (
-            <Link
-              key={action.label}
-              href={action.href}
-              className="bg-white border border-[#E2E8F0] rounded-xl p-5 sm:p-6 hover:border-blue-300 transition-colors group shadow-sm"
-            >
-              <h3 className="font-semibold mb-1 group-hover:text-[#2563EB] transition-colors text-[#334155]">{action.label}</h3>
-              <p className="text-[#64748B] text-sm">{action.desc}</p>
+            <Link key={action.label} href={action.href}>
+              <Card className="border border-[#E2E8F0] rounded-xl shadow-sm hover:border-blue-300 transition-colors group">
+                <CardContent className="p-5 sm:p-6">
+                  <h3 className="font-semibold mb-1 group-hover:text-[#2563EB] transition-colors text-[#334155]">{action.label}</h3>
+                  <p className="text-[#64748B] text-sm">{action.desc}</p>
+                </CardContent>
+              </Card>
             </Link>
           ))}
         </div>
 
-        {/* Recent users — card on mobile, table on sm+ */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden shadow-sm">
+        {/* Recent users */}
+        <Card className="border border-[#E2E8F0] rounded-xl overflow-hidden shadow-sm">
           <div className="px-4 sm:px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
             <h2 className="font-semibold text-[#334155]">Học viên mới nhất</h2>
             <Link href="/admin/users" className="text-[#2563EB] text-sm hover:underline">Xem tất cả</Link>
@@ -88,9 +102,9 @@ export default async function AdminPage() {
               <div key={u.id} className="px-4 py-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-medium text-sm text-[#334155] truncate mr-2">{u.email}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${u.role === 'ADMIN' ? 'bg-blue-100 text-[#2563EB]' : 'bg-slate-100 text-[#64748B]'}`}>
+                  <Badge className={`text-xs flex-shrink-0 ${u.role === 'ADMIN' ? 'bg-blue-100 text-[#2563EB] hover:bg-blue-100' : 'bg-slate-100 text-[#64748B] hover:bg-slate-100'}`}>
                     {u.role}
-                  </span>
+                  </Badge>
                 </div>
                 <div className="text-xs text-[#64748B]">
                   {u.name || '—'} · {new Date(u.createdAt).toLocaleDateString('vi-VN')}
@@ -99,36 +113,36 @@ export default async function AdminPage() {
             ))}
           </div>
 
-          {/* Desktop: table */}
+          {/* Desktop: shadcn Table */}
           <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[#E2E8F0] bg-slate-50">
-                  <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Email</th>
-                  <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Tên</th>
-                  <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Vai trò</th>
-                  <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Ngày đăng ký</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-50 border-b border-[#E2E8F0]">
+                  <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Email</TableHead>
+                  <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Tên</TableHead>
+                  <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Vai trò</TableHead>
+                  <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Ngày đăng ký</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {recentUsers.map(u => (
-                  <tr key={u.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-[#334155]">{u.email}</td>
-                    <td className="px-6 py-4 text-sm text-[#334155]">{u.name || '—'}</td>
-                    <td className="px-6 py-4">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === 'ADMIN' ? 'bg-blue-100 text-[#2563EB]' : 'bg-slate-100 text-[#64748B]'}`}>
+                  <TableRow key={u.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-slate-50 transition-colors">
+                    <TableCell className="text-sm text-[#334155]">{u.email}</TableCell>
+                    <TableCell className="text-sm text-[#334155]">{u.name || '—'}</TableCell>
+                    <TableCell>
+                      <Badge className={`text-xs ${u.role === 'ADMIN' ? 'bg-blue-100 text-[#2563EB] hover:bg-blue-100' : 'bg-slate-100 text-[#64748B] hover:bg-slate-100'}`}>
                         {u.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-[#64748B]">
                       {new Date(u.createdAt).toLocaleDateString('vi-VN')}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   )

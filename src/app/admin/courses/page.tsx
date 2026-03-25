@@ -2,6 +2,16 @@ import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,64 +51,66 @@ export default async function AdminCoursesPage() {
             {/* Mobile: card list */}
             <div className="sm:hidden space-y-3">
               {courses.map(c => (
-                <div key={c.id} className="bg-white border border-[#E2E8F0] rounded-xl p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-[#334155] truncate">{c.title}</h3>
-                      <div className="flex flex-wrap gap-2 mt-1.5">
-                        <span className="text-xs text-[#64748B]">{c.language}</span>
-                        <span className="text-xs text-[#64748B]">·</span>
-                        <span className="text-xs text-[#64748B]">{c.level}</span>
-                        <span className="text-xs text-[#64748B]">·</span>
-                        <span className="text-xs text-[#64748B]">{c._count.lessons} bài</span>
+                <Card key={c.id} className="border border-[#E2E8F0] rounded-xl shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-[#334155] truncate">{c.title}</h3>
+                        <div className="flex flex-wrap gap-2 mt-1.5">
+                          <span className="text-xs text-[#64748B]">{c.language}</span>
+                          <span className="text-xs text-[#64748B]">·</span>
+                          <span className="text-xs text-[#64748B]">{c.level}</span>
+                          <span className="text-xs text-[#64748B]">·</span>
+                          <span className="text-xs text-[#64748B]">{c._count.lessons} bài</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <Badge className={`text-xs ${c.published ? 'bg-green-100 text-green-600 hover:bg-green-100' : 'bg-slate-100 text-[#64748B] hover:bg-slate-100'}`}>
+                          {c.published ? 'Đã đăng' : 'Nháp'}
+                        </Badge>
+                        <Link href={`/admin/courses/${c.id}`} className="text-[#2563EB] text-sm hover:underline font-medium">Sửa</Link>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${c.published ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-[#64748B]'}`}>
-                        {c.published ? 'Đã đăng' : 'Nháp'}
-                      </span>
-                      <Link href={`/admin/courses/${c.id}`} className="text-[#2563EB] text-sm hover:underline font-medium">Sửa</Link>
-                    </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
 
-            {/* Desktop: table */}
-            <div className="hidden sm:block bg-white border border-[#E2E8F0] rounded-xl overflow-hidden shadow-sm">
+            {/* Desktop: shadcn Table */}
+            <Card className="hidden sm:block border border-[#E2E8F0] rounded-xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#E2E8F0] bg-slate-50">
-                      <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Tên khóa học</th>
-                      <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Ngôn ngữ</th>
-                      <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Cấp độ</th>
-                      <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Bài học</th>
-                      <th className="text-left px-6 py-3 text-[#64748B] text-xs font-medium uppercase tracking-wider">Trạng thái</th>
-                      <th className="px-6 py-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-[#E2E8F0] bg-slate-50">
+                      <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Tên khóa học</TableHead>
+                      <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Ngôn ngữ</TableHead>
+                      <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Cấp độ</TableHead>
+                      <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Bài học</TableHead>
+                      <TableHead className="text-[#64748B] text-xs font-medium uppercase tracking-wider">Trạng thái</TableHead>
+                      <TableHead className="w-16"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {courses.map(c => (
-                      <tr key={c.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-[#334155]">{c.title}</td>
-                        <td className="px-6 py-4 text-[#334155] text-sm">{c.language}</td>
-                        <td className="px-6 py-4 text-[#334155] text-sm">{c.level}</td>
-                        <td className="px-6 py-4 text-[#334155] text-sm">{c._count.lessons}</td>
-                        <td className="px-6 py-4">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${c.published ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-[#64748B]'}`}>
+                      <TableRow key={c.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-slate-50 transition-colors">
+                        <TableCell className="font-medium text-[#334155]">{c.title}</TableCell>
+                        <TableCell className="text-[#334155] text-sm">{c.language}</TableCell>
+                        <TableCell className="text-[#334155] text-sm">{c.level}</TableCell>
+                        <TableCell className="text-[#334155] text-sm">{c._count.lessons}</TableCell>
+                        <TableCell>
+                          <Badge className={`text-xs ${c.published ? 'bg-green-100 text-green-600 hover:bg-green-100' : 'bg-slate-100 text-[#64748B] hover:bg-slate-100'}`}>
                             {c.published ? 'Đã đăng' : 'Nháp'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
                           <Link href={`/admin/courses/${c.id}`} className="text-[#2563EB] text-sm hover:underline font-medium">Sửa</Link>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
-            </div>
+            </Card>
           </>
         )}
       </div>
