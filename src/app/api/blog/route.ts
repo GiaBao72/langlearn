@@ -1,18 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    + '-' + Date.now()
-}
+import { slugify } from '@/lib/slugify'
 
 // GET /api/blog — public listing (published only, unless admin)
 export async function GET(req: NextRequest) {
@@ -65,7 +54,7 @@ export async function POST(req: NextRequest) {
   const post = await prisma.blogPost.create({
     data: {
       title,
-      slug: slugify(title),
+      slug: slugify(title) + '-' + Date.now(),
       content,
       excerpt: excerpt ?? content.slice(0, 160) + '…',
       published: published ?? false,

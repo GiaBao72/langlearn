@@ -1,174 +1,201 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useState } from 'react'
-import { BookOpen, Flame, Target, Trophy, Menu, X } from 'lucide-react'
+import { BookOpen, Flame, Target, Trophy, ArrowRight } from 'lucide-react'
+import Navbar from '@/components/Navbar'
 
-interface Props {
-  user: { name: string; email: string }
-  heatmapData: Record<string, number>
-  streak: number
-  totalExercises: number
-  courses: { id: string; title: string; language: string; level: string; lessonCount: number }[]
+interface HeatmapDay {
+  date: string
+  count: number
 }
 
-function Heatmap({ data }: { data: Record<string, number> }) {
-  const weeks: { date: string; count: number }[][] = []
-  const today = new Date()
+interface DashboardData {
+  totalScore: number
+  completedCount: number
+  streak: number
+  heatmap: HeatmapDay[]
+  nextLesson: { id: string; title: string; courseTitle: string } | null
+  recentProgress: {
+    id: string
+    score: number
+    completedAt: string
+    lessonTitle: string
+    courseTitle: string
+  }[]
+}
 
-  const startDate = new Date(today)
-  startDate.setDate(startDate.getDate() - 364)
-  startDate.setDate(startDate.getDate() - startDate.getDay() + 1)
-
-  let week: { date: string; count: number }[] = []
-  for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
-    const key = d.toISOString().split('T')[0]
-    week.push({ date: key, count: data[key] || 0 })
-    if (week.length === 7) {
-      weeks.push(week)
-      week = []
-    }
-  }
-  if (week.length) weeks.push(week)
-
+function Heatmap({ days }: { days: HeatmapDay[] }) {
   function getColor(count: number) {
-    if (count === 0) return 'bg-slate-100'
-    if (count < 3) return 'bg-blue-200'
-    if (count < 6) return 'bg-blue-400'
+    if (count === 0) return 'bg-[#E2E8F0]'
+    if (count <= 2) return 'bg-blue-200'
     return 'bg-[#2563EB]'
   }
 
   return (
-    <div className="flex gap-0.5 sm:gap-1 overflow-x-auto pb-2">
-      {weeks.map((week, wi) => (
-        <div key={wi} className="flex flex-col gap-0.5 sm:gap-1">
-          {week.map((day) => (
-            <div
-              key={day.date}
-              title={`${day.date}: ${day.count} bài`}
-              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm ${getColor(day.count)}`}
-            />
-          ))}
-        </div>
+    <div className="grid grid-cols-10 gap-1">
+      {days.map((day) => (
+        <div
+          key={day.date}
+          title={`${day.date}: ${day.count} bai`}
+          className={`w-6 h-6 rounded-sm ${getColor(day.count)}`}
+        />
       ))}
     </div>
   )
 }
 
-export default function DashboardClient({ user, heatmapData, streak, totalExercises, courses }: Props) {
-  const [menuOpen, setMenuOpen] = useState(false)
+export default function DashboardClient() {
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/dashboard')
+      .then(res => {
+        if (!res.ok) throw new Error('Unauthorized')
+        return res.json()
+      })
+      .then(setData)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Nav */}
-      <nav className="bg-white border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between max-w-5xl mx-auto">
-          <Link href="/" className="font-bold text-lg tracking-tight text-[#334155]">LangLearn</Link>
-
-          {/* Desktop nav */}
-          <div className="hidden sm:flex items-center gap-5 text-sm">
-            <Link href="/practice" className="text-[#64748B] hover:text-[#334155] transition-colors font-medium">Luyện tập</Link>
-            <Link href="/courses" className="text-[#64748B] hover:text-[#334155] transition-colors font-medium">Khóa học</Link>
-            <Link href="/blog" className="text-[#64748B] hover:text-[#334155] transition-colors font-medium">Blog</Link>
-            <span className="text-[#E2E8F0]">|</span>
-            <span className="text-[#334155] font-semibold">{user.name}</span>
-          </div>
-
-          {/* Mobile hamburger */}
-          <button
-            className="sm:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menu"
-          >
-            {menuOpen ? <X className="w-5 h-5 text-[#334155]" /> : <Menu className="w-5 h-5 text-[#334155]" />}
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        {menuOpen && (
-          <div className="sm:hidden mt-3 pb-3 border-t border-[#E2E8F0] pt-3 max-w-5xl mx-auto flex flex-col gap-1">
-            <Link href="/practice" className="text-[#334155] py-2.5 px-1 text-sm font-medium hover:text-[#2563EB] transition-colors">Luyện tập</Link>
-            <Link href="/courses" className="text-[#334155] py-2.5 px-1 text-sm font-medium hover:text-[#2563EB] transition-colors">Khóa học</Link>
-            <Link href="/blog" className="text-[#334155] py-2.5 px-1 text-sm font-medium hover:text-[#2563EB] transition-colors">Blog</Link>
-            <div className="pt-2 border-t border-[#E2E8F0] mt-1">
-              <span className="text-[#64748B] text-xs">Đăng nhập với: {user.email}</span>
+      <Navbar />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        {loading && (
+          <div className="flex items-center justify-center h-64 text-[#64748B]">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-sm">Dang tai...</p>
             </div>
           </div>
         )}
-      </nav>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#334155] mb-1">Chào, {user.name} 👋</h1>
-          <p className="text-[#64748B] text-sm sm:text-base">Hôm nay học gì nào?</p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          {[
-            { icon: Flame, label: 'Streak', value: `${streak} ngày`, color: 'text-orange-500', bg: 'bg-orange-50' },
-            { icon: Target, label: 'Đã hoàn thành', value: `${totalExercises} bài`, color: 'text-[#2563EB]', bg: 'bg-blue-50' },
-            { icon: Trophy, label: 'Mục tiêu hôm nay', value: '5 phút', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { icon: BookOpen, label: 'Khóa học', value: `${courses.length} khóa`, color: 'text-sky-600', bg: 'bg-sky-50' },
-          ].map(stat => (
-            <div key={stat.label} className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 shadow-sm">
-              <div className={`w-8 h-8 sm:w-9 sm:h-9 ${stat.bg} rounded-lg flex items-center justify-center mb-2 sm:mb-3`}>
-                <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-[#334155] mb-0.5">{stat.value}</div>
-              <div className="text-[#64748B] text-xs sm:text-sm">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Quick practice CTA */}
-        <Link
-          href="/practice"
-          className="block bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl p-4 sm:p-5 mb-6 sm:mb-8 shadow-sm transition-colors group"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-base sm:text-lg">Tiếp tục luyện tập</p>
-              <p className="text-blue-200 text-xs sm:text-sm mt-0.5">Chỉ cần 5 phút mỗi ngày</p>
-            </div>
-            <span className="text-blue-300 text-2xl group-hover:translate-x-1 transition-transform">→</span>
-          </div>
-        </Link>
-
-        {/* Heatmap */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-sm">
-          <h2 className="font-semibold text-[#334155] mb-4 text-sm sm:text-base">Hoạt động học tập</h2>
-          <Heatmap data={heatmapData} />
-          <p className="text-[#64748B] text-xs mt-3">Mỗi ô = 1 ngày · Màu càng đậm = học càng nhiều</p>
-        </div>
-
-        {/* Courses */}
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold text-[#334155] text-sm sm:text-base">Khóa học</h2>
-          <Link href="/courses" className="text-[#2563EB] text-sm hover:underline font-medium">Xem tất cả →</Link>
-        </div>
-
-        {courses.length === 0 ? (
-          <div className="bg-white border border-[#E2E8F0] rounded-xl p-8 sm:p-10 text-center text-[#64748B] shadow-sm">
-            Chưa có khóa học nào. Admin sẽ thêm sớm!
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {courses.map(c => (
-              <Link
-                key={c.id}
-                href={`/courses/${c.id}`}
-                className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-6 hover:border-blue-300 hover:shadow-md transition-all group shadow-sm"
-              >
-                <div className="text-xs text-[#64748B] uppercase tracking-widest mb-2 sm:mb-3 font-medium">
-                  {c.language} · {c.level}
-                </div>
-                <h3 className="font-semibold text-[#334155] group-hover:text-[#2563EB] transition-colors mb-2 text-sm sm:text-base">{c.title}</h3>
-                <p className="text-[#64748B] text-xs sm:text-sm">{c.lessonCount} bài học</p>
+        {error && (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <p className="text-[#64748B] mb-4">Vui long dang nhap de xem dashboard</p>
+              <Link href="/login" className="bg-[#2563EB] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                Dang nhap
               </Link>
-            ))}
+            </div>
           </div>
+        )}
+
+        {data && (
+          <>
+            {/* Hero row */}
+            <div className="mb-6 sm:mb-8 flex flex-wrap items-center gap-3">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#334155]">
+                  Chao, ban!
+                </h1>
+                <p className="text-[#64748B] text-sm sm:text-base mt-1">Hom nay hoc gi nao?</p>
+              </div>
+              <div className="ml-auto flex items-center gap-3">
+                {data.streak > 0 && (
+                  <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-600 px-3 py-1.5 rounded-full text-sm font-semibold">
+                    <Flame className="w-4 h-4" />
+                    {data.streak} ngay streak
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-[#2563EB] px-3 py-1.5 rounded-full text-sm font-semibold">
+                  <Trophy className="w-4 h-4" />
+                  {data.totalScore} diem
+                </div>
+              </div>
+            </div>
+
+            {/* Stats row - 3 cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+              <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 shadow-sm">
+                <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                  <Target className="w-5 h-5 text-[#2563EB]" />
+                </div>
+                <div className="text-2xl font-bold text-[#334155] mb-0.5">{data.completedCount}</div>
+                <div className="text-[#64748B] text-sm">Bai da lam</div>
+              </div>
+
+              <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 shadow-sm">
+                <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center mb-3">
+                  <Trophy className="w-5 h-5 text-[#10B981]" />
+                </div>
+                <div className="text-2xl font-bold text-[#334155] mb-0.5">{data.totalScore}</div>
+                <div className="text-[#64748B] text-sm">Tong diem</div>
+              </div>
+
+              <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 shadow-sm">
+                <div className="w-9 h-9 bg-orange-50 rounded-lg flex items-center justify-center mb-3">
+                  <Flame className="w-5 h-5 text-orange-500" />
+                </div>
+                <div className="text-2xl font-bold text-[#334155] mb-0.5">{data.streak}</div>
+                <div className="text-[#64748B] text-sm">Ngay streak</div>
+              </div>
+            </div>
+
+            {/* Heatmap 30 ngay */}
+            <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-sm">
+              <h2 className="font-semibold text-[#334155] mb-4 text-sm sm:text-base">Hoat dong 30 ngay qua</h2>
+              <Heatmap days={data.heatmap} />
+              <div className="flex items-center gap-4 mt-3">
+                <p className="text-[#64748B] text-xs">Moi o = 1 ngay</p>
+                <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
+                  <span className="w-3 h-3 rounded-sm bg-[#E2E8F0] inline-block" />
+                  Khong hoc
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
+                  <span className="w-3 h-3 rounded-sm bg-blue-200 inline-block" />
+                  1-2 bai
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
+                  <span className="w-3 h-3 rounded-sm bg-[#2563EB] inline-block" />
+                  3+ bai
+                </div>
+              </div>
+            </div>
+
+            {/* Continue learning */}
+            {data.nextLesson ? (
+              <div className="mb-6 sm:mb-8">
+                <h2 className="font-semibold text-[#334155] mb-3 text-sm sm:text-base">Tiep tuc hoc</h2>
+                <Link
+                  href={`/practice/${data.nextLesson.id}`}
+                  className="block bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-[#64748B] mb-1 font-medium">{data.nextLesson.courseTitle}</p>
+                      <p className="font-semibold text-[#334155] group-hover:text-[#2563EB] transition-colors">
+                        {data.nextLesson.title}
+                      </p>
+                    </div>
+                    <div className="w-9 h-9 bg-[#2563EB] rounded-lg flex items-center justify-center group-hover:bg-blue-700 transition-colors">
+                      <ArrowRight className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ) : (
+              <div className="mb-6 sm:mb-8">
+                <div className="bg-[#10B981]/10 border border-[#10B981]/30 rounded-xl p-4 sm:p-5 text-center">
+                  <p className="text-[#10B981] font-semibold">Ban da hoan thanh tat ca bai hoc!</p>
+                  <p className="text-[#64748B] text-sm mt-1">Hay kham pha them khoa hoc moi</p>
+                </div>
+              </div>
+            )}
+
+            {/* All courses */}
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-[#334155] text-sm sm:text-base">Tat ca khoa hoc</h2>
+              <Link href="/courses" className="flex items-center gap-1 text-[#2563EB] text-sm hover:underline font-medium">
+                <BookOpen className="w-4 h-4" />
+                Xem tat ca
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </div>
