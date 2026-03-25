@@ -1,5 +1,5 @@
 import { getCurrentUser } from '@/lib/auth'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Navbar from '@/components/Navbar'
 import ExerciseRunner from '@/components/exercises/ExerciseRunner'
@@ -7,8 +7,7 @@ import ExerciseRunner from '@/components/exercises/ExerciseRunner'
 export const dynamic = 'force-dynamic'
 
 export default async function PracticePage({ params }: { params: Promise<{ lessonId: string }> }) {
-  const user = await getCurrentUser()
-  if (!user) redirect('/login')
+  const user = await getCurrentUser() // optional — null for guests
 
   const { lessonId } = await params
 
