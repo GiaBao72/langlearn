@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <meta>
+    <name>LangLearn</name>
+    <description>Website học ngoại ngữ toàn diện</description>
+    <started>2026-03-25</started>
+    <status>in-progress</status>
+    <repo>https://github.com/GiaBao72/langlearn</repo>
+    <live>http://118.70.49.57:12431</live>
+  </meta>
+
+  <team>
+    <member role="tech-lead">
+      <name>Chó</name>
+      <platform>OpenClaw local</platform>
+      <host>DESKTOP-81IHT44</host>
+      <responsibilities>Frontend, Auth, Coordination</responsibilities>
+    </member>
+    <member role="backend-vps">
+      <name>Chiến</name>
+      <platform>OpenClaw VPS</platform>
+      <host>118.70.49.57</host>
+      <responsibilities>VPS, Deploy, Database, Pipeline</responsibilities>
+    </member>
+    <member role="ux-advisor">
+      <name>Gemini</name>
+      <platform>gemini.google.com</platform>
+      <responsibilities>UI/UX Design, User Flow</responsibilities>
+    </member>
+  </team>
+
+  <stack>
+    <frontend>Next.js 14 App Router + TypeScript</frontend>
+    <styling>Tailwind CSS + shadcn/ui</styling>
+    <database>PostgreSQL + Prisma ORM</database>
+    <auth>JWT httpOnly cookie + Refresh Token Rotation</auth>
+    <deploy>GitHub Actions → SSH → PM2 + Nginx</deploy>
+    <seed>tsx + Prisma Client</seed>
+  </stack>
+
+  <infrastructure>
+    <vps>
+      <ip>118.70.49.57</ip>
+      <user>tmc</user>
+      <ssh_port>38393</ssh_port>
+      <app_port>12431</app_port>
+      <pm2_name>langlearn</pm2_name>
+      <deploy_path>~/langlearn</deploy_path>
+    </vps>
+    <github>
+      <repo>GiaBao72/langlearn</repo>
+      <branch_prod>main</branch_prod>
+      <branch_dev>dev</branch_dev>
+      <actions>deploy on push to main</actions>
+    </github>
+    <admin>
+      <email>admin@langlearn.vn</email>
+      <password>Admin@2026</password>
+    </admin>
+  </infrastructure>
+
+  <design>
+    <vibe>Linear meets Editorial — Minimalist Tech Premium</vibe>
+    <mode>dark default</mode>
+    <background>#111111</background>
+    <accent>#FFB000</accent>
+    <font_ui>Inter / Geist</font_ui>
+    <font_blog>Playfair Display / Merriweather</font_blog>
+    <features>
+      <feature>GitHub-style activity heatmap</feature>
+      <feature>Streak counter</feature>
+      <feature>Zen Mode practice (minimal UI)</feature>
+      <feature>Interactive demo on landing (no signup required)</feature>
+      <feature>Confetti on correct answer → CTA popup</feature>
+    </features>
+  </design>
+
+  <database>
+    <models>
+      <model name="User" fields="id, email, passwordHash, name, role, createdAt, updatedAt"/>
+      <model name="RefreshToken" fields="id, token, userId, expiresAt, revokedAt, createdAt"/>
+      <model name="Course" fields="id, title, language, level, description, published"/>
+      <model name="Lesson" fields="id, courseId, title, order, content, published"/>
+      <model name="Exercise" fields="id, lessonId, type, question, data(JSON), points, order"/>
+      <model name="UserProgress" fields="id, userId, exerciseId, score, completedAt"/>
+      <model name="BlogPost" fields="id, title, slug(unique), content, excerpt, published, publishedAt"/>
+    </models>
+    <exercise_types>
+      <type>FLASHCARD</type>
+      <type>FILL_BLANK</type>
+      <type>MULTIPLE_CHOICE</type>
+      <type>DICTATION</type>
+      <type>SORT_WORDS</type>
+    </exercise_types>
+    <pool_size>10</pool_size>
+  </database>
+
+  <pages>
+    <page path="/" name="Landing Page" status="done">
+      <feature>Interactive fill-blank demo</feature>
+      <feature>Confetti on correct → signup CTA</feature>
+      <feature>3 feature cards</feature>
+    </page>
+    <page path="/login" name="Login" status="done"/>
+    <page path="/register" name="Register" status="done"/>
+    <page path="/dashboard" name="Dashboard" status="done">
+      <feature>Activity heatmap</feature>
+      <feature>Streak counter</feature>
+      <feature>Stats cards</feature>
+      <feature>Course listing</feature>
+    </page>
+    <page path="/practice" name="Practice" status="done-needs-data">
+      <exercise_type>Flashcard</exercise_type>
+      <exercise_type>Fill blank (Cloze)</exercise_type>
+      <exercise_type>Multiple choice with timer</exercise_type>
+      <exercise_type>Dictation</exercise_type>
+      <exercise_type>Sort words</exercise_type>
+    </page>
+    <page path="/blog" name="Blog" status="done-needs-data"/>
+    <page path="/courses" name="Courses" status="done-needs-data"/>
+    <page path="/admin" name="Admin Panel" status="done">
+      <feature>Sidebar navy dark</feature>
+      <feature>Stats cards</feature>
+      <feature>Users table</feature>
+      <feature>Courses management</feature>
+      <feature>Exercises management</feature>
+      <feature>Blog management + Word import</feature>
+    </page>
+  </pages>
+
+  <seed_data>
+    <status>NOT YET RUN ON VPS</status>
+    <command>cd ~/langlearn &amp;&amp; git pull &amp;&amp; npx tsx prisma/seed.ts</command>
+    <contents>
+      <item>1 course: Tiếng Đức A1</item>
+      <item>2 lessons: Chào hỏi + Số đếm</item>
+      <item>15 exercises: 3 per type × 5 types</item>
+      <item>3 blog posts</item>
+    </contents>
+  </seed_data>
+
+  <todo>
+    <high_priority>
+      <task>Run seed data on VPS</task>
+      <task>Setup SSL/HTTPS Let's Encrypt</task>
+      <task>Rate limiting on login endpoint</task>
+    </high_priority>
+    <medium_priority>
+      <task>PM2 cluster mode (4 CPU cores)</task>
+      <task>PostgreSQL auto backup</task>
+      <task>Email verification on register</task>
+      <task>Word import API (mammoth.js)</task>
+    </medium_priority>
+    <low_priority>
+      <task>Gamification: streak freeze, points</task>
+      <task>Blog search</task>
+      <task>Landing page bán sách (conversion optimized)</task>
+      <task>Trang giáo trình chi tiết</task>
+    </low_priority>
+  </todo>
+
+  <lessons_learned>
+    <lesson>Prisma 7: use prisma.config.ts, NOT url in schema.prisma</lesson>
+    <lesson>Telegram Web input is contenteditable div, not input element</lesson>
+    <lesson>Isolated browser loses session on restart — bad for Telegram Web</lesson>
+    <lesson>Seed must run on VPS where PostgreSQL exists</lesson>
+    <lesson>For Vietnamese text in files: always use write tool, never edit/Python replace</lesson>
+  </lessons_learned>
+</project>
