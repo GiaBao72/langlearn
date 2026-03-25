@@ -1,7 +1,10 @@
 import { getCurrentUser } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import ZenPractice from './ZenPractice'
+import Navbar from '@/components/Navbar'
+import ExerciseRunner from '@/components/exercises/ExerciseRunner'
+
+export const dynamic = 'force-dynamic'
 
 export default async function PracticePage({ params }: { params: Promise<{ lessonId: string }> }) {
   const user = await getCurrentUser()
@@ -13,7 +16,7 @@ export default async function PracticePage({ params }: { params: Promise<{ lesso
     where: { id: lessonId },
     include: {
       exercises: { orderBy: { order: 'asc' } },
-      course: { select: { title: true } },
+      course: { select: { id: true, title: true } },
     },
   })
 
@@ -21,16 +24,24 @@ export default async function PracticePage({ params }: { params: Promise<{ lesso
   if (lesson.exercises.length === 0) notFound()
 
   return (
-    <ZenPractice
-      exercises={lesson.exercises.map(e => ({
-        id: e.id,
-        type: e.type,
-        question: e.question,
-        data: e.data as Record<string, unknown>,
-        points: e.points,
-      }))}
-      lessonId={lessonId}
-      lessonTitle={lesson.title}
-    />
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Navbar />
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-[#334155] mb-1">{lesson.title}</h1>
+          <p className="text-[#64748B] text-sm">{lesson.exercises.length} bai tap</p>
+        </div>
+        <ExerciseRunner
+          exercises={lesson.exercises.map(e => ({
+            id: e.id,
+            type: e.type,
+            question: e.question,
+            data: e.data as Record<string, unknown>,
+            points: e.points,
+          }))}
+          lessonId={lessonId}
+        />
+      </div>
+    </div>
   )
 }
