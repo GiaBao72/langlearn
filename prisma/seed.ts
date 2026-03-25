@@ -1,9 +1,7 @@
 /**
- * Seed script: tạo 1 course + 1 lesson + 5 bài tập demo (1 mỗi loại)
- * Run: npx ts-node --project tsconfig.json prisma/seed.ts
- * hoặc: npx tsx prisma/seed.ts
+ * Seed: 1 course + 1 lesson + 5 demo exercises từ Gemini
+ * Run: npx tsx prisma/seed.ts
  */
-
 import { PrismaClient, ExerciseType } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
@@ -12,125 +10,121 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Seeding...')
 
-  // 1. Admin user
+  // Admin
   const adminHash = await bcrypt.hash('Admin@2026', 12)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@langlearn.vn' },
     update: {},
-    create: {
-      email: 'admin@langlearn.vn',
-      passwordHash: adminHash,
-      name: 'Admin',
-      role: 'ADMIN',
-    },
+    create: { email: 'admin@langlearn.vn', passwordHash: adminHash, name: 'Admin', role: 'ADMIN' },
   })
   console.log('✅ Admin:', admin.email)
 
-  // 2. Course
+  // Course
   const course = await prisma.course.upsert({
     where: { id: 'course-german-a1' },
-    update: {},
+    update: { published: true },
     create: {
       id: 'course-german-a1',
       title: 'Tiếng Đức A1 — Căn bản',
       language: 'Tiếng Đức',
       level: 'A1',
-      description: 'Khóa học tiếng Đức từ đầu cho người mới bắt đầu. Học từ vựng, ngữ pháp và hội thoại cơ bản trong 8 tuần.',
+      description: 'Khóa học tiếng Đức từ đầu cho người mới. Học từ vựng, ngữ pháp và hội thoại cơ bản trong 8 tuần.',
       published: true,
     },
   })
   console.log('✅ Course:', course.title)
 
-  // 3. Lesson
+  // Lesson
   const lesson = await prisma.lesson.upsert({
     where: { id: 'lesson-1-gioi-thieu' },
-    update: {},
+    update: { published: true },
     create: {
       id: 'lesson-1-gioi-thieu',
       courseId: course.id,
       title: 'Bài 1 — Tự giới thiệu bản thân',
       order: 1,
-      content: 'Trong bài này bạn sẽ học cách giới thiệu tên, tuổi, và nghề nghiệp bằng tiếng Đức.',
+      content: 'Học cách chào hỏi, giới thiệu tên, tuổi, nghề nghiệp bằng tiếng Đức.',
       published: true,
     },
   })
   console.log('✅ Lesson:', lesson.title)
 
-  // 4. Exercises — 5 loại
+  // Exercises (data từ Gemini + Chó review)
   const exercises = [
     {
       id: 'ex-flashcard-1',
       lessonId: lesson.id,
       type: ExerciseType.FLASHCARD,
-      question: 'Bạn có nhớ nghĩa của từ này không?',
+      question: 'Nhớ lại nghĩa của từ này. Click để lật thẻ!',
       points: 10,
       order: 1,
       data: {
-        front: 'Guten Morgen',
-        back: 'Chào buổi sáng',
-        audioText: 'Guten Morgen',
-        example: 'Guten Morgen! Wie geht es dir?',
+        front: 'die Arbeit',
+        back: 'công việc, việc làm',
+        audioText: 'die Arbeit',
+        example: 'Meine Arbeit macht mir Spaß.',
+        exampleTranslation: 'Tôi thích công việc của mình.',
       },
     },
     {
       id: 'ex-fillblank-1',
       lessonId: lesson.id,
       type: ExerciseType.FILL_BLANK,
-      question: 'Điền từ thích hợp vào chỗ trống để hoàn thành câu:',
+      question: 'Điền từ đúng vào chỗ trống:',
       points: 15,
       order: 2,
       data: {
-        sentence: 'Ich ___ aus Vietnam.',
-        answer: 'komme',
-        hint: 'Động từ "đến từ" chia ở ngôi thứ nhất số ít (kommen → ich ...)',
-        fullSentence: 'Ich komme aus Vietnam.',
-        translation: 'Tôi đến từ Việt Nam.',
+        sentence: 'Ich ___ jeden Tag Deutsch.',
+        answer: 'lerne',
+        hint: 'Động từ "lernen" (học) chia ngôi Ich → ich ___',
+        fullSentence: 'Ich lerne jeden Tag Deutsch.',
+        translation: 'Tôi học tiếng Đức mỗi ngày.',
       },
     },
     {
       id: 'ex-multiplechoice-1',
       lessonId: lesson.id,
       type: ExerciseType.MULTIPLE_CHOICE,
-      question: '"Wie heißt du?" có nghĩa là gì?',
+      question: 'Chọn nghĩa đúng của câu: "Woher kommst du?"',
       points: 10,
       order: 3,
       data: {
         options: [
-          { label: 'A', text: 'Bạn bao nhiêu tuổi?' },
+          { label: 'A', text: 'Bạn đi đâu vậy?' },
           { label: 'B', text: 'Bạn tên là gì?' },
-          { label: 'C', text: 'Bạn ở đâu?' },
-          { label: 'D', text: 'Bạn khỏe không?' },
+          { label: 'C', text: 'Bạn đến từ đâu?' },
+          { label: 'D', text: 'Bạn bao nhiêu tuổi?' },
         ],
-        answer: 'B',
-        explanation: '"Heißen" có nghĩa là "tên là". "Wie heißt du?" = Tên bạn là gì?',
+        answer: 'C',
+        explanation: '"Woher" = từ đâu, "kommen" = đến/đến từ. "Woher kommst du?" = Bạn đến từ đâu?',
       },
     },
     {
       id: 'ex-dictation-1',
       lessonId: lesson.id,
       type: ExerciseType.DICTATION,
-      question: 'Nghe và gõ lại câu bạn vừa nghe:',
+      question: 'Nghe và gõ lại chính xác câu bạn nghe được:',
       points: 20,
       order: 4,
       data: {
-        audioText: 'Mein Name ist Anna.',
-        answer: 'Mein Name ist Anna.',
-        translation: 'Tên tôi là Anna.',
-        hint: 'Câu giới thiệu tên đơn giản nhất trong tiếng Đức',
+        audioText: 'Ich heiße Anna und komme aus Deutschland.',
+        answer: 'Ich heiße Anna und komme aus Deutschland.',
+        translation: 'Tôi tên là Anna và đến từ Đức.',
+        hint: 'Lắng nghe kỹ phần tên và quốc gia',
       },
     },
     {
       id: 'ex-sortwords-1',
       lessonId: lesson.id,
       type: ExerciseType.SORT_WORDS,
-      question: 'Sắp xếp các từ sau thành câu hoàn chỉnh:',
+      question: 'Sắp xếp các từ thành câu hoàn chỉnh:',
       points: 15,
       order: 5,
       data: {
-        words: ['Jahre', 'bin', 'Ich', 'alt', 'zwanzig'],
+        words: ['alt', 'bin', 'Ich', 'Jahre', 'zwanzig'],
         answer: 'Ich bin zwanzig Jahre alt.',
         translation: 'Tôi hai mươi tuổi.',
-        hint: 'Cấu trúc: Chủ ngữ + động từ + số tuổi + Jahre alt',
+        hint: 'Cấu trúc: Chủ ngữ + động từ sein + số + Jahre + alt',
       },
     },
   ]
@@ -141,15 +135,14 @@ async function main() {
       update: {},
       create: ex,
     })
-    console.log('✅ Exercise:', ex.type, '-', ex.question.substring(0, 40))
+    console.log('✅ Exercise:', ex.type, '—', ex.question.substring(0, 45))
   }
 
-  console.log('\n🎉 Seed complete!')
+  console.log('\n🎉 Seed hoàn tất!')
   console.log('📚 Course ID:', course.id)
   console.log('📖 Lesson ID:', lesson.id)
-  console.log('🔐 Admin: admin@langlearn.vn / Admin@2026')
+  console.log('🔐 Login: admin@langlearn.vn / Admin@2026')
+  console.log('🎯 Practice URL: /practice/' + lesson.id)
 }
 
-main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect())
+main().catch(console.error).finally(() => prisma.$disconnect())
