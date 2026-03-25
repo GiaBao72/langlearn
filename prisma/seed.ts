@@ -1,106 +1,155 @@
-import { PrismaClient } from '@prisma/client'
+/**
+ * Seed script: tạo 1 course + 1 lesson + 5 bài tập demo (1 mỗi loại)
+ * Run: npx ts-node --project tsconfig.json prisma/seed.ts
+ * hoặc: npx tsx prisma/seed.ts
+ */
+
+import { PrismaClient, ExerciseType } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  const hash = await bcrypt.hash('admin123', 10)
+  console.log('🌱 Seeding...')
 
+  // 1. Admin user
+  const adminHash = await bcrypt.hash('Admin@2026', 12)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@langlearn.vn' },
     update: {},
     create: {
       email: 'admin@langlearn.vn',
+      passwordHash: adminHash,
       name: 'Admin',
-      passwordHash: hash,
       role: 'ADMIN',
     },
   })
+  console.log('✅ Admin:', admin.email)
 
-  const user = await prisma.user.upsert({
-    where: { email: 'test@langlearn.vn' },
-    update: {},
-    create: {
-      email: 'test@langlearn.vn',
-      name: 'Test User',
-      passwordHash: hash,
-      role: 'USER',
-    },
-  })
-
-  // Seed 1 course + 2 lessons
+  // 2. Course
   const course = await prisma.course.upsert({
-    where: { id: 'seed-course-1' },
+    where: { id: 'course-german-a1' },
     update: {},
     create: {
-      id: 'seed-course-1',
-      title: 'Tiếng Đức cho người mới bắt đầu',
+      id: 'course-german-a1',
+      title: 'Tiếng Đức A1 — Căn bản',
       language: 'Tiếng Đức',
       level: 'A1',
-      description: 'Khóa học dành cho người bắt đầu từ con số 0. Học cách chào hỏi, giới thiệu bản thân và giao tiếp cơ bản.',
+      description: 'Khóa học tiếng Đức từ đầu cho người mới bắt đầu. Học từ vựng, ngữ pháp và hội thoại cơ bản trong 8 tuần.',
       published: true,
     },
   })
+  console.log('✅ Course:', course.title)
 
-  const lesson1 = await prisma.lesson.upsert({
-    where: { id: 'seed-lesson-1' },
+  // 3. Lesson
+  const lesson = await prisma.lesson.upsert({
+    where: { id: 'lesson-1-gioi-thieu' },
     update: {},
     create: {
-      id: 'seed-lesson-1',
-      title: 'Bài 1: Chào hỏi cơ bản',
+      id: 'lesson-1-gioi-thieu',
       courseId: course.id,
+      title: 'Bài 1 — Tự giới thiệu bản thân',
       order: 1,
+      content: 'Trong bài này bạn sẽ học cách giới thiệu tên, tuổi, và nghề nghiệp bằng tiếng Đức.',
       published: true,
     },
   })
+  console.log('✅ Lesson:', lesson.title)
 
-  const lesson2 = await prisma.lesson.upsert({
-    where: { id: 'seed-lesson-2' },
-    update: {},
-    create: {
-      id: 'seed-lesson-2',
-      title: 'Bài 2: Giới thiệu bản thân',
-      courseId: course.id,
+  // 4. Exercises — 5 loại
+  const exercises = [
+    {
+      id: 'ex-flashcard-1',
+      lessonId: lesson.id,
+      type: ExerciseType.FLASHCARD,
+      question: 'Bạn có nhớ nghĩa của từ này không?',
+      points: 10,
+      order: 1,
+      data: {
+        front: 'Guten Morgen',
+        back: 'Chào buổi sáng',
+        audioText: 'Guten Morgen',
+        example: 'Guten Morgen! Wie geht es dir?',
+      },
+    },
+    {
+      id: 'ex-fillblank-1',
+      lessonId: lesson.id,
+      type: ExerciseType.FILL_BLANK,
+      question: 'Điền từ thích hợp vào chỗ trống để hoàn thành câu:',
+      points: 15,
       order: 2,
-      published: true,
+      data: {
+        sentence: 'Ich ___ aus Vietnam.',
+        answer: 'komme',
+        hint: 'Động từ "đến từ" chia ở ngôi thứ nhất số ít (kommen → ich ...)',
+        fullSentence: 'Ich komme aus Vietnam.',
+        translation: 'Tôi đến từ Việt Nam.',
+      },
     },
-  })
+    {
+      id: 'ex-multiplechoice-1',
+      lessonId: lesson.id,
+      type: ExerciseType.MULTIPLE_CHOICE,
+      question: '"Wie heißt du?" có nghĩa là gì?',
+      points: 10,
+      order: 3,
+      data: {
+        options: [
+          { label: 'A', text: 'Bạn bao nhiêu tuổi?' },
+          { label: 'B', text: 'Bạn tên là gì?' },
+          { label: 'C', text: 'Bạn ở đâu?' },
+          { label: 'D', text: 'Bạn khỏe không?' },
+        ],
+        answer: 'B',
+        explanation: '"Heißen" có nghĩa là "tên là". "Wie heißt du?" = Tên bạn là gì?',
+      },
+    },
+    {
+      id: 'ex-dictation-1',
+      lessonId: lesson.id,
+      type: ExerciseType.DICTATION,
+      question: 'Nghe và gõ lại câu bạn vừa nghe:',
+      points: 20,
+      order: 4,
+      data: {
+        audioText: 'Mein Name ist Anna.',
+        answer: 'Mein Name ist Anna.',
+        translation: 'Tên tôi là Anna.',
+        hint: 'Câu giới thiệu tên đơn giản nhất trong tiếng Đức',
+      },
+    },
+    {
+      id: 'ex-sortwords-1',
+      lessonId: lesson.id,
+      type: ExerciseType.SORT_WORDS,
+      question: 'Sắp xếp các từ sau thành câu hoàn chỉnh:',
+      points: 15,
+      order: 5,
+      data: {
+        words: ['Jahre', 'bin', 'Ich', 'alt', 'zwanzig'],
+        answer: 'Ich bin zwanzig Jahre alt.',
+        translation: 'Tôi hai mươi tuổi.',
+        hint: 'Cấu trúc: Chủ ngữ + động từ + số tuổi + Jahre alt',
+      },
+    },
+  ]
 
-  // Seed exercises for lesson 1
-  await prisma.exercise.createMany({
-    skipDuplicates: true,
-    data: [
-      {
-        id: 'seed-ex-1',
-        lessonId: lesson1.id,
-        type: 'MULTIPLE_CHOICE',
-        question: '"Guten Morgen" có nghĩa là gì?',
-        data: { options: ['Chào buổi sáng', 'Chào buổi tối', 'Tạm biệt', 'Cảm ơn'], answer: 'Chào buổi sáng' },
-        order: 1,
-      },
-      {
-        id: 'seed-ex-2',
-        lessonId: lesson1.id,
-        type: 'MULTIPLE_CHOICE',
-        question: 'Cách nói "Xin chào" trong tiếng Đức là?',
-        data: { options: ['Hallo', 'Danke', 'Bitte', 'Ja'], answer: 'Hallo' },
-        order: 2,
-      },
-      {
-        id: 'seed-ex-3',
-        lessonId: lesson1.id,
-        type: 'MULTIPLE_CHOICE',
-        question: '"Auf Wiedersehen" có nghĩa là gì?',
-        data: { options: ['Tạm biệt', 'Xin lỗi', 'Vâng', 'Không'], answer: 'Tạm biệt' },
-        order: 3,
-      },
-    ],
-  })
+  for (const ex of exercises) {
+    await prisma.exercise.upsert({
+      where: { id: ex.id },
+      update: {},
+      create: ex,
+    })
+    console.log('✅ Exercise:', ex.type, '-', ex.question.substring(0, 40))
+  }
 
-  console.log('✅ Seed done!')
-  console.log('Admin:', admin.email, '/ admin123')
-  console.log('User:', user.email, '/ admin123')
-  console.log('Course:', course.title)
+  console.log('\n🎉 Seed complete!')
+  console.log('📚 Course ID:', course.id)
+  console.log('📖 Lesson ID:', lesson.id)
+  console.log('🔐 Admin: admin@langlearn.vn / Admin@2026')
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect())
+main()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect())
