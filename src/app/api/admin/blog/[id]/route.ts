@@ -11,6 +11,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   const body = await req.json()
 
+  // Validate title nếu có update
+  if (body.title !== undefined && !body.title?.trim()) {
+    return NextResponse.json({ error: 'Tiêu đề không được để trống' }, { status: 400 })
+  }
+
   const post = await prisma.blogPost.update({
     where: { id },
     data: {

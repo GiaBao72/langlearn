@@ -15,6 +15,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (body.role) data.role = body.role
   if (body.name !== undefined) data.name = body.name
   if (body.password) {
+    if (body.password.length < 6) return NextResponse.json({ error: "Mật khẩu tối thiểu 6 ký tự" }, { status: 400 })
     data.passwordHash = await bcrypt.hash(body.password, 10)
   }
 

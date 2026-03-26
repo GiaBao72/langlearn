@@ -7,8 +7,6 @@ import ExerciseRunner from '@/components/exercises/ExerciseRunner'
 export const dynamic = 'force-dynamic'
 
 export default async function PracticePage({ params }: { params: Promise<{ lessonId: string }> }) {
-  const user = await getCurrentUser() // optional — null for guests
-
   const { lessonId } = await params
 
   const lesson = await prisma.lesson.findUnique({

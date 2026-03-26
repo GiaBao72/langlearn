@@ -244,9 +244,18 @@ export default function ExerciseRunner({ exercises, lessonId }: Props) {
           <span className="text-2xl">{correct ? '✅' : '❌'}</span>
           <div>
             <p className="font-semibold text-sm">{correct ? 'Chính xác!' : 'Chưa đúng rồi!'}</p>
-            <p className="text-xs opacity-80">
-              {correct ? `+${exercise.points} điểm` : 'Tiếp tục cố gắng nhé!'}
-            </p>
+            {correct
+              ? <p className="text-xs opacity-80">+{exercise.points} điểm</p>
+              : <p className="text-xs opacity-90">
+                  Đáp án đúng: <span className="font-semibold">
+                    {exercise.type === 'MULTIPLE_CHOICE'
+                      ? String(exercise.data.answer)
+                      : exercise.type === 'SORT_WORDS'
+                      ? String(exercise.data.answer)
+                      : String(exercise.data.answer ?? '')}
+                  </span>
+                </p>
+            }
           </div>
         </div>
       )}
