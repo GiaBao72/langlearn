@@ -103,7 +103,7 @@ export default function StorePage() {
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-extrabold text-[#334155]">149.000đ</span>
                 <span className="text-[#64748B] line-through text-base">200.000đ</span>
-                <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">-16%</span>
+                <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">-25.5%</span>
               </div>
 
               <div className="text-sm text-[#64748B]">⭐ 4.9/5 từ 1,247 người học</div>
