@@ -10,7 +10,7 @@ interface NavbarClientProps {
 
 export default function NavbarClient({ user }: NavbarClientProps) {
   async function handleLogout() {
-    await fetch('/api/auth/refresh', { method: 'DELETE' })
+    await fetch('/api/auth/logout', { method: 'POST' })
     window.location.href = '/'
   }
 
