@@ -109,7 +109,7 @@ export default function StorePage() {
               <div className="text-sm text-[#64748B]">⭐ 4.9/5 từ 1,247 người học</div>
 
               <a
-                href="https://m.me/GiaBaoBooks"
+                href="https://5phuttiengduc.giabaobooks.vn"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block text-center bg-[#F5A623] text-[#334155] font-bold text-base px-8 py-3.5 rounded-full hover:brightness-105 transition shadow-md w-full sm:w-auto"
@@ -149,7 +149,7 @@ export default function StorePage() {
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">Cần tư vấn trước khi mua?</h2>
           <p className="text-blue-100 mb-6 text-sm">Nhắn Messenger — chúng tôi trả lời trong vòng 5 phút.</p>
           <a
-            href="https://m.me/GiaBaoBooks"
+            href="https://5phuttiengduc.giabaobooks.vn"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-white text-[#2563EB] font-bold px-8 py-3.5 rounded-full hover:bg-blue-50 transition shadow-md"
