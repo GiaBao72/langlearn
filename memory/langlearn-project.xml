@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>LangLearn</name>
+  <date>2026-03-25</date>
+  <team>
+    <member role="owner">Gia Bảo (Nhà Vua)</member>
+    <member role="frontend-ai">Chó 🐶 (PC Win11 - Claude)</member>
+    <member role="content-ai">Gemini 🤖</member>
+    <member role="vps-backend">Chiến 🕺 (VPS 118.70.49.57)</member>
+  </team>
+
+  <stack>
+    <framework>Next.js 14 (App Router + Turbopack)</framework>
+    <database>PostgreSQL 16</database>
+    <orm>Prisma 5</orm>
+    <auth>JWT httpOnly cookie (jose library)</auth>
+    <styling>Tailwind CSS + shadcn/ui (migrating)</styling>
+    <runtime>Node.js v22</runtime>
+  </stack>
+
+  <infrastructure>
+    <vps>
+      <ip>118.70.49.57</ip>
+      <user>tmc</user>
+      <ssh_port>38393</ssh_port>
+      <os>Ubuntu 24.04</os>
+    </vps>
+    <app>
+      <pm2_mode>fork</pm2_mode>
+      <app_port>3000</app_port>
+      <public_port>1234</public_port>
+      <nginx>true - :1234 proxy_pass :3000</nginx>
+      <max_memory>512M</max_memory>
+    </app>
+    <database>
+      <host>localhost</host>
+      <port>5432</port>
+      <name>langlearn</name>
+      <user>langlearn_user</user>
+    </database>
+    <backup>
+      <schedule>0 2 * * * (2AM daily)</schedule>
+      <retention>7 days</retention>
+      <path>/home/tmc/backups/langlearn/</path>
+    </backup>
+    <cicd>
+      <provider>GitHub Actions</provider>
+      <trigger>push to main</trigger>
+      <steps>git reset --hard → npm ci → npm run build → pm2 restart</steps>
+      <ssh_key>~/.ssh/github_deploy (ed25519)</ssh_key>
+    </cicd>
+  </infrastructure>
+
+  <repository>
+    <url>https://github.com/GiaBao72/langlearn</url>
+    <total_commits>70</total_commits>
+    <first_commit>2657a82</first_commit>
+    <last_commit>23b9ce1</last_commit>
+  </repository>
+
+  <schema>
+    <model name="User" fields="id,email,passwordHash,name,role,createdAt,updatedAt"/>
+    <model name="RefreshToken" fields="id,token,userId,expiresAt,revokedAt,createdAt"/>
+    <model name="Course" fields="id,title,language,level,description,published,createdAt,updatedAt"/>
+    <model name="Lesson" fields="id,courseId,title,order,content,published,createdAt,updatedAt"/>
+    <model name="Exercise" fields="id,lessonId,type,question,data(JSON),points,order"/>
+    <model name="UserProgress" fields="id,userId,exerciseId,score,completedAt" unique="userId+exerciseId"/>
+    <model name="BlogPost" fields="id,title,slug,content,excerpt,published,publishedAt,createdAt,updatedAt"/>
+  </schema>
+
+  <exercise_types>
+    <type name="MULTIPLE_CHOICE" scoring="full or zero"/>
+    <type name="FILL_BLANK" scoring="full or zero (case insensitive)"/>
+    <type name="FLASHCARD" scoring="full or zero (self-reported)"/>
+    <type name="DICTATION" scoring="partial - % words correct"/>
+    <type name="SORT_WORDS" scoring="full or zero"/>
+  </exercise_types>
+
+  <apis>
+    <group name="Auth">
+      <endpoint method="POST" path="/api/auth/login"/>
+      <endpoint method="POST" path="/api/auth/register"/>
+      <endpoint method="POST" path="/api/auth/logout"/>
+      <endpoint method="POST" path="/api/auth/refresh"/>
+    </group>
+    <group name="Public">
+      <endpoint method="GET" path="/api/blog"/>
+      <endpoint method="GET" path="/api/courses"/>
+      <endpoint method="GET" path="/api/lessons/[id]/exercises"/>
+    </group>
+    <group name="Protected">
+      <endpoint method="POST" path="/api/exercises/[id]/submit"/>
+      <endpoint method="GET|POST" path="/api/progress"/>
+    </group>
+    <group name="Admin">
+      <endpoint method="GET|POST" path="/api/admin/courses"/>
+      <endpoint method="GET|PATCH|DELETE" path="/api/admin/courses/[id]"/>
+      <endpoint method="GET|POST" path="/api/admin/courses/[id]/lessons"/>
+      <endpoint method="GET|PATCH|DELETE" path="/api/admin/lessons/[id]"/>
+      <endpoint method="GET|POST" path="/api/admin/lessons/[id]/exercises"/>
+      <endpoint method="GET|PATCH|DELETE" path="/api/admin/exercises/[id]"/>
+      <endpoint method="GET|POST|PATCH|DELETE" path="/api/admin/blog"/>
+    </group>
+  </apis>
+
+  <pages>
+    <page path="/" auth="public" description="Landing page - stats, features, CTA"/>
+    <page path="/login" auth="public" description="Login form"/>
+    <page path="/register" auth="public" description="Register form"/>
+    <page path="/courses" auth="public" description="Course listing with search/filter"/>
+    <page path="/roadmap" auth="public" description="Learning roadmap"/>
+    <page path="/blog" auth="public" description="Blog listing"/>
+    <page path="/store" auth="public" description="Book store"/>
+    <page path="/practice/[lessonId]" auth="public" description="5 exercise types interactive"/>
+    <page path="/dashboard" auth="required" description="User dashboard - heatmap, streak"/>
+    <page path="/admin" auth="admin" description="Admin panel"/>
+    <page path="/admin/courses/[id]" auth="admin" description="Course edit + lesson management"/>
+    <page path="/admin/lessons/[id]" auth="admin" description="Lesson edit + exercise management"/>
+    <page path="/admin/blog/new" auth="admin" description="Blog editor + Word import"/>
+  </pages>
+
+  <seed>
+    <admin email="admin@langlearn.vn" password="Admin@2026" role="ADMIN"/>
+    <test email="test@langlearn.vn" password="admin123" role="USER"/>
+    <course id="course-german-a1" title="Tiếng Đức A1 — Căn bản" language="DE" level="A1"/>
+    <lesson id="lesson-1-gioi-thieu" title="Bài 1 — Tự giới thiệu bản thân" order="1"/>
+    <exercises count="5" types="FLASHCARD,FILL_BLANK,MULTIPLE_CHOICE,DICTATION,SORT_WORDS"/>
+  </seed>
+
+  <bugs_fixed>
+    <bug id="1" desc="jsonwebtoken không chạy Edge Runtime" fix="Dùng jose (Web Crypto API)"/>
+    <bug id="2" desc="Cookie Secure=true block trên HTTP" fix="Check NEXTAUTH_URL.startsWith('https')"/>
+    <bug id="3" desc="pm2 không load .env" fix="Hardcode env trong ecosystem.config.js"/>
+    <bug id="4" desc="Server component tự redirect() bypass middleware" fix="Bỏ auth guard, guest = null"/>
+    <bug id="5" desc="router.push() sau login không re-render Navbar" fix="window.location.href = full reload"/>
+    <bug id="6" desc="Navbar server component import trong use client tree" fix="Dùng jose, move Navbar lên server wrapper"/>
+    <bug id="7" desc="MultipleChoice closure bug" fix="useRef để preserve state"/>
+    <bug id="8" desc="GitHub Actions continue-on-error mask failures" fix="Remove continue-on-error"/>
+    <bug id="9" desc="VPS stale build" fix="Workflow thêm npm run build trước pm2 restart"/>
+  </bugs_fixed>
+
+  <lessons_learned>
+    <lesson>Next.js App Router: async server components không thể import trong 'use client' component tree</lesson>
+    <lesson>Next.js App Router: router.push() là client-side nav, server components không re-render → dùng window.location.href</lesson>
+    <lesson>Next.js Edge Runtime: chỉ support Web Crypto API, không support Node.js built-ins → jose thay jsonwebtoken</lesson>
+    <lesson>pm2 fork mode là đủ cho Next.js; cluster mode không compatible</lesson>
+    <lesson>Middleware public paths không đủ nếu server component tự gọi redirect()</lesson>
+  </lessons_learned>
+
+  <status date="2026-03-25T19:16:00+07:00">
+    <vps_status>healthy</vps_status>
+    <pm2_status>online</pm2_status>
+    <db_users>4</db_users>
+    <ram_used>1.8G / 11G</ram_used>
+    <disk_used>18G / 98G</disk_used>
+    <ongoing>shadcn/ui migration (Chó đang làm)</ongoing>
+  </status>
+</project>

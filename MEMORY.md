@@ -64,8 +64,9 @@ Clone: `git clone https://[GITHUB_PAT]@github.com/GiaBao72/<repo>.git`
 - ⚠️ KHÔNG dùng `sessions_send` — dùng `exec curl` trực tiếp
 
 ## Phân Công Chó - Chiến
-- **Chó 🐶** (PC Win11): làm việc hàng ngày, gần Nhà Vua
-- **Chiến 🕺** (VPS): backup + emergency, lên thay khi Chó sập
+- **Chó 🐶** (PC Win11): làm việc hàng ngày, gần Nhà Vua, PC tasks
+- **Chiến 🕺** (VPS): VPS/server tasks, 24/7, phân công và giao Chó khi cần
+- **Gia Bảo ra lệnh 1 chỗ (Chiến)** → Chiến tự phân công
 
 ## LangLearn Project (2026-03-25)
 
@@ -164,12 +165,25 @@ Clone: `git clone https://[GITHUB_PAT]@github.com/GiaBao72/<repo>.git`
 - Trang báo mạng — Chiến sẽ code toàn bộ khi Gia Bảo sẵn sàng
 - Stack gợi ý: WordPress hoặc Ghost, host trên VPS này
 
-## Chó - Kết Nối 2 Chiều
-- **Tailscale IP:** 100.73.204.7
-- **Port:** 18789
-- **Gateway Token:** [OPENCLAW_TOKEN_CHO]
+## Chó ↔ Chiến Giao Tiếp (verified 2026-03-27)
+
+### Chiến → Chó (gateway, stateless)
 - **Endpoint:** `http://100.73.204.7:18789/v1/chat/completions`
-- **Status:** 2 chiều hoạt động (Chiến → Chó → reply trong response) ✅
+- **Token:** `[OPENCLAW_TOKEN_CHO]`
+- Chó có tool access thật (read/write/exec), không có memory giữa các lần gọi
+
+### Chiến → Chó (Telegram, khi cần memory)
+- Gửi qua bot Chó: `https://api.telegram.org/bot[TELEGRAM_TOKEN_CHO]/sendMessage`
+- chat_id: `1375328147`
+
+### Chó → Chiến (gateway)
+- **Endpoint:** `http://118.70.49.57:18789/v1/chat/completions` (đã enable, verified ✅)
+- **Token:** `[OPENCLAW_TOKEN_VPS]`
+- Verify: Chó tạo `/tmp/cho-test.txt` trên VPS thành công
+
+### Điều kiện
+- Tailscale phải chạy trên cả 2 máy (`tailscale status`)
+- Chó Tailscale IP: `100.73.204.7`
 
 ## About User
 
