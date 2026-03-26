@@ -189,3 +189,21 @@ User, RefreshToken, Course, Lesson, Exercise (JSON data), UserProgress, BlogPost
 ### Status
 - Live: http://118.70.49.57:12431 ✅
 - TODO còn lại: SSL/HTTPS, seed data trên VPS
+
+---
+
+## 2026-03-27 (session 2) — Chiến 🕺
+
+### Bugs đã fix (commit a140c55)
+
+| Bug | Fix |
+|-----|-----|
+| BUG-01: register dùng `router.push` → Navbar không re-render | Đổi sang `window.location.href = '/dashboard'`, bỏ `useRouter` |
+| BUG-02: practice/page.tsx navbar hardcode | Dùng `<Navbar />` chung, thêm link "← Dashboard" vào heading |
+| BUG-03: Dashboard không có loading state | Thêm `DashboardSkeleton` component với animation pulse, fix toàn bộ encoding tiếng Việt bị mất dấu |
+| BUG-04: /api/admin/* không check ADMIN | Review code → đã có check sẵn, không cần fix |
+
+### Deploy ✅
+- Build: success
+- pm2 restart: online
+- Live: http://118.70.49.57:12431
