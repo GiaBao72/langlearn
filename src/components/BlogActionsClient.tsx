@@ -44,7 +44,7 @@ export default function BlogActionsClient({ post }: { post: Post }) {
         Xem
       </Link>
       <Link
-        href={`/admin/blog/${post.id}/edit`}
+        href={`/admin/blog/${post.id}`}
         className="text-xs text-[#2563EB] hover:underline border border-blue-200 px-2.5 py-1.5 rounded-lg transition-colors"
       >
         Sửa

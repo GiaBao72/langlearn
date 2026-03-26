@@ -39,6 +39,9 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             <Link href="/dashboard" className="text-sm text-[#64748B] hover:text-[#334155] transition-colors">
               Dashboard
             </Link>
+            <Link href="/profile" className="text-sm text-[#64748B] hover:text-[#334155] transition-colors">
+              Tài khoản
+            </Link>
             <div className="flex items-center gap-2">
               <Avatar className="w-8 h-8">
                 <AvatarFallback className="bg-[#2563EB] text-white text-xs font-bold">
@@ -106,6 +109,10 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)}
                   className="block px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors">
                   Dashboard
+                </Link>
+                <Link href="/profile" onClick={() => setMenuOpen(false)}
+                  className="block px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors">
+                  Tài khoản
                 </Link>
                 {user.role === 'ADMIN' && (
                   <Link href="/admin" onClick={() => setMenuOpen(false)}
