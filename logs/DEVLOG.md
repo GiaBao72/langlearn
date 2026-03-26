@@ -114,9 +114,9 @@ User, RefreshToken, Course, Lesson, Exercise (JSON data), UserProgress, BlogPost
 - **Cách đúng duy nhất:** Click vào ô → type bằng selector → Enter để gửi
 - **Không dùng:** clipboard paste, Bot API (1 chiều), execCommand
 
-### Vấn đề chưa giải quyết
-- Seed data chưa chạy được (PostgreSQL không có local, cần chạy trên VPS)
-- Giao tiếp với Chiến qua Telegram Web không ổn định
+### Vấn đề đã giải quyết
+- ✅ Seed data đã chạy trên VPS (`npx prisma db seed`)
+- ✅ Giao tiếp Chó ↔ Chiến qua OpenClaw Gateway (Tailscale) thay thế Telegram Web
 
 ---
 
@@ -139,3 +139,20 @@ User, RefreshToken, Course, Lesson, Exercise (JSON data), UserProgress, BlogPost
 - [ ] Gamification: streak freeze, điểm thưởng
 - [ ] Blog search
 - [ ] Practice Zen Mode hoàn chỉnh (cần data)
+
+---
+
+## 2026-03-27 — Chiến 🕺
+
+### Fixes đã deploy (commit b938c6e)
+
+| Fix | Vấn đề | File |
+|-----|--------|------|
+| Logout bug | NavbarClient gọi DELETE /api/auth/refresh → không xóa cookie | NavbarClient.tsx + logout/route.ts (mới) |
+| Rate limiting | Login không có giới hạn số lần sai | auth/login/route.ts |
+| /api/auth/me | Không có endpoint check auth state | auth/me/route.ts (mới) |
+| Homepage navbar | page.tsx là 'use client' hardcode → không đọc auth sau login | page.tsx refactor + HomePageClient.tsx (mới) |
+
+### Status
+- Live: http://118.70.49.57:12431 ✅
+- TODO còn lại: SSL/HTTPS, seed data trên VPS
