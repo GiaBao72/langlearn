@@ -101,8 +101,8 @@ export default function StorePage() {
               </p>
 
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-extrabold text-[#334155]">185.000đ</span>
-                <span className="text-[#64748B] line-through text-base">220.000đ</span>
+                <span className="text-3xl font-extrabold text-[#334155]">149.000đ</span>
+                <span className="text-[#64748B] line-through text-base">200.000đ</span>
                 <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">-16%</span>
               </div>
 
@@ -114,7 +114,7 @@ export default function StorePage() {
                 rel="noopener noreferrer"
                 className="inline-block text-center bg-[#F5A623] text-[#334155] font-bold text-base px-8 py-3.5 rounded-full hover:brightness-105 transition shadow-md w-full sm:w-auto"
               >
-                Đặt mua ngay — 185.000đ
+                Đặt mua ngay — 149.000đ
               </a>
             </div>
           </div>
