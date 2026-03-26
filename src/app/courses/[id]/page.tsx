@@ -1,20 +1,18 @@
 import { getCurrentUser } from '@/lib/auth'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await getCurrentUser()
-  if (!user) redirect('/login')
+  const user = await getCurrentUser() // null = guest OK
 
   const { id } = await params
   const course = await prisma.course.findUnique({
     where: { id, published: true },
     include: {
       lessons: {
-        where: { published: true },
         orderBy: { order: 'asc' },
         include: { _count: { select: { exercises: true } } },
       },
@@ -22,12 +20,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   })
   if (!course) notFound()
 
-  // Get user progress for this course
+  // Get user progress (only if logged in)
   const lessonIds = course.lessons.map(l => l.id)
-  const progress = await prisma.userProgress.findMany({
+  const progress = user ? await prisma.userProgress.findMany({
     where: { userId: user.userId, exercise: { lessonId: { in: lessonIds } } },
     select: { exercise: { select: { lessonId: true } } },
-  })
+  }) : []
   const completedLessons = new Set(progress.map(p => p.exercise.lessonId))
 
   return (
