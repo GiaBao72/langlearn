@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/table'
 import { Card } from '@/components/ui/card'
 import UserActionsClient from '@/components/UserActionsClient'
+import CreateUserClient from '@/components/CreateUserClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,9 +22,12 @@ export default async function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Quản lý người dùng</h1>
-        <p className="text-sm text-muted-foreground mt-1">{users.length} người dùng</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Quản lý người dùng</h1>
+          <p className="text-sm text-muted-foreground mt-1">{users.length} người dùng</p>
+        </div>
+        <CreateUserClient />
       </div>
 
       {/* Mobile: card list */}
