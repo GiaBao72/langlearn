@@ -85,7 +85,7 @@ export default function RegisterPage() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   minLength={8}
-                  placeholder="Ít nhất 8 ký tự"
+                  placeholder="Tối thiểu 6 ký tự"
                   className="bg-[#F8FAFC] border-[#E2E8F0] text-[#334155] placeholder:text-[#94a3b8] focus:border-blue-400 h-12"
                 />
               </div>
