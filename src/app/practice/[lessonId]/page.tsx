@@ -37,6 +37,7 @@ export default async function PracticePage({ params }: { params: Promise<{ lesso
             points: e.points,
           }))}
           lessonId={lessonId}
+          courseId={lesson.course.id}
         />
       </div>
     </div>

@@ -21,6 +21,7 @@ interface Exercise {
 interface Props {
   exercises: Exercise[]
   lessonId: string
+  courseId?: string
 }
 
 function checkCorrectness(exercise: Exercise, answer: string): boolean {
@@ -47,7 +48,7 @@ function checkCorrectness(exercise: Exercise, answer: string): boolean {
   }
 }
 
-export default function ExerciseRunner({ exercises, lessonId }: Props) {
+export default function ExerciseRunner({ exercises, lessonId, courseId }: Props) {
   const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [userAnswer, setUserAnswer] = useState('')
@@ -148,7 +149,7 @@ export default function ExerciseRunner({ exercises, lessonId }: Props) {
             Học lại
           </button>
           <button
-            onClick={() => router.back()}
+            onClick={() => courseId ? router.push(`/courses/${courseId}`) : router.push('/practice')}
             className="px-5 py-2.5 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm shadow-sm"
           >
             Về khóa học
