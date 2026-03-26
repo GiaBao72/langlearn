@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 
 export default async function PracticeIndexPage() {
   const user = await getCurrentUser()
@@ -27,15 +28,11 @@ export default async function PracticeIndexPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <nav className="bg-white border-b border-[#E2E8F0] px-6 py-4">
-        <div className="flex items-center justify-between max-w-3xl mx-auto">
-          <Link href="/dashboard" className="font-bold text-lg text-[#334155]">LangLearn</Link>
-          <Link href="/dashboard" className="text-[#64748B] text-sm hover:text-[#334155] transition-colors">← Dashboard</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-3xl mx-auto px-4 py-12">
         <div className="mb-10">
+          <Link href="/dashboard" className="text-[#64748B] text-sm hover:text-[#334155] transition-colors mb-4 inline-block">← Dashboard</Link>
           <h1 className="text-3xl font-bold text-[#334155] mb-2">Khu vực luyện tập</h1>
           <p className="text-[#64748B]">Chọn bài học và bắt đầu</p>
         </div>

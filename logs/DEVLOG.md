@@ -142,6 +142,39 @@ User, RefreshToken, Course, Lesson, Exercise (JSON data), UserProgress, BlogPost
 
 ---
 
+## [2026-03-27 02:30] Verify Chó ↔ Chiến Gateway Communication
+
+**Những gì đã làm:**
+- Enable external access cho Chiến gateway (`http://118.70.49.57:18789`)
+- Verify Chó → Chiến: Chó tạo `/tmp/cho-test.txt` trên VPS thành công qua gateway endpoint
+- Confirm hai chiều đều hoạt động qua Tailscale
+
+**Chi tiết:**
+| Hướng | Endpoint | Token |
+|---|---|---|
+| Chiến → Chó | `http://100.73.204.7:18789/v1/chat/completions` | `7c9489405f3bdfc243dfeaa9b0b34686577c95a6491a9007` |
+| Chó → Chiến | `http://118.70.49.57:18789/v1/chat/completions` | `17da1049c150103cfc2e97f45b97ff43a37bcb49835daf6b` |
+
+**Kết quả:** ✅ Team communication channel verified — Chó và Chiến có thể giao task cho nhau trực tiếp qua Gateway
+
+---
+
+## [2026-03-27 02:57] Setup Task Log System & DEVLOG Convention
+
+**Những gì đã làm:**
+- Tạo `/home/tmc/.openclaw/workspace/logs/chien-tasks.md` — log tổng hợp toàn bộ tasks của Chiến
+- Update `AGENTS.md`: rule ghi log sau mỗi task dự án vào `chien-tasks.md`
+- Retroactively ghi lại toàn bộ LangLearn tasks từ 25/03
+- **Hôm nay (27/03):** Gia Bảo ra lệnh tách riêng — LangLearn tasks → `DEVLOG.md`, không ghi vào `chien-tasks.md`
+
+**Convention từ giờ:**
+- LangLearn tasks → `/home/tmc/projects/langlearn/logs/DEVLOG.md`
+- Tasks dự án khác → `/home/tmc/.openclaw/workspace/logs/chien-tasks.md`
+
+**Kết quả:** ✅ Logging system rõ ràng, tách biệt theo dự án
+
+---
+
 ## 2026-03-27 — Chiến 🕺
 
 ### Fixes đã deploy (commit b938c6e)
