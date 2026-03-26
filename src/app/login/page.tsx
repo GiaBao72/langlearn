@@ -1,19 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // TC34: Read ?from= param to redirect back after login
+  const searchParams = useSearchParams()
+  const from = searchParams.get('from') || '/dashboard'
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    // TC35: Prevent double-click — bail out immediately if already loading
+    if (loading) return
+
     setError('')
     setLoading(true)
     try {
@@ -27,7 +36,8 @@ export default function LoginPage() {
         setError(data.error || 'Đăng nhập thất bại')
         return
       }
-      window.location.replace('/dashboard')
+      // TC34: Redirect to original destination after successful login
+      window.location.replace(from)
     } catch {
       setError('Lỗi kết nối, thử lại sau')
     } finally {
@@ -38,7 +48,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4 sm:px-6">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="text-2xl font-bold tracking-tight text-[#334155]">LangLearn</Link>
           <p className="text-[#64748B] text-sm mt-2">Tiếp tục hành trình học của bạn</p>
@@ -101,5 +110,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

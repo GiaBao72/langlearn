@@ -11,13 +11,26 @@ export async function middleware(request: NextRequest) {
   const isPublic = PUBLIC_PATHS.some(
     (p) => pathname === p || pathname.startsWith(p + '/')
   )
-  if (isPublic) return NextResponse.next()
 
-  // Check access token
   const token = request.cookies.get('access_token')?.value
 
+  // TC33: If already logged in and trying to access /login or /register → redirect to /dashboard
+  if (token && (pathname === '/login' || pathname === '/register')) {
+    try {
+      const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!)
+      await jwtVerify(token, secret)
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    } catch {
+      // Token invalid, let them through to login
+    }
+  }
+
+  if (isPublic) return NextResponse.next()
+
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    // TC34: Append ?from= so login page can redirect back after auth
+    const from = encodeURIComponent(pathname + request.nextUrl.search)
+    return NextResponse.redirect(new URL(`/login?from=${from}`, request.url))
   }
 
   try {
@@ -31,7 +44,8 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next()
   } catch {
-    return NextResponse.redirect(new URL('/login', request.url))
+    const from = encodeURIComponent(pathname + request.nextUrl.search)
+    return NextResponse.redirect(new URL(`/login?from=${from}`, request.url))
   }
 }
 
