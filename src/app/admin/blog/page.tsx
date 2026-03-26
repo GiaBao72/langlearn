@@ -10,6 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card } from '@/components/ui/card'
+import BlogUploadClient from '@/components/BlogUploadClient'
+import BlogActionsClient from '@/components/BlogActionsClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,103 +39,86 @@ export default async function AdminBlogPage() {
           href="/admin/blog/new"
           className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors h-10 flex items-center"
         >
-          + Viết bài mới
+          + Viết tay
         </Link>
       </div>
 
-      {posts.length === 0 ? (
-        <div className="border border-dashed border-border rounded-xl p-16 text-center text-muted-foreground">
-          <p className="text-base mb-4">Chưa có bài viết nào.</p>
-          <Link href="/admin/blog/new" className="text-[#2563EB] hover:underline font-medium">
-            Viết bài đầu tiên →
-          </Link>
-        </div>
-      ) : (
-        <>
-          {/* Mobile: card list */}
-          <div className="sm:hidden space-y-3">
-            {posts.map((post) => (
-              <div key={post.id} className="bg-card border border-border rounded-xl p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-medium text-foreground text-sm leading-snug mb-1.5">
-                      {post.title}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        className={`text-xs ${
-                          post.published
-                            ? 'bg-green-100 text-green-600 hover:bg-green-100'
-                            : 'bg-slate-100 text-muted-foreground hover:bg-slate-100'
-                        }`}
-                      >
-                        {post.published ? 'Đã đăng' : 'Nháp'}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                      </span>
-                    </div>
-                  </div>
-                  <Link
-                    href={`/admin/blog/${post.id}/edit`}
-                    className="text-[#2563EB] hover:underline text-sm font-medium flex-shrink-0"
-                  >
-                    Sửa
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Upload section */}
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-3">📤 Upload từ file .txt / .md</h2>
+        <BlogUploadClient />
+      </div>
 
-          {/* Desktop: table */}
-          <Card className="hidden sm:block border border-border rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-b border-border bg-muted/40">
-                    <TableHead className="text-muted-foreground font-medium">Tiêu đề</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Trạng thái</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Ngày tạo</TableHead>
-                    <TableHead className="w-16" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {posts.map((post) => (
-                    <TableRow
-                      key={post.id}
-                      className="hover:bg-muted/30 transition-colors border-b border-border last:border-0"
-                    >
-                      <TableCell className="font-medium text-foreground">{post.title}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={`text-xs ${
-                            post.published
-                              ? 'bg-green-100 text-green-600 hover:bg-green-100'
-                              : 'bg-slate-100 text-muted-foreground hover:bg-slate-100'
-                          }`}
-                        >
+      <div className="border-t border-border pt-6">
+        <h2 className="text-sm font-semibold text-foreground mb-4">📋 Danh sách bài viết</h2>
+
+        {posts.length === 0 ? (
+          <div className="border border-dashed border-border rounded-xl p-16 text-center text-muted-foreground">
+            <p className="text-base mb-2">Chưa có bài viết nào.</p>
+            <p className="text-sm">Upload file .txt bên trên hoặc viết tay.</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile */}
+            <div className="sm:hidden space-y-3">
+              {posts.map((post) => (
+                <div key={post.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-foreground text-sm leading-snug mb-1.5">
+                        {post.title}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`text-xs ${post.published ? 'bg-green-100 text-green-600 hover:bg-green-100' : 'bg-slate-100 text-muted-foreground hover:bg-slate-100'}`}>
                           {post.published ? 'Đã đăng' : 'Nháp'}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Link
-                          href={`/admin/blog/${post.id}/edit`}
-                          className="text-[#2563EB] hover:underline text-xs font-medium"
-                        >
-                          Sửa
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(post.createdAt).toLocaleDateString('vi-VN')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <BlogActionsClient post={post} />
+                </div>
+              ))}
             </div>
-          </Card>
-        </>
-      )}
+
+            {/* Desktop */}
+            <Card className="hidden sm:block border border-border rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-border bg-muted/40">
+                      <TableHead className="text-muted-foreground font-medium">Tiêu đề</TableHead>
+                      <TableHead className="text-muted-foreground font-medium">Trạng thái</TableHead>
+                      <TableHead className="text-muted-foreground font-medium">Ngày tạo</TableHead>
+                      <TableHead className="w-40 text-right" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {posts.map((post) => (
+                      <TableRow key={post.id} className="hover:bg-muted/30 transition-colors border-b border-border last:border-0">
+                        <TableCell className="font-medium text-foreground max-w-xs truncate">{post.title}</TableCell>
+                        <TableCell>
+                          <Badge className={`text-xs ${post.published ? 'bg-green-100 text-green-600 hover:bg-green-100' : 'bg-slate-100 text-muted-foreground hover:bg-slate-100'}`}>
+                            {post.published ? 'Đã đăng' : 'Nháp'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {new Date(post.createdAt).toLocaleDateString('vi-VN')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <BlogActionsClient post={post} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </>
+        )}
+      </div>
     </div>
   )
 }
