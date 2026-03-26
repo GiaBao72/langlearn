@@ -60,7 +60,8 @@ Clone: `git clone https://[GITHUB_PAT]@github.com/GiaBao72/<repo>.git`
 - **Tailscale IP:** 100.73.204.7
 - **Gateway URL:** http://100.73.204.7:18789
 - **Gateway Token:** [OPENCLAW_TOKEN_CHO]
-- Dùng `sessions_send` với gatewayUrl + gatewayToken để ping Chó
+- **Cách gọi:** `curl -X POST http://100.73.204.7:18789/v1/chat/completions` với Bearer token
+- ⚠️ KHÔNG dùng `sessions_send` — dùng `exec curl` trực tiếp
 
 ## Phân Công Chó - Chiến
 - **Chó 🐶** (PC Win11): làm việc hàng ngày, gần Nhà Vua
