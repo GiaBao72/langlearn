@@ -25,7 +25,12 @@ interface Props {
 
 function checkCorrectness(exercise: Exercise, answer: string): boolean {
   const data = exercise.data as Record<string, unknown>
-  const normalize = (s: string) => s.trim().toLowerCase().replace(/[.!?,]/g, '')
+  const normalize = (s: string) => s
+    .trim()
+    .toLowerCase()
+    .replace(/[.!?,]/g, '')
+    // Chấp nhận cả ký tự đặc biệt tiếng Đức lẫn dạng thay thế
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   switch (exercise.type) {
     case 'FLASHCARD':
       return answer === 'known'
