@@ -26,9 +26,9 @@ export default async function UsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Quan ly nguoi dung</h1>
+        <h1 className="text-2xl font-bold text-foreground">Quản lý người dùng</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {users.length} nguoi dung trong he thong
+          {users.length} người dùng trong hệ thống
         </p>
       </div>
 
@@ -39,9 +39,9 @@ export default async function UsersPage() {
               <TableRow>
                 <TableHead className="w-24">ID</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Ten</TableHead>
-                <TableHead>Vai tro</TableHead>
-                <TableHead>Ngay tao</TableHead>
+                <TableHead>Tên</TableHead>
+                <TableHead>Vai trò</TableHead>
+                <TableHead>Ngày tạo</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -80,7 +80,7 @@ export default async function UsersPage() {
                     colSpan={6}
                     className="text-center text-muted-foreground py-12"
                   >
-                    Chua co nguoi dung nao
+                    Chưa có người dùng nào
                   </TableCell>
                 </TableRow>
               )}

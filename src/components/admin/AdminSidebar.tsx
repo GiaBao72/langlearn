@@ -17,14 +17,14 @@ import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/users', label: 'Nguoi dung', icon: Users },
-  { href: '/admin/courses', label: 'Khoa hoc', icon: BookOpen },
-  { href: '/admin/exercises', label: 'Bai tap', icon: Pencil },
+  { href: '/admin/users', label: 'Người dùng', icon: Users },
+  { href: '/admin/courses', label: 'Khóa học', icon: BookOpen },
+  { href: '/admin/exercises', label: 'Bài tập', icon: Pencil },
   { href: '/admin/blog', label: 'Blog', icon: FileText },
 ]
 
 const bottomItems = [
-  { href: '/', label: 'Trang chu', icon: Home },
+  { href: '/', label: 'Trang chủ', icon: Home },
 ]
 
 export function AdminSidebar() {
@@ -116,10 +116,10 @@ export function AdminSidebar() {
             collapsed ? 'justify-center' : 'justify-end'
           )}
           style={{ color: '#94a3b8' }}
-          title={collapsed ? 'Mo rong' : 'Thu gon'}
+          title={collapsed ? 'Mở rộng' : 'Thu gọn'}
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          {!collapsed && <span className="ml-1 text-xs">Thu gon</span>}
+          {!collapsed && <span className="ml-1 text-xs">Thu gọn</span>}
         </button>
       </div>
     </aside>

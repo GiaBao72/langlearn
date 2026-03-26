@@ -69,7 +69,7 @@ export default function NewExercisePage() {
         setLessons(d.lessons || [])
         if (d.lessons?.length > 0) setLessonId(d.lessons[0].id)
       })
-      .catch(() => setError('Loi tai danh sach bai hoc'))
+      .catch(() => setError('Lỗi tải danh sách bài học'))
       .finally(() => setLessonLoading(false))
   }, [])
 
@@ -107,37 +107,31 @@ export default function NewExercisePage() {
       })
       const json = await res.json()
       if (!res.ok) {
-        setError(json.error || 'Loi tao bai tap')
+        setError(json.error || 'Lỗi tạo bài tập')
         return
       }
       router.push('/admin/exercises')
     } catch {
-      setError('Loi ket noi')
+      setError('Lỗi kết nối')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <nav className="border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-2 text-sm text-[#64748B]">
-          <Link href="/admin" className="hover:text-[#2563EB] transition-colors">
-            Admin
-          </Link>
-          <span>/</span>
+    <div className="max-w-3xl space-y-6">
+      <div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
           <Link href="/admin/exercises" className="hover:text-[#2563EB] transition-colors">
-            Bai tap
+            Bài tập
           </Link>
           <span>/</span>
-          <span className="text-[#334155]">Them moi</span>
+          <span className="text-foreground">Thêm mới</span>
         </div>
-      </nav>
-
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-[#334155]">
-          Tao bai tap moi
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+          Tạo bài tập mới
         </h1>
+      </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-6">
@@ -256,11 +250,10 @@ export default function NewExercisePage() {
               href="/admin/exercises"
               className="px-6 py-3 border border-[#E2E8F0] rounded-lg text-[#334155] hover:bg-slate-100 transition-colors text-sm text-center h-12 flex items-center justify-center"
             >
-              Huy
+              Hủy
             </Link>
           </div>
         </form>
-      </div>
     </div>
   )
 }

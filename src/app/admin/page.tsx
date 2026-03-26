@@ -29,17 +29,17 @@ export default async function AdminPage() {
   })
 
   const stats = [
-    { icon: Users, label: 'Tong users', value: userCount, href: '/admin/users', color: 'text-blue-500' },
-    { icon: BookOpen, label: 'Tong khoa hoc', value: courseCount, href: '/admin/courses', color: 'text-emerald-500' },
-    { icon: FileText, label: 'Tong bai viet', value: blogCount, href: '/admin/blog', color: 'text-violet-500' },
-    { icon: Pencil, label: 'Tong bai tap', value: exerciseCount, href: '/admin/exercises', color: 'text-orange-500' },
+    { icon: Users, label: 'Tổng users', value: userCount, href: '/admin/users', color: 'text-blue-500' },
+    { icon: BookOpen, label: 'Tổng khóa học', value: courseCount, href: '/admin/courses', color: 'text-emerald-500' },
+    { icon: FileText, label: 'Tổng bài viết', value: blogCount, href: '/admin/blog', color: 'text-violet-500' },
+    { icon: Pencil, label: 'Tổng bài tập', value: exerciseCount, href: '/admin/exercises', color: 'text-orange-500' },
   ]
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Tong quan he thong LangLearn</p>
+        <p className="text-sm text-muted-foreground mt-1">Tổng quan hệ thống LangLearn</p>
       </div>
 
       {/* Stats grid */}
@@ -66,9 +66,9 @@ export default async function AdminPage() {
       {/* Recent users table */}
       <Card>
         <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="font-semibold text-foreground">Nguoi dung moi nhat</h2>
+          <h2 className="font-semibold text-foreground">Người dùng mới nhất</h2>
           <Link href="/admin/users" className="text-sm text-blue-600 hover:underline">
-            Xem tat ca
+            Xem tất cả
           </Link>
         </div>
         <div className="overflow-x-auto">
@@ -76,9 +76,9 @@ export default async function AdminPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Email</TableHead>
-                <TableHead>Ten</TableHead>
-                <TableHead>Vai tro</TableHead>
-                <TableHead>Ngay dang ky</TableHead>
+                <TableHead>Tên</TableHead>
+                <TableHead>Vai trò</TableHead>
+                <TableHead>Ngày đăng ký</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -105,7 +105,7 @@ export default async function AdminPage() {
               {recentUsers.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                    Chua co nguoi dung nao
+                    Chưa có người dùng nào
                   </TableCell>
                 </TableRow>
               )}

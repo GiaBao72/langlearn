@@ -31,19 +31,15 @@ export default function NewCoursePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <nav className="border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center gap-2 sm:gap-3 text-sm max-w-3xl mx-auto">
-          <Link href="/admin" className="text-[#64748B] hover:text-[#2563EB] transition-colors">Admin</Link>
-          <span className="text-[#64748B]">/</span>
-          <Link href="/admin/courses" className="text-[#64748B] hover:text-[#2563EB] transition-colors">Khóa học</Link>
-          <span className="text-[#64748B]">/</span>
-          <span className="text-[#334155]">Tạo mới</span>
+    <div className="max-w-3xl space-y-6">
+      <div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <Link href="/admin/courses" className="hover:text-[#2563EB] transition-colors">Khóa học</Link>
+          <span>/</span>
+          <span className="text-foreground">Tạo mới</span>
         </div>
-      </nav>
-
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-[#334155]">Tạo khóa học mới</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tạo khóa học mới</h1>
+      </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-6">
@@ -113,7 +109,6 @@ export default function NewCoursePage() {
             </Link>
           </div>
         </form>
-      </div>
     </div>
   )
 }

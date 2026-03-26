@@ -163,51 +163,48 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Nav */}
-      <nav className="bg-white border-b border-[#E2E8F0] px-4 sm:px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2 text-sm text-[#64748B] flex-wrap">
-            <Link href="/admin" className="hover:text-[#2563EB]">Admin</Link>
+    <div className="max-w-3xl space-y-6">
+      {/* Breadcrumb + publish toggle */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1 flex-wrap">
+            <Link href={`/admin/courses/${lesson.course.id}`} className="hover:text-[#2563EB] truncate max-w-[120px] sm:max-w-none">
+              {lesson.course.title}
+            </Link>
             <span>/</span>
-            <Link href={`/admin/courses/${lesson.course.id}`} className="hover:text-[#2563EB] truncate max-w-[120px] sm:max-w-none">{lesson.course.title}</Link>
-            <span>/</span>
-            <span className="text-[#334155] font-medium truncate max-w-[100px] sm:max-w-none">{lesson.title}</span>
+            <span className="text-foreground font-medium truncate max-w-[100px] sm:max-w-none">{lesson.title}</span>
           </div>
-          <button onClick={togglePublish} disabled={publishing}
-            className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors shrink-0 ${
-              lesson.published ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-[#E2E8F0] text-[#64748B] hover:bg-slate-200'
-            }`}>
-            {lesson.published ? '✓ Đã đăng' : 'Chưa đăng'}
-          </button>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{lesson.title}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{lesson.exercises.length} bài tập</p>
         </div>
-      </nav>
+        <button onClick={togglePublish} disabled={publishing}
+          className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors shrink-0 ${
+            lesson.published ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          }`}>
+          {lesson.published ? '✓ Đã đăng' : 'Chưa đăng'}
+        </button>
+      </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-[#334155]">{lesson.title}</h1>
-          <p className="text-[#64748B] text-sm mt-1">{lesson.exercises.length} bài tập</p>
-        </div>
-
+      <div className="space-y-4">
         {lesson.exercises.length > 0 && (
-          <div className="space-y-2 mb-6 sm:mb-8">
+          <div className="space-y-2">
             {lesson.exercises.map((ex, i) => (
-              <div key={ex.id} className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
-                <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-[#F8FAFC] transition-colors"
+              <div key={ex.id} className="bg-card border border-border rounded-xl overflow-hidden">
+                <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-muted/40 transition-colors"
                   onClick={() => setExpanded(expanded === ex.id ? null : ex.id)}>
                   <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-blue-50 text-[#2563EB] text-xs font-bold flex items-center justify-center flex-shrink-0">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-[#2563EB] mr-2">{TYPE_LABELS[ex.type]}</span>
-                    <span className="text-sm text-[#334155] truncate">{ex.question}</span>
+                    <span className="text-sm text-foreground truncate">{ex.question}</span>
                   </div>
-                  <span className="text-xs text-[#64748B] mr-1 sm:mr-2 shrink-0">{ex.points}đ</span>
-                  {expanded === ex.id ? <ChevronUp className="w-4 h-4 text-[#64748B] shrink-0" /> : <ChevronDown className="w-4 h-4 text-[#64748B] shrink-0" />}
+                  <span className="text-xs text-muted-foreground mr-1 sm:mr-2 shrink-0">{ex.points}đ</span>
+                  {expanded === ex.id ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
                 </div>
                 {expanded === ex.id && (
-                  <div className="px-4 sm:px-5 pb-4 border-t border-[#E2E8F0]">
-                    <pre className="text-xs text-[#64748B] mt-3 bg-[#F8FAFC] rounded p-3 overflow-auto max-h-40">
+                  <div className="px-4 sm:px-5 pb-4 border-t border-border">
+                    <pre className="text-xs text-muted-foreground mt-3 bg-muted rounded p-3 overflow-auto max-h-40">
                       {JSON.stringify(ex.data ?? {}, null, 2)}
                     </pre>
                     <button onClick={() => deleteExercise(ex.id)} disabled={deleting === ex.id}

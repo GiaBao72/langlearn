@@ -57,19 +57,15 @@ export default function NewBlogPostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <nav className="border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-3 text-sm text-[#64748B]">
-          <Link href="/admin" className="hover:text-[#2563EB] transition-colors">Admin</Link>
-          <span>/</span>
+    <div className="max-w-3xl space-y-6">
+      <div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
           <Link href="/admin/blog" className="hover:text-[#2563EB] transition-colors">Blog</Link>
           <span>/</span>
-          <span className="text-[#334155]">Bài mới</span>
+          <span className="text-foreground">Bài mới</span>
         </div>
-      </nav>
-
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-[#334155]">Viết bài mới</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Viết bài mới</h1>
+      </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-6">
@@ -150,7 +146,6 @@ export default function NewBlogPostPage() {
             </Link>
           </div>
         </form>
-      </div>
     </div>
   )
 }

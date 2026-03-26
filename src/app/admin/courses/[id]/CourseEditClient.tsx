@@ -68,27 +68,28 @@ export default function CourseEditClient({ course }: { course: Course }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <nav className="border-b border-[#E2E8F0] px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 text-sm">
-          <Link href="/admin" className="text-[#64748B] hover:text-white transition-colors">Admin</Link>
-          <span className="text-[#64748B]">/</span>
-          <Link href="/admin/courses" className="text-[#64748B] hover:text-white transition-colors">Khóa học</Link>
-          <span className="text-[#64748B]">/</span>
-          <span className="truncate max-w-xs">{course.title}</span>
+    <div className="max-w-5xl space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+            <Link href="/admin/courses" className="hover:text-[#2563EB] transition-colors">Khóa học</Link>
+            <span>/</span>
+            <span className="text-foreground truncate max-w-xs">{course.title}</span>
+          </div>
+          <h1 className="text-xl font-bold text-foreground">Chỉnh sửa khóa học</h1>
         </div>
         <div className="flex gap-2">
           <button onClick={saveChanges} disabled={saving}
-            className="bg-[#2563EB] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#2563EB]/90 transition-colors disabled:opacity-50">
+            className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50">
             {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : 'Lưu'}
           </button>
-          <button onClick={deleteCourse} className="border border-red-500/30 text-red-400 px-4 py-2 rounded-lg text-sm hover:bg-red-500/10 transition-colors">
+          <button onClick={deleteCourse} className="border border-red-300 text-red-500 px-4 py-2 rounded-lg text-sm hover:bg-red-50 transition-colors">
             Xóa
           </button>
         </div>
-      </nav>
+      </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10 grid md:grid-cols-5 gap-8">
+      <div className="grid md:grid-cols-5 gap-8">
         {/* Left: course info */}
         <div className="md:col-span-2 space-y-5">
           <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Thông tin khóa học</h2>
