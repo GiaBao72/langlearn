@@ -189,3 +189,158 @@ body {
     @apply font-sans;
   }
 }
+/* ===========================
+   Blog Prose Styles
+   =========================== */
+.prose-langlearn {
+  color: #334155;
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+.prose-langlearn h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1E293B;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #E2E8F0;
+}
+
+.prose-langlearn h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1E293B;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-langlearn p {
+  margin-bottom: 1.25rem;
+  line-height: 1.85;
+}
+
+.prose-langlearn ul {
+  list-style: none;
+  margin: 0.75rem 0 1.25rem 0;
+  padding: 0;
+}
+
+.prose-langlearn ul li {
+  padding-left: 1.5rem;
+  position: relative;
+  margin-bottom: 0.6rem;
+  line-height: 1.75;
+}
+
+.prose-langlearn ul li::before {
+  content: '→';
+  color: #2563EB;
+  font-weight: 600;
+  position: absolute;
+  left: 0;
+}
+
+.prose-langlearn ol {
+  list-style: decimal;
+  margin: 0.75rem 0 1.25rem 1.5rem;
+}
+
+.prose-langlearn ol li {
+  margin-bottom: 0.6rem;
+  line-height: 1.75;
+  padding-left: 0.25rem;
+}
+
+.prose-langlearn strong {
+  font-weight: 700;
+  color: #1E293B;
+}
+
+.prose-langlearn em {
+  font-style: italic;
+  color: #475569;
+}
+
+.prose-langlearn a {
+  color: #2563EB;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-langlearn a:hover { color: #1d4ed8; }
+
+.prose-langlearn blockquote {
+  border-left: 4px solid #2563EB;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  background: #EFF6FF;
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #1E40AF;
+  font-style: italic;
+}
+
+.prose-langlearn hr {
+  border: none;
+  border-top: 2px solid #E2E8F0;
+  margin: 2rem 0;
+}
+
+.prose-langlearn code {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.875rem;
+  color: #2563EB;
+}
+
+/* Tables */
+.prose-langlearn table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.9rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid #E2E8F0;
+}
+
+.prose-langlearn thead {
+  background: #2563EB;
+  color: white;
+}
+
+.prose-langlearn thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.prose-langlearn tbody tr {
+  border-bottom: 1px solid #E2E8F0;
+  transition: background 0.15s;
+}
+
+.prose-langlearn tbody tr:last-child {
+  border-bottom: none;
+}
+
+.prose-langlearn tbody tr:hover {
+  background: #F8FAFC;
+}
+
+.prose-langlearn td {
+  padding: 0.7rem 1rem;
+  color: #334155;
+}
+
+.prose-langlearn tbody tr:nth-child(even) {
+  background: #F8FAFC;
+}
+.prose-langlearn tbody tr:nth-child(even):hover {
+  background: #EFF6FF;
+}

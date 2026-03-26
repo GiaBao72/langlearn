@@ -14,7 +14,7 @@ async function main() {
   const adminHash = await bcrypt.hash('Admin@2026', 12)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@langlearn.vn' },
-    update: { published: true, publishedAt: new Date() },
+    update: {},
     create: { email: 'admin@langlearn.vn', passwordHash: adminHash, name: 'Admin', role: 'ADMIN' },
   })
   console.log('✅ Admin:', admin.email)
@@ -132,7 +132,7 @@ async function main() {
   for (const ex of exercises) {
     await prisma.exercise.upsert({
       where: { id: ex.id },
-      update: { published: true, publishedAt: new Date() },
+      update: {},
       create: ex,
     })
     console.log('✅ Exercise:', ex.type, '—', ex.question.substring(0, 45))
