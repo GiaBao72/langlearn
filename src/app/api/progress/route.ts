@@ -7,11 +7,25 @@ export async function POST(req: NextRequest) {
     const user = await getCurrentUser()
     if (!user) return NextResponse.json({ ok: false }, { status: 401 })
     const { exerciseId, score } = await req.json()
-    await prisma.userProgress.upsert({
+
+    const existing = await prisma.userProgress.findUnique({
       where: { userId_exerciseId: { userId: user.userId, exerciseId } },
-      update: { score, completedAt: new Date() },
-      create: { userId: user.userId, exerciseId, score },
     })
+
+    if (existing) {
+      // Chỉ update nếu điểm mới cao hơn
+      if (score > existing.score) {
+        await prisma.userProgress.update({
+          where: { userId_exerciseId: { userId: user.userId, exerciseId } },
+          data: { score, completedAt: new Date() },
+        })
+      }
+    } else {
+      await prisma.userProgress.create({
+        data: { userId: user.userId, exerciseId, score },
+      })
+    }
+
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ ok: false }, { status: 500 })

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BookOpen, Flame, Target, Trophy, ArrowRight } from 'lucide-react'
+import useAutoRefresh from '@/hooks/useAutoRefresh'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -76,6 +77,7 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardClient() {
+  useAutoRefresh()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

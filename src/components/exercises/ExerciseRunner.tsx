@@ -204,6 +204,7 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
             data={exercise.data}
             value={userAnswer}
             onChange={setUserAnswer}
+            onSubmit={checkAnswer}
             submitted={submitted}
             correct={correct}
           />

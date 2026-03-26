@@ -3,6 +3,7 @@
 interface FillBlankData {
   answer: string
   hint?: string
+  onSubmit?: () => void
 }
 
 interface Props {
@@ -10,11 +11,12 @@ interface Props {
   data: Record<string, unknown>
   value: string
   onChange: (val: string) => void
+  onSubmit?: () => void
   submitted: boolean
   correct: boolean
 }
 
-export default function FillBlankExercise({ question, data, value, onChange, submitted, correct }: Props) {
+export default function FillBlankExercise({ question, data, value, onChange, onSubmit, submitted, correct }: Props) {
   const d = data as unknown as FillBlankData
 
   // Replace ___ in question with input box display
@@ -44,6 +46,7 @@ export default function FillBlankExercise({ question, data, value, onChange, sub
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && !submitted && onSubmit?.()}
         disabled={submitted}
         placeholder="Điền vào đây..."
         autoFocus
