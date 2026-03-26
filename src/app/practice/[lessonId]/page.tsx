@@ -28,7 +28,7 @@ export default async function PracticePage({ params }: { params: Promise<{ lesso
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-[#334155] mb-1">{lesson.title}</h1>
-          <p className="text-[#64748B] text-sm">{lesson.exercises.length} bai tap</p>
+          <p className="text-[#64748B] text-sm">{lesson.exercises.length} bài tập</p>
         </div>
         <ExerciseRunner
           exercises={lesson.exercises.map(e => ({

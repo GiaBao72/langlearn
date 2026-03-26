@@ -2,8 +2,19 @@ import { getCurrentUser } from '@/lib/auth'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const course = await prisma.course.findUnique({ where: { id }, select: { title: true, description: true } })
+  if (!course) return { title: 'Không tìm thấy — LangLearn' }
+  return {
+    title: `${course.title} — LangLearn`,
+    description: course.description || `Khóa học ${course.title} với phương pháp Spaced Repetition`,
+  }
+}
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser() // null = guest OK

@@ -1,8 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Blog — LangLearn',
+  description: 'Kiến thức học ngoại ngữ, mẹo học tiếng Đức, phương pháp Spaced Repetition và nhiều hơn nữa.',
+}
 
 const PAGE_SIZE = 9
 
