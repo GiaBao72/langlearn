@@ -14,13 +14,16 @@ type Course = {
 
 export default function CoursesClient({ courses }: { courses: Course[] }) {
   const languages = [...new Set(courses.map(c => c.language))]
+  const levels = [...new Set(courses.map(c => c.level))].sort()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLang, setSelectedLang] = useState('')
+  const [selectedLevel, setSelectedLevel] = useState('')
 
   const filtered = courses.filter(c => {
     const matchSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchLang = selectedLang ? c.language === selectedLang : true
-    return matchSearch && matchLang
+    const matchLevel = selectedLevel ? c.level === selectedLevel : true
+    return matchSearch && matchLang && matchLevel
   })
 
   return (
@@ -67,6 +70,24 @@ export default function CoursesClient({ courses }: { courses: Course[] }) {
                 }`}
               >
                 {lang}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Level filter pills */}
+        {levels.length > 1 && (
+          <div className="flex gap-2 mb-6 sm:mb-8 flex-wrap">
+            <button onClick={() => setSelectedLevel('')}
+              className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center transition-colors ${
+                selectedLevel === '' ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-[#E2E8F0] text-[#334155] hover:border-emerald-400'}`}>
+              Mọi cấp độ
+            </button>
+            {levels.map(level => (
+              <button key={level} onClick={() => setSelectedLevel(level === selectedLevel ? '' : level)}
+                className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center transition-colors ${
+                  selectedLevel === level ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-[#E2E8F0] text-[#334155] hover:border-emerald-400'}`}>
+                {level}
               </button>
             ))}
           </div>

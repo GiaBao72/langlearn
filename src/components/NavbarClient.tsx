@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
@@ -18,8 +18,27 @@ const navLinks = [
   { href: '/store', label: 'Sách' },
 ]
 
+function useDarkMode() {
+  const [dark, setDark] = useState(false)
+  useEffect(() => {
+    const saved = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isDark = saved ? saved === 'dark' : prefersDark
+    setDark(isDark)
+    document.documentElement.classList.toggle('dark', isDark)
+  }, [])
+  function toggle() {
+    const next = !dark
+    setDark(next)
+    localStorage.setItem('theme', next ? 'dark' : 'light')
+    document.documentElement.classList.toggle('dark', next)
+  }
+  return { dark, toggle }
+}
+
 export default function NavbarClient({ user }: NavbarClientProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { dark, toggle } = useDarkMode()
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -30,6 +49,10 @@ export default function NavbarClient({ user }: NavbarClientProps) {
     <>
       {/* Desktop right side */}
       <div className="hidden md:flex items-center gap-3">
+        <button onClick={toggle} aria-label="Toggle dark mode"
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-[#64748B] hover:bg-slate-100 hover:text-[#334155] transition-colors">
+          {dark ? '☀️' : '🌙'}
+        </button>
         {user ? (
           <>
             {user.role === 'ADMIN' && (
@@ -90,6 +113,14 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                 {link.label}
               </Link>
             ))}
+
+            <div className="border-t border-[#E2E8F0] my-2" />
+
+            {/* Dark mode toggle mobile */}
+            <button onClick={toggle}
+              className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors flex items-center gap-2">
+              {dark ? '☀️ Chế độ sáng' : '🌙 Chế độ tối'}
+            </button>
 
             <div className="border-t border-[#E2E8F0] my-2" />
 

@@ -22,6 +22,14 @@ interface DashboardData {
   studiedToday: boolean
   heatmap: HeatmapDay[]
   nextLesson: { id: string; title: string; courseTitle: string } | null
+  inProgressLessons: {
+    id: string
+    title: string
+    courseTitle: string
+    courseId: string
+    done: number
+    total: number
+  }[]
   recentProgress: {
     id: string
     score: number
@@ -268,6 +276,39 @@ export default function DashboardClient() {
           <div className="bg-[#10B981]/10 border border-[#10B981]/30 rounded-xl p-4 sm:p-5 text-center">
             <p className="text-[#10B981] font-semibold">Bạn đã hoàn thành tất cả bài học! 🎉</p>
             <p className="text-[#64748B] text-sm mt-1">Hãy khám phá thêm khóa học mới</p>
+          </div>
+        </div>
+      )}
+
+      {/* Bài đang dở */}
+      {data.inProgressLessons && data.inProgressLessons.length > 0 && (
+        <div className="mb-6 sm:mb-8">
+          <h2 className="font-semibold text-[#334155] mb-3 text-sm sm:text-base">📖 Bài đang học dở ({data.inProgressLessons.length})</h2>
+          <div className="space-y-2">
+            {data.inProgressLessons.map((lesson) => {
+              const pct = Math.round((lesson.done / lesson.total) * 100)
+              return (
+                <Link key={lesson.id} href={`/practice/${lesson.id}`}>
+                  <Card className="border border-[#E2E8F0] rounded-xl shadow-sm hover:border-blue-300 hover:shadow-md transition-all group">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-[#64748B] mb-0.5">{lesson.courseTitle}</p>
+                          <p className="font-medium text-[#334155] group-hover:text-[#2563EB] transition-colors text-sm truncate">{lesson.title}</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="w-16 bg-slate-100 rounded-full h-1.5">
+                            <div className="h-1.5 bg-[#2563EB] rounded-full" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-xs text-[#64748B] w-8">{pct}%</span>
+                          <ArrowRight className="w-4 h-4 text-[#2563EB]" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}

@@ -2,11 +2,21 @@
 
 import { useState } from 'react'
 
-interface Props {
-  user: { userId: string; email: string; role: string }
+interface RecentProgressItem {
+  score: number
+  completedAt: string
+  exerciseType: string
+  exerciseQuestion: string | null
+  lessonTitle: string | null
+  courseTitle: string | null
 }
 
-export default function ProfileClient({ user }: Props) {
+interface Props {
+  user: { userId: string; email: string; role: string }
+  recentProgress: RecentProgressItem[]
+}
+
+export default function ProfileClient({ user, recentProgress }: Props) {
   const [name, setName] = useState('')
   const [curPw, setCurPw] = useState('')
   const [newPw, setNewPw] = useState('')
@@ -96,6 +106,29 @@ export default function ProfileClient({ user }: Props) {
           {msgPw && <p className={`text-sm ${msgPw.type === 'ok' ? 'text-green-600' : 'text-red-500'}`}>{msgPw.text}</p>}
         </div>
       </div>
+
+      {/* Lịch sử học */}
+      {recentProgress.length > 0 && (
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
+          <h2 className="font-semibold text-[#334155] mb-4">📚 Lịch sử học gần đây</h2>
+          <div className="space-y-2">
+            {recentProgress.map((p, i) => (
+              <div key={i} className="flex items-center justify-between py-2 border-b border-[#F1F5F9] last:border-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-[#64748B]">{p.courseTitle} · {p.lessonTitle}</p>
+                  <p className="text-sm text-[#334155] truncate">{p.exerciseQuestion || `(${p.exerciseType})`}</p>
+                </div>
+                <div className="flex items-center gap-3 ml-3 flex-shrink-0">
+                  <span className="text-sm font-semibold text-[#2563EB]">+{p.score}đ</span>
+                  <span className="text-xs text-[#94A3B8]">
+                    {new Date(p.completedAt).toLocaleDateString('vi-VN')}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -43,7 +43,7 @@ export async function GET() {
   const completedExerciseIds = new Set(progress.map(p => p.exerciseId))
   const allLessons = await prisma.lesson.findMany({
     where: { published: true, course: { published: true } },
-    include: { exercises: { select: { id: true } }, course: { select: { title: true } } },
+    include: { exercises: { select: { id: true } }, course: { select: { id: true, title: true } } },
     orderBy: [{ course: { createdAt: 'asc' } }, { order: 'asc' }]
   })
 
@@ -56,6 +56,25 @@ export async function GET() {
     }
   }
 
+  // inProgress: lessons đã làm ít nhất 1 bài nhưng chưa xong
+  const userExerciseIds = completedExerciseIds
+  const inProgressLessons = allLessons
+    .filter(l => {
+      const total = l.exercises.length
+      if (total === 0) return false
+      const done = l.exercises.filter(e => userExerciseIds.has(e.id)).length
+      return done > 0 && done < total
+    })
+    .slice(0, 5)
+    .map(l => ({
+      id: l.id,
+      title: l.title,
+      courseTitle: l.course.title,
+      courseId: l.course.id,
+      done: l.exercises.filter(e => userExerciseIds.has(e.id)).length,
+      total: l.exercises.length,
+    }))
+
   return NextResponse.json({
     totalScore,
     completedCount,
@@ -63,6 +82,7 @@ export async function GET() {
     studiedToday,
     heatmap,
     nextLesson,
+    inProgressLessons,
     recentProgress: progress.slice(0, 5).map(p => ({
       id: p.id,
       score: p.score,

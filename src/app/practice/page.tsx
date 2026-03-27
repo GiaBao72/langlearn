@@ -26,6 +26,17 @@ export default async function PracticeIndexPage() {
   })
   const completedSet = new Set(completedIds.map(p => p.exerciseId))
 
+  // Score per lesson
+  const progressWithScore = await prisma.userProgress.findMany({
+    where: { userId: user.userId },
+    select: { exerciseId: true, score: true, exercise: { select: { lessonId: true } } },
+  })
+  const scorePerLesson: Record<string, number> = {}
+  for (const p of progressWithScore) {
+    const lid = p.exercise.lessonId
+    scorePerLesson[lid] = (scorePerLesson[lid] ?? 0) + p.score
+  }
+
   // Tìm bài tiếp theo chưa hoàn thành
   let nextLesson: { id: string; title: string } | null = null
   outer: for (const course of courses) {
@@ -106,6 +117,9 @@ export default async function PracticeIndexPage() {
                             />
                           </div>
                           <span className="text-xs text-[#64748B] w-8 text-right">{pct}%</span>
+                          {scorePerLesson[lesson.id] > 0 && (
+                            <span className="text-xs font-semibold text-[#2563EB]">{scorePerLesson[lesson.id]}đ</span>
+                          )}
                           <span className="text-[#64748B] group-hover:text-blue-500 transition-colors text-lg">→</span>
                         </div>
                       </Link>
