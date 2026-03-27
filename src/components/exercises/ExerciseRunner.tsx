@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+// @ts-ignore
+import confetti from 'canvas-confetti'
 import FlashcardExercise from './FlashcardExercise'
 import FillBlankExercise from './FillBlankExercise'
 import MultipleChoiceExercise from './MultipleChoiceExercise'
@@ -65,6 +67,12 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
     correct: boolean
   }>>([])
 
+  useEffect(() => {
+    if (finished) {
+      confetti({ particleCount: 200, spread: 120, origin: { y: 0.4 }, colors: ['#2563EB','#10B981','#F59E0B','#EF4444'] })
+    }
+  }, [finished])
+
   const exercise = exercises[currentIndex]
   const isFlashcard = exercise?.type === 'FLASHCARD'
   const progress = exercises.length > 0 ? ((currentIndex) / exercises.length) * 100 : 0
@@ -98,6 +106,7 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
     if (isCorrect) {
       setTotalScore(s => s + exercise.points)
       setCorrectCount(c => c + 1)
+      confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } })
     }
     const data = exercise.data as Record<string, unknown>
     const correctAnswer =

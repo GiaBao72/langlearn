@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+// @ts-ignore
+import confetti from 'canvas-confetti'
 
 const ALL_QUESTIONS = [
   { sentence: 'Ich ___ jeden Tag Deutsch.', answer: 'lerne', hint: 'Động từ "học" chia ngôi thứ nhất số ít' },
@@ -36,13 +39,22 @@ export default function HomePageClient() {
     setQuestions(shuffle(ALL_QUESTIONS))
   }, [])
 
+  useEffect(() => {
+    if (showCTA && correctCount >= 4) {
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } })
+    }
+  }, [showCTA])
+
   const q = questions[current]
 
   function checkAnswer() {
     if (!input.trim()) return
     const correct = normalize(input) === normalize(q.answer)
     setResult(correct ? 'correct' : 'wrong')
-    if (correct) setCorrectCount(c => c + 1)
+    if (correct) {
+      setCorrectCount(c => c + 1)
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: ['#2563EB','#10B981','#F59E0B'] })
+    }
 
     setTimeout(() => {
       if (current + 1 >= questions.length) {
@@ -62,16 +74,31 @@ export default function HomePageClient() {
         <p className="text-[#2563EB] text-xs sm:text-sm font-semibold tracking-widest uppercase mb-4">
           Hack não bộ để học ngoại ngữ
         </p>
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] mb-4 sm:mb-6 text-[#334155]">
+        <motion.h1
+          className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] mb-4 sm:mb-6 text-[#334155]"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           5 phút mỗi ngày.<br />
           <span className="text-[#2563EB]">Kết quả thật.</span>
-        </h1>
-        <p className="text-[#64748B] text-base sm:text-lg max-w-md mx-auto mb-8 sm:mb-12 leading-relaxed">
+        </motion.h1>
+        <motion.p
+          className="text-[#64748B] text-base sm:text-lg max-w-md mx-auto mb-8 sm:mb-12 leading-relaxed"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+        >
           Phương pháp Spaced Repetition giúp não bộ ghi nhớ tự nhiên — không nhồi nhét, không quên.
-        </p>
+        </motion.p>
 
         {/* Demo Widget */}
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-8 max-w-md mx-auto shadow-sm mb-8 sm:mb-10">
+        <motion.div
+          className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-8 max-w-md mx-auto shadow-sm mb-8 sm:mb-10"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.25 }}
+        >
           {!showCTA ? (
             <>
               <div className="flex items-center justify-between mb-4">
@@ -131,17 +158,22 @@ export default function HomePageClient() {
               </Link>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* CTA buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <motion.div
+          className="flex flex-col sm:flex-row gap-3 justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
           <Link href="/register" className="bg-[#2563EB] text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base text-center">
             Bắt đầu miễn phí →
           </Link>
           <Link href="/courses" className="border border-[#E2E8F0] text-[#334155] px-6 py-3 rounded-full font-semibold hover:border-[#2563EB] hover:text-[#2563EB] transition-colors text-sm sm:text-base text-center bg-white">
             Xem khóa học
           </Link>
-        </div>
+        </motion.div>
       </section>
 
       {/* Stats bar */}
@@ -153,7 +185,7 @@ export default function HomePageClient() {
             { n: '100%', label: 'miễn phí đăng ký' },
           ].map(s => (
             <div key={s.n}>
-              <div className="text-xl sm:text-3xl font-extrabold text-[#2563EB]">{s.n}</div>
+              <div className="text-xl sm:text-3xl font-extrabold text-[#2563EB] tabular-nums animate-count-up">{s.n}</div>
               <div className="text-[#64748B] text-xs sm:text-sm mt-1">{s.label}</div>
             </div>
           ))}
@@ -172,11 +204,16 @@ export default function HomePageClient() {
             { icon: '📚', title: 'Lộ trình rõ ràng', desc: 'Từ A1 đến C1 — biết mình đang ở đâu và bước tiếp theo là gì.' },
             { icon: '✍️', title: 'Blog học thuật', desc: 'Mẹo học, tips ngữ pháp, câu chuyện từ người học thật.' },
           ].map(f => (
-            <div key={f.title} className="bg-white border border-[#E2E8F0] rounded-xl p-5 sm:p-6 shadow-sm hover:border-blue-200 hover:shadow-md transition-all">
+            <motion.div
+              key={f.title}
+              className="bg-white border border-[#E2E8F0] rounded-xl p-5 sm:p-6 shadow-sm hover:border-blue-200 hover:shadow-md transition-all"
+              whileHover={{ y: -4, boxShadow: "0 8px 30px rgba(37,99,235,0.12)" }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
               <div className="text-2xl sm:text-3xl mb-3">{f.icon}</div>
               <h3 className="font-semibold mb-2 text-[#334155] text-sm sm:text-base">{f.title}</h3>
               <p className="text-[#64748B] text-xs sm:text-sm leading-relaxed">{f.desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>

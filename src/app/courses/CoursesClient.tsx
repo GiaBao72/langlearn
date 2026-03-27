@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 type Course = {
   id: string
@@ -76,16 +77,22 @@ export default function CoursesClient({ courses }: { courses: Course[] }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {filtered.map(c => (
-              <Link key={c.id} href={`/courses/${c.id}`}
-                className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 hover:border-blue-300 transition-all hover:-translate-y-0.5 group shadow-sm">
-                <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <span className="text-xs text-[#64748B] uppercase tracking-widest">{c.language}</span>
-                  <span className="text-xs bg-slate-100 text-[#64748B] px-2 py-0.5 rounded-full">{c.level}</span>
-                </div>
-                <h2 className="font-semibold text-base sm:text-lg mb-2 group-hover:text-[#2563EB] transition-colors leading-snug text-[#334155]">{c.title}</h2>
-                {c.description && <p className="text-[#64748B] text-sm line-clamp-2 mb-3 sm:mb-4">{c.description}</p>}
-                <div className="text-[#64748B] text-xs">{c._count.lessons} bài học</div>
-              </Link>
+              <motion.div
+                key={c.id}
+                whileHover={{ y: -3, scale: 1.01 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <Link href={`/courses/${c.id}`}
+                  className="block bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 hover:border-blue-300 transition-all hover:-translate-y-0.5 group shadow-sm">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <span className="text-xs text-[#64748B] uppercase tracking-widest">{c.language}</span>
+                    <span className="text-xs bg-slate-100 text-[#64748B] px-2 py-0.5 rounded-full">{c.level}</span>
+                  </div>
+                  <h2 className="font-semibold text-base sm:text-lg mb-2 group-hover:text-[#2563EB] transition-colors leading-snug text-[#334155]">{c.title}</h2>
+                  {c.description && <p className="text-[#64748B] text-sm line-clamp-2 mb-3 sm:mb-4">{c.description}</p>}
+                  <div className="text-[#64748B] text-xs">{c._count.lessons} bài học</div>
+                </Link>
+              </motion.div>
             ))}
           </div>
         )}
