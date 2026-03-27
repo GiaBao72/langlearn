@@ -6,17 +6,17 @@ export default async function Navbar() {
   const user = await getCurrentUser()
 
   return (
-    <nav className="border-b border-[#E2E8F0] bg-white sticky top-0 z-40">
+    <nav className="border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-bold text-[#2563EB] text-lg">LangLearn</Link>
           {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-4 text-sm text-[#64748B]">
-            <Link href="/courses" className="hover:text-[#334155] transition-colors">Khóa học</Link>
-            <Link href="/roadmap" className="hover:text-[#334155] transition-colors">Lộ trình</Link>
-            <Link href="/blog" className="hover:text-[#334155] transition-colors">Blog</Link>
-            <Link href="/leaderboard" className="hover:text-[#334155] transition-colors">🏆 Xếp hạng</Link>
-            <Link href="/store" className="hover:text-[#334155] transition-colors">Sách</Link>
+          <div className="hidden md:flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
+            <Link href="/courses" className="hover:text-[var(--color-text-main)] transition-colors">Khóa học</Link>
+            <Link href="/roadmap" className="hover:text-[var(--color-text-main)] transition-colors">Lộ trình</Link>
+            <Link href="/blog" className="hover:text-[var(--color-text-main)] transition-colors">Blog</Link>
+            <Link href="/leaderboard" className="hover:text-[var(--color-text-main)] transition-colors">🏆 Xếp hạng</Link>
+            <Link href="/store" className="hover:text-[var(--color-text-main)] transition-colors">Sách</Link>
           </div>
         </div>
 

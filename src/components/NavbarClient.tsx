@@ -50,20 +50,20 @@ export default function NavbarClient({ user }: NavbarClientProps) {
       {/* Desktop right side */}
       <div className="hidden md:flex items-center gap-3">
         <button onClick={toggle} aria-label="Toggle dark mode"
-          className="w-9 h-9 rounded-lg flex items-center justify-center text-[#64748B] hover:bg-slate-100 hover:text-[#334155] transition-colors">
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
           {dark ? '☀️' : '🌙'}
         </button>
         {user ? (
           <>
             {user.role === 'ADMIN' && (
-              <Link href="/admin" className="text-sm text-[#64748B] hover:text-[#334155] transition-colors">
+              <Link href="/admin" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">
                 Admin
               </Link>
             )}
-            <Link href="/dashboard" className="text-sm text-[#64748B] hover:text-[#334155] transition-colors">
+            <Link href="/dashboard" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">
               Dashboard
             </Link>
-            <Link href="/profile" className="text-sm text-[#64748B] hover:text-[#334155] transition-colors">
+            <Link href="/profile" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">
               Tài khoản
             </Link>
             <div className="flex items-center gap-2">
@@ -72,16 +72,16 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   {user.name.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm text-[#334155]">{user.name}</span>
+              <span className="text-sm text-[var(--color-text-main)]">{user.name}</span>
             </div>
             <Button variant="ghost" size="sm" onClick={handleLogout}
-              className="text-sm text-[#64748B] hover:text-red-500 transition-colors">
+              className="text-sm text-[var(--color-text-muted)] hover:text-red-500 transition-colors">
               Đăng xuất
             </Button>
           </>
         ) : (
           <>
-            <Link href="/login" className="text-sm text-[#64748B] hover:text-[#334155] transition-colors">
+            <Link href="/login" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">
               Đăng nhập
             </Link>
             <Link href="/register"
@@ -94,7 +94,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
       {/* Mobile: hamburger button */}
       <button
-        className="md:hidden p-2 rounded-lg text-[#64748B] hover:text-[#334155] hover:bg-slate-100 transition-colors"
+        className="md:hidden p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-border)] transition-colors"
         onClick={() => setMenuOpen(o => !o)}
         aria-label="Menu"
       >
@@ -103,26 +103,26 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
       {/* Mobile dropdown menu */}
       {menuOpen && (
-        <div className="absolute top-14 left-0 right-0 bg-white border-b border-[#E2E8F0] shadow-lg z-50 md:hidden">
+        <div className="absolute top-14 left-0 right-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] shadow-lg z-50 md:hidden">
           <div className="max-w-6xl mx-auto px-4 py-3 space-y-1">
             {/* Nav links */}
             {navLinks.map(link => (
               <Link key={link.href} href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="block px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors">
+                className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
                 {link.label}
               </Link>
             ))}
 
-            <div className="border-t border-[#E2E8F0] my-2" />
+            <div className="border-t border-[var(--color-border)] my-2" />
 
             {/* Dark mode toggle mobile */}
             <button onClick={toggle}
-              className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors flex items-center gap-2">
+              className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors flex items-center gap-2">
               {dark ? '☀️ Chế độ sáng' : '🌙 Chế độ tối'}
             </button>
 
-            <div className="border-t border-[#E2E8F0] my-2" />
+            <div className="border-t border-[var(--color-border)] my-2" />
 
             {user ? (
               <>
@@ -134,33 +134,33 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="text-sm font-medium text-[#334155]">{user.name}</div>
-                    <div className="text-xs text-[#64748B]">{user.email}</div>
+                    <div className="text-sm font-medium text-[var(--color-text-main)]">{user.name}</div>
+                    <div className="text-xs text-[var(--color-text-muted)]">{user.email}</div>
                   </div>
                 </div>
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors">
+                  className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
                   Dashboard
                 </Link>
                 <Link href="/profile" onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors">
+                  className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
                   Tài khoản
                 </Link>
                 {user.role === 'ADMIN' && (
                   <Link href="/admin" onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 hover:text-[#334155] transition-colors">
+                    className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
                     ⚙️ Quản trị
                   </Link>
                 )}
                 <button onClick={() => { setMenuOpen(false); handleLogout() }}
-                  className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors">
+                  className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                   Đăng xuất
                 </button>
               </>
             ) : (
               <>
                 <Link href="/login" onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-sm text-[#64748B] hover:bg-slate-50 transition-colors">
+                  className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] transition-colors">
                   Đăng nhập
                 </Link>
                 <Link href="/register" onClick={() => setMenuOpen(false)}
