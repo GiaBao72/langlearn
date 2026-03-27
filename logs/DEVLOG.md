@@ -207,3 +207,40 @@ User, RefreshToken, Course, Lesson, Exercise (JSON data), UserProgress, BlogPost
 - Build: success
 - pm2 restart: online
 - Live: http://118.70.49.57:12431
+
+---
+
+## 2026-03-27 (tiếp theo) — Chiến 🕺
+
+### Tính năng mới (commit 3b6c1a8 → 8f2e272)
+
+| Tính năng | URL |
+|-----------|-----|
+| Blog tìm kiếm + phân trang | `/blog?q=...&page=2` |
+| Trang Profile user | `/profile` |
+| Admin blog edit | `/admin/blog/[id]` |
+| Quên mật khẩu (token 15 phút) | `/forgot-password` |
+| 404 custom | tự động |
+| SEO meta động | blog, courses, course detail |
+
+### Bug fixes
+- Homepage navbar hiển thị đúng auth sau đăng nhập (page.tsx → server component)
+- Logout route mới `POST /api/auth/logout`
+- Rate limiting login: max 5 lần / 15 phút / IP
+- Cookie `secure` đồng bộ env check ở login/register/refresh
+- Progress API: giữ điểm cao nhất, không ghi đè khi làm lại kém hơn
+- FillBlank: Enter để submit
+- Hiển thị đáp án đúng khi sai (ExerciseRunner feedback)
+- Chấp nhận ä/ö/ü/ß lẫn ae/oe/ue/ss khi điền đáp án
+- Nút "Về khóa học" redirect đúng về `/courses/[courseId]`
+- Dictation: fallback khi browser không hỗ trợ Speech API
+- SortWords: shuffle cố định theo nội dung, không xáo lại mỗi render
+- Email validate format server-side ở register
+- Auto refresh token mỗi 12 phút (useAutoRefresh hook)
+- Đồng bộ yêu cầu mật khẩu tối thiểu 6 ký tự toàn bộ
+- Xóa ZenPractice (dead code), dùng ExerciseRunner
+
+### Status
+- Live: http://118.70.49.57:12431 ✅
+- Latest commit: 8f2e272
+- TODO còn lại: SSL/HTTPS (chờ domain)
