@@ -4,140 +4,156 @@ import { useEffect, useRef, useState } from 'react'
 
 type Mood = 'walk' | 'idle' | 'sleep' | 'wave'
 
-// ── Dog SVG — mặc định nhìn sang PHẢI ────────────────────────
-// Bố cục: thân giữa, đầu bên phải, đuôi bên trái
-// flip=true khi đi sang trái
+/**
+ * Dog SVG — viewBox 100x70
+ * Mặc định nhìn sang PHẢI
+ * Bố cục:
+ *   - Thân: ellipse giữa (cx=45, cy=52)
+ *   - Đầu: circle bên phải (cx=72, cy=36) — nối với thân
+ *   - Đuôi: bên trái thân
+ *   - Chân trước: dưới đầu (x~65)
+ *   - Chân sau: dưới đuôi (x~22)
+ */
 function DogSVG({ mood }: { mood: Mood }) {
   const isSleep = mood === 'sleep'
   const isWave  = mood === 'wave'
   const isWalk  = mood === 'walk'
 
   return (
-    <svg
-      width="80" height="60"
-      viewBox="0 0 80 60"
-      fill="none"
+    <svg width="100" height="70" viewBox="0 0 100 70" fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ overflow: 'visible', display: 'block' }}
-    >
-      {/* === ĐUÔI (trái) === */}
-      <path
-        d="M14 36 Q4 28 6 18 Q8 12 13 18"
+      style={{ display: 'block', overflow: 'visible' }}>
+
+      {/* ĐUÔI — gốc tại (18,48), cong lên trái */}
+      <path d="M18 48 Q6 38 10 24 Q12 16 18 24"
         stroke="#C8935A" strokeWidth="4" strokeLinecap="round" fill="none"
         style={{
-          transformOrigin: '14px 36px',
+          transformOrigin: '18px 48px',
           animation: isWalk
-            ? 'dog-tail 0.35s ease-in-out infinite'
-            : 'dog-tail 1.4s ease-in-out infinite',
+            ? 'dog-tail 0.38s ease-in-out infinite'
+            : 'dog-tail 1.5s ease-in-out infinite',
         }}
       />
 
-      {/* === THÂN === */}
-      <ellipse cx="38" cy="42" rx="20" ry="11" fill="#E8B47A"/>
-      {/* Bụng */}
-      <ellipse cx="38" cy="44" rx="12" ry="7" fill="#F5D5A8"/>
+      {/* THÂN — ellipse nằm ngang */}
+      <ellipse cx="46" cy="50" rx="24" ry="13" fill="#E8B47A"/>
+      {/* Bụng sáng */}
+      <ellipse cx="46" cy="53" rx="15" ry="8" fill="#F5D5A8"/>
 
-      {/* === CHÂN SAU (trái) === */}
-      <rect x="16" y="49" width="9" height="7" rx="4"
-        fill="#C8935A"
+      {/* CHÂN SAU — dưới đuôi */}
+      <rect x="20" y="59" width="11" height="8" rx="4" fill="#C8935A"
         style={isWalk ? {
-          transformOrigin: '20px 49px',
-          animation: 'dog-leg-back 0.35s ease-in-out infinite',
+          transformOrigin: '25px 59px',
+          animation: 'dog-leg-back 0.38s ease-in-out infinite',
         } : {}}
       />
-      {/* === CHÂN TRƯỚC (phải) === */}
-      <rect x="50" y="49" width="9" height="7" rx="4"
-        fill="#C8935A"
+      {/* CHÂN TRƯỚC — dưới đầu */}
+      <rect x="62" y="59" width="11" height="8" rx="4" fill="#C8935A"
         style={isWalk ? {
-          transformOrigin: '54px 49px',
-          animation: 'dog-leg-front 0.35s ease-in-out infinite',
+          transformOrigin: '67px 59px',
+          animation: 'dog-leg-front 0.38s ease-in-out infinite',
         } : {}}
       />
 
-      {/* === ĐẦU (bên phải) === */}
-      <circle cx="60" cy="30" r="16" fill="#E8B47A"/>
+      {/* ĐẦU — cx=72 nối liền thân */}
+      <circle cx="72" cy="34" r="18" fill="#E8B47A"/>
 
-      {/* === TAI === */}
-      {/* Tai trên (gần đỉnh đầu) */}
-      <path d="M52 17 Q48 6 56 10 Q62 8 58 19Z" fill="#C8935A"/>
-      {/* Tai dưới / floppy (bên phải đầu) */}
-      <path d="M72 20 Q80 16 78 28 Q76 34 70 30 Q74 23 72 20Z" fill="#C8935A"/>
+      {/* TAI TRÁI (trên đỉnh đầu) — hình giọt nước */}
+      <ellipse cx="64" cy="18" rx="6" ry="10"
+        transform="rotate(-15 64 18)" fill="#C8935A"/>
+      {/* TAI PHẢI (floppy, cạnh phải đầu) */}
+      <ellipse cx="86" cy="26" rx="5" ry="9"
+        transform="rotate(20 86 26)" fill="#C8935A"/>
 
-      {/* === MÕM === */}
-      <ellipse cx="72" cy="34" rx="7" ry="5.5" fill="#F5D5A8"/>
+      {/* MÕM — ellipse nhô ra phải */}
+      <ellipse cx="86" cy="40" rx="8" ry="6" fill="#F5D5A8"/>
       {/* Mũi */}
-      <ellipse cx="74" cy="32" rx="3" ry="2.2" fill="#5C3322"/>
-      <ellipse cx="73.2" cy="31.4" rx="1" ry="0.7" fill="white" opacity="0.55"/>
+      <ellipse cx="88" cy="37.5" rx="3.5" ry="2.5" fill="#4A2810"/>
+      {/* Shine mũi */}
+      <circle cx="87" cy="36.8" r="1" fill="white" opacity="0.6"/>
       {/* Miệng */}
-      <path d="M69 37 Q72 40.5 75 37" stroke="#8B5E3C" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M82 43 Q86 47 90 43"
+        stroke="#8B5E3C" strokeWidth="2" strokeLinecap="round" fill="none"/>
 
-      {/* === MẮT === */}
+      {/* MẮT */}
       {isSleep ? (
         <>
-          <path d="M55 27 Q58 30 61 27" stroke="#5C3D1E" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-          <path d="M63 26 Q66 29 69 26" stroke="#5C3D1E" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-          <text x="44" y="20" fontSize="9" fill="#94A3B8" fontWeight="bold" fontFamily="sans-serif">z</text>
-          <text x="40" y="13" fontSize="7" fill="#94A3B8" fontWeight="bold" fontFamily="sans-serif">z</text>
+          <path d="M64 31 Q67 34 70 31"
+            stroke="#4A2810" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+          <path d="M74 30 Q77 33 80 30"
+            stroke="#4A2810" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+          {/* Zzz */}
+          <text x="50" y="22" fontSize="10" fill="#94A3B8"
+            fontWeight="bold" fontFamily="sans-serif">z</text>
+          <text x="45" y="14" fontSize="7" fill="#94A3B8"
+            fontWeight="bold" fontFamily="sans-serif">z</text>
         </>
       ) : (
         <>
-          <circle cx="57" cy="27" r="3.5" fill="#3D2B1A"/>
-          <circle cx="67" cy="27" r="3.5" fill="#3D2B1A"/>
-          <circle cx="58.2" cy="25.8" r="1.2" fill="white"/>
-          <circle cx="68.2" cy="25.8" r="1.2" fill="white"/>
+          <circle cx="66" cy="30" r="4" fill="#2D1A0E"/>
+          <circle cx="78" cy="30" r="4" fill="#2D1A0E"/>
+          {/* Shine */}
+          <circle cx="67.5" cy="28.5" r="1.4" fill="white"/>
+          <circle cx="79.5" cy="28.5" r="1.4" fill="white"/>
+          {/* Nheo mắt vui khi wave */}
           {isWave && (
             <>
-              {/* Nheo mắt vui */}
-              <path d="M54 26 Q57 23 60 26" stroke="#3D2B1A" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/>
-              <path d="M64 26 Q67 23 70 26" stroke="#3D2B1A" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+              <path d="M63 29 Q66 26 69 29"
+                stroke="#2D1A0E" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.6"/>
+              <path d="M75 29 Q78 26 81 29"
+                stroke="#2D1A0E" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.6"/>
             </>
           )}
         </>
       )}
 
-      {/* === MÁ HỒNG === */}
-      <ellipse cx="54" cy="33" rx="3.5" ry="2.2" fill="#F4A261" opacity="0.35"/>
-      <ellipse cx="70" cy="33" rx="3.5" ry="2.2" fill="#F4A261" opacity="0.35"/>
+      {/* MÁ HỒNG */}
+      <ellipse cx="63" cy="39" rx="4" ry="2.5" fill="#F4A261" opacity="0.38"/>
+      <ellipse cx="81" cy="39" rx="4" ry="2.5" fill="#F4A261" opacity="0.38"/>
 
-      {/* === CHÂN VẪY KHI WAVE === */}
+      {/* CHÂN VẪY khi wave */}
       {isWave && (
-        <g style={{ transformOrigin: '54px 49px', animation: 'dog-wave-paw 0.5s ease-in-out infinite' }}>
-          <rect x="50" y="44" width="9" height="7" rx="4" fill="#E8B47A"/>
-          <ellipse cx="54" cy="44" rx="5" ry="3" fill="#F5D5A8"/>
+        <g style={{
+          transformOrigin: '67px 59px',
+          animation: 'dog-wave-paw 0.5s ease-in-out infinite',
+        }}>
+          <rect x="62" y="54" width="11" height="8" rx="4" fill="#E8B47A"/>
+          <ellipse cx="67" cy="54" rx="6" ry="3.5" fill="#F5D5A8"/>
         </g>
       )}
     </svg>
   )
 }
 
-// ── Config ────────────────────────────────────────────────────
-const SPEED    = 1.6
-const MARGIN   = 60
-const PAUSE_MS = { min: 1800, max: 4500 }
+/* ── Config ─────────────────────────────────────────── */
+const SPEED    = 1.8
+const MARGIN   = 20
+const DOG_W    = 100
+const PAUSE_MS = { min: 1800, max: 4200 }
+
+const BUBBLES = [
+  'Guten Tag! 🐾', 'Woof! 🐶',
+  'Học Tiếng Đức chưa? 📚', 'Streak hôm nay chưa? 🔥',
+  'Ich bin ein guter Hund! 🇩🇪', '*ngáp*... zzz 💤',
+  'Wunderbar! ✨', 'A1→C1 mình đồng hành! 🚀',
+  'Bạn giỏi lắm! 🏆', 'Hallo hallo! 👋',
+]
 
 export default function Mascot() {
-  const [x, setX]         = useState(120)
-  const [flip, setFlip]   = useState(false)   // true = đi trái
-  const [mood, setMood]   = useState<Mood>('walk')
+  const [x, setX]           = useState(150)
+  const [flip, setFlip]     = useState(false)
+  const [mood, setMood]     = useState<Mood>('walk')
   const [bubble, setBubble] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
 
-  const xRef    = useRef(x)
-  const dirRef  = useRef(1)   // 1=phải, -1=trái
-  const paused  = useRef(false)
-  const rafRef  = useRef<number>(0)
+  const xRef   = useRef(x)
+  const dirRef = useRef(1)   // 1=phải, -1=trái
+  const paused = useRef(false)
+  const rafRef = useRef<number>(0)
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pauseTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   xRef.current = x
-
-  const BUBBLES = [
-    'Guten Tag! 🐾', 'Woof! 🐶',
-    'Học Tiếng Đức chưa? 📚', 'Streak hôm nay chưa? 🔥',
-    'Ich bin ein guter Hund! 🇩🇪', '*ngáp*... zzz 💤',
-    'Wunderbar! ✨', 'A1→C1 mình đồng hành! 🚀',
-    'Bạn giỏi lắm! 🏆', 'Hallo hallo! 👋',
-  ]
 
   function showBubble() {
     const msg = BUBBLES[Math.floor(Math.random() * BUBBLES.length)]
@@ -162,27 +178,22 @@ export default function Mascot() {
   }
 
   useEffect(() => {
-    // dogWidth ~80px
-    const dogW = 80
-
     function loop() {
       if (!paused.current) {
-        const maxX = window.innerWidth - dogW - MARGIN
+        const maxX = window.innerWidth - DOG_W - MARGIN
         const cur  = xRef.current
         const dir  = dirRef.current
         const next = cur + SPEED * dir
 
         if (next >= maxX) {
-          // chạm tường phải → quay trái
           setX(maxX)
           dirRef.current = -1
-          setFlip(true)    // flip=true = nhìn trái
+          setFlip(true)
           doPause()
         } else if (next <= MARGIN) {
-          // chạm tường trái → quay phải
           setX(MARGIN)
           dirRef.current = 1
-          setFlip(false)   // flip=false = nhìn phải (mặc định)
+          setFlip(false)
           doPause()
         } else {
           setX(next)
@@ -199,16 +210,28 @@ export default function Mascot() {
     }
   }, []) // eslint-disable-line
 
+  /* Click vào chó — toggle hướng và chạy */
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation()
-    if (pauseTimer.current) clearTimeout(pauseTimer.current)
-    paused.current = true
-    setMood('wave')
-    showBubble()
-    pauseTimer.current = setTimeout(() => {
+
+    // Nếu đang pause thì resume, đổi hướng
+    if (paused.current) {
       paused.current = false
+      if (pauseTimer.current) clearTimeout(pauseTimer.current)
+      // đổi chiều
+      const newDir = dirRef.current * -1
+      dirRef.current = newDir
+      setFlip(newDir === -1)
       setMood('walk')
-    }, 3400)
+      showBubble()
+      return
+    }
+
+    // Đang đi thì đổi hướng ngay
+    const newDir = dirRef.current * -1
+    dirRef.current = newDir
+    setFlip(newDir === -1)
+    showBubble()
   }
 
   if (!visible) return null
@@ -219,19 +242,19 @@ export default function Mascot() {
       style={{
         position: 'fixed',
         left: x,
-        bottom: 0,         // sat đáy màn hình
+        bottom: 0,
         zIndex: 9999,
         userSelect: 'none',
         pointerEvents: 'none',
-        // flip toàn bộ wrapper
+        // flip toàn bộ wrapper để chó quay đầu
         transform: flip ? 'scaleX(-1)' : 'scaleX(1)',
       }}
     >
-      {/* Bubble — luôn không bị flip */}
+      {/* Speech bubble — counter-flip để chữ không ngược */}
       {bubble && (
         <div style={{
           position: 'absolute',
-          bottom: 64,
+          bottom: 74,
           left: '50%',
           transform: flip
             ? 'translateX(-50%) scaleX(-1)'
@@ -248,10 +271,8 @@ export default function Mascot() {
           animation: 'bubble-pop 0.2s ease',
         }}>
           {bubble}
-          {/* Tam giác dưới */}
           <div style={{
-            position: 'absolute',
-            bottom: -9, left: '50%',
+            position: 'absolute', bottom: -9, left: '50%',
             transform: 'translateX(-50%)',
             width: 0, height: 0,
             borderLeft: '7px solid transparent',
@@ -259,8 +280,7 @@ export default function Mascot() {
             borderTop: '9px solid var(--color-border, #e2e8f0)',
           }}/>
           <div style={{
-            position: 'absolute',
-            bottom: -6, left: '50%',
+            position: 'absolute', bottom: -6, left: '50%',
             transform: 'translateX(-50%)',
             width: 0, height: 0,
             borderLeft: '5px solid transparent',
@@ -278,19 +298,19 @@ export default function Mascot() {
         <DogSVG mood={mood} />
       </div>
 
-      {/* Nút ẩn — không bị flip */}
+      {/* Nút ẩn */}
       <button
         onClick={(e) => { e.stopPropagation(); setVisible(false) }}
         className="mascot-close"
         style={{
           position: 'absolute',
-          top: 4, right: -4,
-          width: 18, height: 18,
+          top: 4, right: -6,
+          width: 20, height: 20,
           borderRadius: '50%',
           background: '#ef4444',
           color: '#fff',
           border: 'none',
-          fontSize: 11,
+          fontSize: 12,
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -298,7 +318,6 @@ export default function Mascot() {
           pointerEvents: 'auto',
           opacity: 0,
           transition: 'opacity 0.2s',
-          lineHeight: 1,
           transform: flip ? 'scaleX(-1)' : 'none',
         }}
       >×</button>
