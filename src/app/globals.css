@@ -749,3 +749,12 @@ html.dark .cta-bottom__btn:hover {
   0%, 100% { transform: rotate(-20deg) translateY(0); }
   50%       { transform: rotate(20deg) translateY(-4px); }
 }
+
+@keyframes dog-leg-front {
+  0%, 100% { transform: rotate(-15deg); }
+  50%       { transform: rotate(15deg); }
+}
+@keyframes dog-leg-back {
+  0%, 100% { transform: rotate(15deg); }
+  50%       { transform: rotate(-15deg); }
+}

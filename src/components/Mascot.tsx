@@ -2,242 +2,230 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+type Mood = 'walk' | 'idle' | 'sleep' | 'wave'
+
 // ── Cute dog SVG ───────────────────────────────────────────────
-function DogSVG({ mood }: { mood: Mood }) {
+function DogSVG({ mood, flip }: { mood: Mood; flip: boolean }) {
   const isSleep = mood === 'sleep'
   const isWave  = mood === 'wave'
-  const isJump  = mood === 'jump'
+  const isWalk  = mood === 'walk'
 
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Tail */}
-      <path d="M36 34 Q44 28 42 22 Q40 18 37 22" stroke="#C8935A" strokeWidth="3" strokeLinecap="round" fill="none"
-        style={mood==='walk'||mood==='idle' ? {transformOrigin:'36px 34px', animation:'dog-tail 0.5s ease-in-out infinite'} : {}}
+    <svg
+      width="64" height="64"
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ transform: flip ? 'scaleX(-1)' : 'scaleX(1)', overflow: 'visible' }}
+    >
+      {/* === TAIL === */}
+      <path
+        d="M48 40 Q56 34 54 26 Q52 20 48 25"
+        stroke="#C8935A" strokeWidth="3.5" strokeLinecap="round" fill="none"
+        style={isWalk ? { transformOrigin: '48px 40px', animation: 'dog-tail 0.4s ease-in-out infinite' } : { transformOrigin: '48px 40px', animation: 'dog-tail 1.2s ease-in-out infinite' }}
       />
-      {/* Body */}
-      <ellipse cx="24" cy="33" rx="13" ry="9" fill="#E8B47A"/>
-      {/* Belly patch */}
-      <ellipse cx="23" cy="35" rx="7" ry="5" fill="#F5D5A8"/>
-      {/* Back leg */}
-      <ellipse cx="34" cy="41" rx="4" ry="3" fill="#C8935A"/>
-      {/* Front leg */}
-      <ellipse cx="15" cy="41" rx="4" ry="3" fill="#C8935A"/>
-      {/* Head */}
-      <circle cx="18" cy="22" r="11" fill="#E8B47A"/>
-      {/* Snout */}
-      <ellipse cx="14" cy="25" rx="5" ry="4" fill="#F5D5A8"/>
-      {/* Nose */}
-      <ellipse cx="13" cy="24" rx="2" ry="1.5" fill="#8B5E3C"/>
-      {/* Left ear (floppy) */}
-      <path d="M10 14 Q5 10 7 20 Q9 24 12 22 Q10 16 10 14Z" fill="#C8935A"/>
-      {/* Right ear */}
-      <path d="M24 13 Q29 8 27 18 Q25 22 22 21 Q24 15 24 13Z" fill="#C8935A"/>
 
-      {/* Eyes */}
+      {/* === BODY === */}
+      <ellipse cx="34" cy="44" rx="16" ry="10" fill="#E8B47A"/>
+      {/* Belly */}
+      <ellipse cx="33" cy="46" rx="9" ry="6" fill="#F5D5A8"/>
+
+      {/* === LEGS === */}
+      {/* Back legs */}
+      <rect x="43" y="51" width="7" height="5" rx="3" fill="#C8935A"/>
+      {/* Front legs */}
+      <rect x="18" y="51" width="7" height="5" rx="3" fill="#C8935A"/>
+
+      {/* === HEAD === */}
+      <circle cx="22" cy="30" r="13" fill="#E8B47A"/>
+
+      {/* === EARS === */}
+      {/* Left ear — floppy down */}
+      <path d="M12 22 Q6 16 9 28 Q11 33 15 30 Q12 24 12 22Z" fill="#C8935A"/>
+      {/* Right ear */}
+      <path d="M30 21 Q36 15 33 27 Q31 32 27 29 Q30 23 30 21Z" fill="#C8935A"/>
+
+      {/* === SNOUT === */}
+      <ellipse cx="20" cy="34" rx="6" ry="4.5" fill="#F5D5A8"/>
+      {/* Nose */}
+      <ellipse cx="19" cy="32.5" rx="2.5" ry="1.8" fill="#6B3F1F"/>
+      {/* Nose shine */}
+      <ellipse cx="18.2" cy="32" rx="0.8" ry="0.6" fill="white" opacity="0.6"/>
+
+      {/* === MOUTH === */}
+      <path d="M16 36 Q19 39 22 36" stroke="#8B5E3C" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+
+      {/* === EYES === */}
       {isSleep ? (
         <>
-          {/* Closed eyes — sleep lines */}
-          <path d="M15 20 Q17 22 19 20" stroke="#5C3D1E" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-          <path d="M21 19 Q22 21 23 19" stroke="#5C3D1E" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-          {/* Zzz */}
-          <text x="26" y="14" fontSize="7" fill="#94A3B8" fontWeight="bold">z</text>
-          <text x="29" y="10" fontSize="5" fill="#94A3B8" fontWeight="bold">z</text>
+          <path d="M17 27 Q19 29.5 21 27" stroke="#5C3D1E" strokeWidth="2" strokeLinecap="round" fill="none"/>
+          <path d="M23 26.5 Q25 29 27 26.5" stroke="#5C3D1E" strokeWidth="2" strokeLinecap="round" fill="none"/>
+          <text x="32" y="22" fontSize="8" fill="#94A3B8" fontWeight="bold" fontFamily="sans-serif">z</text>
+          <text x="36" y="16" fontSize="6" fill="#94A3B8" fontWeight="bold" fontFamily="sans-serif">z</text>
         </>
       ) : (
         <>
-          <circle cx="16" cy="20" r="2.5" fill="#5C3D1E"/>
-          <circle cx="22" cy="20" r="2.5" fill="#5C3D1E"/>
-          {/* Shine */}
-          <circle cx="17" cy="19" r="0.8" fill="white"/>
-          <circle cx="23" cy="19" r="0.8" fill="white"/>
-          {/* Happy squint on wave/jump */}
-          {(isWave || isJump) && (
+          <circle cx="19" cy="27" r="3" fill="#3D2B1A"/>
+          <circle cx="26" cy="27" r="3" fill="#3D2B1A"/>
+          <circle cx="20" cy="26" r="1" fill="white"/>
+          <circle cx="27" cy="26" r="1" fill="white"/>
+          {isWave && (
             <>
-              <path d="M14 19 Q16 17 18 19" stroke="#5C3D1E" strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.5"/>
-              <path d="M20 19 Q22 17 24 19" stroke="#5C3D1E" strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.5"/>
+              <path d="M17 26 Q19 24 21 26" stroke="#3D2B1A" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.6"/>
+              <path d="M24 26 Q26 24 28 26" stroke="#3D2B1A" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.6"/>
             </>
           )}
         </>
       )}
 
-      {/* Mouth */}
-      {isWave || isJump
-        ? <path d="M12 27 Q14 30 16 27" stroke="#8B5E3C" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-        : <path d="M12 27 Q14 29 16 27" stroke="#8B5E3C" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-      }
-      {/* Tongue on jump */}
-      {isJump && <ellipse cx="14" cy="29" rx="2" ry="1.5" fill="#F87171"/>}
+      {/* === BLUSH === */}
+      <ellipse cx="14" cy="33" rx="3" ry="2" fill="#F4A261" opacity="0.35"/>
+      <ellipse cx="26" cy="33" rx="3" ry="2" fill="#F4A261" opacity="0.35"/>
 
-      {/* Blush cheeks */}
-      <ellipse cx="11" cy="26" rx="2.5" ry="1.5" fill="#F4A261" opacity="0.4"/>
-      <ellipse cx="21" cy="26" rx="2.5" ry="1.5" fill="#F4A261" opacity="0.4"/>
-
-      {/* Wave paw */}
+      {/* === WAVE PAW === */}
       {isWave && (
-        <g style={{transformOrigin:'15px 38px', animation:'dog-wave-paw 0.5s ease-in-out infinite'}}>
-          <ellipse cx="15" cy="38" rx="4" ry="3" fill="#E8B47A"/>
-          <ellipse cx="15" cy="37" rx="3" ry="2" fill="#F5D5A8"/>
+        <g style={{ transformOrigin: '20px 50px', animation: 'dog-wave-paw 0.5s ease-in-out infinite' }}>
+          <rect x="16" y="48" width="8" height="5" rx="3" fill="#E8B47A"/>
+          <ellipse cx="20" cy="48" rx="4" ry="2.5" fill="#F5D5A8"/>
         </g>
+      )}
+
+      {/* === WALK LEG ANIMATION === */}
+      {isWalk && (
+        <>
+          <rect x="43" y="51" width="7" height="5" rx="3" fill="#C8935A"
+            style={{ transformOrigin: '46px 51px', animation: 'dog-leg-back 0.4s ease-in-out infinite' }}/>
+          <rect x="18" y="51" width="7" height="5" rx="3" fill="#C8935A"
+            style={{ transformOrigin: '21px 51px', animation: 'dog-leg-front 0.4s ease-in-out infinite' }}/>
+        </>
       )}
     </svg>
   )
 }
 
 // ── Sprite config ──────────────────────────────────────────────
-const SPRITE_SIZE = 48   // px, display size
-const SPEED       = 2.8  // px per frame
-const IDLE_AFTER  = 2500 // ms without movement → idle
-
-type Mood = 'idle' | 'walk' | 'jump' | 'wave' | 'sleep'
-
-// Emoji per mood (fallback nếu không có sprite ảnh)
-const MOOD_EMOJI: Record<Mood, string> = {
-  idle:  '🐶',
-  walk:  '🐕',
-  jump:  '🐶',
-  wave:  '🐾',
-  sleep: '🐩',
-}
-
-const MOOD_ANIM: Record<Mood, string> = {
-  idle:  'mascot-idle',
-  walk:  'mascot-walk',
-  jump:  'mascot-jump',
-  wave:  'mascot-wave',
-  sleep: 'mascot-sleep',
-}
-
-interface Vec2 { x: number; y: number }
+const SPEED    = 1.8   // px per frame — chạy vừa phải
+const MARGIN   = 80    // px from edge before turning
+const BOTTOM   = 72    // px from bottom of viewport
+const PAUSE_MS = { min: 1500, max: 4000 }
 
 export default function Mascot() {
-  const [pos, setPos]       = useState<Vec2>({ x: 80, y: window?.innerHeight ? window.innerHeight - 120 : 600 })
-  const [target, setTarget] = useState<Vec2 | null>(null)
-  const [mood, setMood]     = useState<Mood>('idle')
+  const [x, setX]           = useState(100)
   const [flip, setFlip]     = useState(false)
+  const [mood, setMood]     = useState<Mood>('walk')
   const [bubble, setBubble] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
 
-  const posRef    = useRef(pos)
-  const targetRef = useRef(target)
-  const moodRef   = useRef(mood)
-  const rafRef    = useRef<number>(0)
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const xRef    = useRef(x)
+  const flipRef = useRef(flip)
+  const moodRef = useRef(mood)
+  const dirRef  = useRef(1)  // 1 = right, -1 = left
+  const rafRef  = useRef<number>(0)
+  const pauseRef   = useRef(false)
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  posRef.current    = pos
-  targetRef.current = target
-  moodRef.current   = mood
+  xRef.current    = x
+  flipRef.current = flip
+  moodRef.current = mood
 
-  // ── Bubble messages ────────────────────────────────────────
   const BUBBLES = [
-    'Woof! Học Tiếng Đức chưa? 📚', 'Guten Tag! 🐾',
-    'Hallo! Wie geht\'s? 🐶', 'Streak hôm nay chưa? 🔥',
-    'Ich bin ein guter Hund! 🇩🇪', 'Cún muốn học cùng bạn! 🎓',
-    'A1 → C1, cún đồng hành! 🚀', '*ngáp* ...zzz 💤', 'Wunderbar! ✨',
-    'Bạn giỏi lắm! 🏆', 'Woof woof! 🐕',
+    'Guten Tag! 🐾', 'Woof woof! 🐶',
+    'Học Tiếng Đức chưa? 📚', 'Streak hôm nay chưa? 🔥',
+    'Ich bin ein guter Hund! 🇩🇪', '*ngáp*... zzz 💤',
+    'Wunderbar! ✨', 'A1→C1 mình đồng hành! 🚀', 'Bạn giỏi lắm! 🏆',
   ]
 
-  function showBubble(msg?: string) {
-    const text = msg ?? BUBBLES[Math.floor(Math.random() * BUBBLES.length)]
-    setBubble(text)
+  function showBubble() {
+    const msg = BUBBLES[Math.floor(Math.random() * BUBBLES.length)]
+    setBubble(msg)
     if (bubbleTimer.current) clearTimeout(bubbleTimer.current)
     bubbleTimer.current = setTimeout(() => setBubble(null), 3000)
   }
 
-  // ── Idle mood cycle ────────────────────────────────────────
-  function startIdleTimer() {
-    if (idleTimer.current) clearTimeout(idleTimer.current)
-    idleTimer.current = setTimeout(() => {
-      const rand = Math.random()
-      if (rand < 0.35) { setMood('wave'); showBubble() }
-      else if (rand < 0.55) { setMood('sleep') }
-      else { setMood('idle') }
-    }, IDLE_AFTER + Math.random() * 3000)
+  function doPause() {
+    pauseRef.current = true
+    // random mood while pausing
+    const rand = Math.random()
+    if (rand < 0.4) { setMood('wave'); showBubble() }
+    else if (rand < 0.6) { setMood('sleep') }
+    else { setMood('idle') }
+
+    const ms = PAUSE_MS.min + Math.random() * (PAUSE_MS.max - PAUSE_MS.min)
+    setTimeout(() => {
+      pauseRef.current = false
+      setMood('walk')
+    }, ms)
   }
 
-  // ── Click on page → mascot walks there ────────────────────
+  // ── Main movement loop ─────────────────────────────────────
   useEffect(() => {
-    function onPageClick(e: MouseEvent) {
-      // ignore clicks on mascot itself
-      const el = e.target as HTMLElement
-      if (el.closest('#mascot-container')) return
+    const maxX = () => window.innerWidth - MARGIN
 
-      const newTarget = { x: e.clientX - SPRITE_SIZE / 2, y: e.clientY - SPRITE_SIZE }
-      setTarget(newTarget)
-      setMood('walk')
-      setFlip(e.clientX < posRef.current.x)
-      if (idleTimer.current) clearTimeout(idleTimer.current)
-    }
-    window.addEventListener('click', onPageClick)
-    return () => window.removeEventListener('click', onPageClick)
-  }, [])
-
-  // ── Animation loop ─────────────────────────────────────────
-  useEffect(() => {
     function loop() {
-      const cur = posRef.current
-      const tgt = targetRef.current
+      if (!pauseRef.current) {
+        const cur = xRef.current
+        const dir = dirRef.current
+        const next = cur + SPEED * dir
 
-      if (tgt) {
-        const dx = tgt.x - cur.x
-        const dy = tgt.y - cur.y
-        const dist = Math.hypot(dx, dy)
-
-        if (dist < SPEED + 1) {
-          setPos(tgt)
-          setTarget(null)
-          setMood('idle')
-          startIdleTimer()
-        } else {
-          const nx = cur.x + (dx / dist) * SPEED
-          const ny = cur.y + (dy / dist) * SPEED
-          setPos({ x: nx, y: ny })
+        // Hit right wall
+        if (next >= maxX()) {
+          dirRef.current = -1
+          setFlip(true)
+          doPause()
+        }
+        // Hit left wall
+        else if (next <= MARGIN) {
+          dirRef.current = 1
+          setFlip(false)
+          doPause()
+        }
+        else {
+          setX(next)
         }
       }
-
       rafRef.current = requestAnimationFrame(loop)
     }
 
     rafRef.current = requestAnimationFrame(loop)
-    startIdleTimer()
     return () => {
       cancelAnimationFrame(rafRef.current)
-      if (idleTimer.current) clearTimeout(idleTimer.current)
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current)
     }
   }, []) // eslint-disable-line
 
-  // ── Click mascot → jump + bubble ──────────────────────────
-  function handleMascotClick(e: React.MouseEvent) {
+  // ── Click mascot → random mood + bubble ───────────────────
+  function handleClick(e: React.MouseEvent) {
     e.stopPropagation()
-    setMood('jump')
+    setMood('wave')
     showBubble()
-    setTimeout(() => { setMood('idle'); startIdleTimer() }, 700)
+    pauseRef.current = true
+    setTimeout(() => {
+      pauseRef.current = false
+      setMood('walk')
+    }, 3200)
   }
 
   if (!visible) return null
 
-  const emoji = MOOD_EMOJI[mood]
-  const anim  = MOOD_ANIM[mood]
+  const bottom = BOTTOM
 
   return (
     <div
-      id="mascot-container"
+      id="mascot-wrap"
       style={{
         position: 'fixed',
-        left: pos.x,
-        top:  pos.y,
+        left: x,
+        bottom: bottom,
         zIndex: 9999,
         userSelect: 'none',
         pointerEvents: 'none',
-        transition: target ? 'none' : 'left 0.1s, top 0.1s',
       }}
     >
       {/* Speech bubble */}
       {bubble && (
         <div style={{
           position: 'absolute',
-          bottom: SPRITE_SIZE + 8,
+          bottom: 68,
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'var(--color-surface, #fff)',
@@ -252,50 +240,48 @@ export default function Mascot() {
           animation: 'bubble-pop 0.2s ease',
         }}>
           {bubble}
-          {/* Triangle */}
           <div style={{
             position: 'absolute',
-            bottom: -8, left: '50%',
+            bottom: -9, left: '50%',
             transform: 'translateX(-50%)',
             width: 0, height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderTop: '8px solid var(--color-border, #e2e8f0)',
-          }} />
+            borderLeft: '7px solid transparent',
+            borderRight: '7px solid transparent',
+            borderTop: '9px solid var(--color-border, #e2e8f0)',
+          }}/>
+          <div style={{
+            position: 'absolute',
+            bottom: -6, left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: '7px solid var(--color-surface, #fff)',
+          }}/>
         </div>
       )}
 
-      {/* Mascot sprite */}
+      {/* Dog */}
       <div
-        className={anim}
-        onClick={handleMascotClick}
-        title="Click mình đi!"
-        style={{
-          width: SPRITE_SIZE,
-          height: SPRITE_SIZE,
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-          transform: flip ? 'scaleX(-1)' : 'scaleX(1)',
-          cursor: 'pointer',
-          pointerEvents: 'auto',
-        }}
+        onClick={handleClick}
+        style={{ cursor: 'pointer', pointerEvents: 'auto', display: 'inline-block' }}
       >
-        <DogSVG mood={mood} />
+        <DogSVG mood={mood} flip={flip} />
       </div>
 
-      {/* Hide button */}
+      {/* Close button */}
       <button
         onClick={(e) => { e.stopPropagation(); setVisible(false) }}
+        className="mascot-close"
         style={{
           position: 'absolute',
-          top: -8, right: -8,
+          top: -4, right: -4,
           width: 18, height: 18,
           borderRadius: '50%',
           background: '#ef4444',
           color: '#fff',
           border: 'none',
-          fontSize: 10,
+          fontSize: 11,
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -303,11 +289,9 @@ export default function Mascot() {
           pointerEvents: 'auto',
           opacity: 0,
           transition: 'opacity 0.2s',
+          lineHeight: 1,
         }}
-        className="mascot-close"
-      >
-        ×
-      </button>
+      >×</button>
     </div>
   )
 }
