@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronRight, LayoutDashboard, LogOut, Menu } from 'lucide-react'
 import {
@@ -47,7 +47,6 @@ function useBreadcrumbs() {
 }
 
 export function AdminHeader({ user }: AdminHeaderProps) {
-  const router = useRouter()
   const crumbs = useBreadcrumbs()
   const initials = user.email.slice(0, 2).toUpperCase()
   const { toggle } = useSidebar()
