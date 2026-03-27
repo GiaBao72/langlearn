@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BookOpen, Flame, Target, Trophy, ArrowRight } from 'lucide-react'
 import useAutoRefresh from '@/hooks/useAutoRefresh'
+import StreakBanner from '@/components/StreakBanner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -17,6 +18,7 @@ interface DashboardData {
   totalScore: number
   completedCount: number
   streak: number
+  studiedToday: boolean
   heatmap: HeatmapDay[]
   nextLesson: { id: string; title: string; courseTitle: string } | null
   recentProgress: {
@@ -112,6 +114,12 @@ export default function DashboardClient() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      {/* Streak Banner */}
+      <StreakBanner
+        streak={data.streak}
+        studiedToday={data.studiedToday}
+        nextLesson={data.nextLesson}
+      />
       {/* Hero row */}
       <div className="mb-6 sm:mb-8 flex flex-wrap items-center gap-3">
         <div>

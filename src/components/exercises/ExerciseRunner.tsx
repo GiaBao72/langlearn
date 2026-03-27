@@ -57,6 +57,13 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
   const [totalScore, setTotalScore] = useState(0)
   const [correctCount, setCorrectCount] = useState(0)
   const [finished, setFinished] = useState(false)
+  const [sessionResults, setSessionResults] = useState<Array<{
+    type: string
+    question: string
+    userAnswer: string
+    correctAnswer: string
+    correct: boolean
+  }>>([])
 
   const exercise = exercises[currentIndex]
   const isFlashcard = exercise?.type === 'FLASHCARD'
@@ -71,8 +78,15 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
       setTotalScore(s => s + exercise.points)
       setCorrectCount(c => c + 1)
     }
+    const data = exercise.data as Record<string, unknown>
+    setSessionResults(prev => [...prev, {
+      type: exercise.type,
+      question: String(data.front ?? ''),
+      userAnswer: answer,
+      correctAnswer: String(data.back ?? ''),
+      correct: isCorrect,
+    }])
     saveProgress(exercise.id, isCorrect ? exercise.points : 0)
-    // Auto-advance after short delay for flashcard
     setTimeout(() => nextExercise(), 600)
   }
 
@@ -85,6 +99,19 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
       setTotalScore(s => s + exercise.points)
       setCorrectCount(c => c + 1)
     }
+    const data = exercise.data as Record<string, unknown>
+    const correctAnswer =
+      exercise.type === 'MULTIPLE_CHOICE' ? String(data.answer ?? '') :
+      exercise.type === 'SORT_WORDS' ? String(data.answer ?? '') :
+      exercise.type === 'FILL_BLANK' ? String(data.answer ?? '') :
+      exercise.type === 'DICTATION' ? String(data.answer ?? '') : ''
+    setSessionResults(prev => [...prev, {
+      type: exercise.type,
+      question: exercise.question,
+      userAnswer,
+      correctAnswer,
+      correct: isCorrect,
+    }])
     saveProgress(exercise.id, isCorrect ? exercise.points : 0)
   }
 
@@ -112,49 +139,61 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
     const totalPoints = exercises.reduce((s, e) => s + e.points, 0)
     const pct = totalPoints > 0 ? Math.round((totalScore / totalPoints) * 100) : 0
     const emoji = pct >= 80 ? '🏆' : pct >= 50 ? '💪' : '📚'
+    const wrongExercises = sessionResults.filter(r => !r.correct)
 
     return (
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-8 text-center">
-        <div className="text-5xl mb-4">{emoji}</div>
-        <h2 className="text-3xl font-bold text-[#334155] mb-1">{pct}%</h2>
-        <p className="text-[#64748B] text-sm mb-1">chính xác</p>
-        <p className="text-[#64748B] text-sm mb-2">
-          {correctCount}/{exercises.length} câu đúng · {totalScore}/{totalPoints} điểm
-        </p>
+      <div className="space-y-4">
+        {/* Result card */}
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-8 text-center">
+          <div className="text-5xl mb-4">{emoji}</div>
+          <h2 className="text-3xl font-bold text-[#334155] mb-1">{pct}%</h2>
+          <p className="text-[#64748B] text-sm mb-1">chính xác</p>
+          <p className="text-[#64748B] text-sm mb-2">
+            {correctCount}/{exercises.length} câu đúng · {totalScore}/{totalPoints} điểm
+          </p>
 
-        {/* Score bar */}
-        <div className="h-2 bg-slate-200 rounded-full mx-auto max-w-xs mb-8">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{
-              width: `${pct}%`,
-              background: pct >= 80 ? '#10B981' : pct >= 50 ? '#2563EB' : '#EF4444',
-            }}
-          />
+          {/* Score bar */}
+          <div className="h-2 bg-slate-200 rounded-full mx-auto max-w-xs mb-8">
+            <div className="h-full rounded-full transition-all"
+              style={{ width: `${pct}%`, background: pct >= 80 ? '#10B981' : pct >= 50 ? '#2563EB' : '#EF4444' }} />
+          </div>
+
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => {
+                setCurrentIndex(0); setUserAnswer(''); setSubmitted(false)
+                setCorrect(false); setTotalScore(0); setCorrectCount(0)
+                setFinished(false); setSessionResults([])
+              }}
+              className="px-5 py-2.5 border-2 border-[#E2E8F0] rounded-xl text-[#334155] hover:bg-slate-50 font-medium transition-colors text-sm">
+              Học lại
+            </button>
+            <button
+              onClick={() => courseId ? router.push(`/courses/${courseId}`) : router.push('/practice')}
+              className="px-5 py-2.5 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm shadow-sm">
+              Về khóa học
+            </button>
+          </div>
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <button
-            onClick={() => {
-              setCurrentIndex(0)
-              setUserAnswer('')
-              setSubmitted(false)
-              setCorrect(false)
-              setTotalScore(0)
-              setCorrectCount(0)
-              setFinished(false)
-            }}
-            className="px-5 py-2.5 border-2 border-[#E2E8F0] rounded-xl text-[#334155] hover:bg-slate-50 font-medium transition-colors text-sm"
-          >
-            Học lại
-          </button>
-          <button
-            onClick={() => courseId ? router.push(`/courses/${courseId}`) : router.push('/practice')}
-            className="px-5 py-2.5 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm shadow-sm"
-          >
-            Về khóa học
-          </button>
-        </div>
+        {/* Bài sai */}
+        {wrongExercises.length > 0 && (
+          <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5">
+            <h3 className="font-semibold text-[#334155] mb-4 text-sm">❌ Bài làm sai ({wrongExercises.length})</h3>
+            <div className="space-y-3">
+              {wrongExercises.map((r, i) => (
+                <div key={i} className="bg-red-50 border border-red-100 rounded-xl p-4">
+                  <p className="text-[#64748B] text-xs uppercase tracking-widest mb-1">{r.type.replace('_', ' ')}</p>
+                  <p className="text-[#334155] text-sm font-medium mb-2">{r.question || '(Flashcard)'}</p>
+                  <div className="flex flex-col sm:flex-row gap-2 text-xs">
+                    <span className="text-red-500">✗ Bạn: <span className="font-medium">{r.userAnswer || '(trống)'}</span></span>
+                    <span className="text-green-600">✓ Đúng: <span className="font-medium">{r.correctAnswer}</span></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     )
   }

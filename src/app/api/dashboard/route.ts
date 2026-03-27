@@ -25,13 +25,17 @@ export async function GET() {
     return { date: dateStr, count }
   })
 
-  // Streak
+  // Streak + studiedToday
+  const todayStr = new Date().toISOString().split('T')[0]
   let streak = 0
+  let studiedToday = false
   for (let i = 0; i < 30; i++) {
-    const date = new Date(today)
-    date.setDate(today.getDate() - i)
+    const date = new Date()
+    date.setDate(date.getDate() - i)
     const dateStr = date.toISOString().split('T')[0]
-    if (heatmap.find(h => h.date === dateStr && h.count > 0)) streak++
+    const hasActivity = heatmap.find(h => h.date === dateStr && h.count > 0)
+    if (i === 0 && hasActivity) studiedToday = true
+    if (hasActivity) streak++
     else break
   }
 
@@ -56,6 +60,7 @@ export async function GET() {
     totalScore,
     completedCount,
     streak,
+    studiedToday,
     heatmap,
     nextLesson,
     recentProgress: progress.slice(0, 5).map(p => ({

@@ -15,6 +15,7 @@ export default async function Navbar() {
             <Link href="/courses" className="hover:text-[#334155] transition-colors">Khóa học</Link>
             <Link href="/roadmap" className="hover:text-[#334155] transition-colors">Lộ trình</Link>
             <Link href="/blog" className="hover:text-[#334155] transition-colors">Blog</Link>
+            <Link href="/leaderboard" className="hover:text-[#334155] transition-colors">🏆 Xếp hạng</Link>
             <Link href="/store" className="hover:text-[#334155] transition-colors">Sách</Link>
           </div>
         </div>
