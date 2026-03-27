@@ -14,6 +14,7 @@ const navLinks = [
   { href: '/courses', label: 'Khóa học' },
   { href: '/roadmap', label: 'Lộ trình' },
   { href: '/blog', label: 'Blog' },
+  { href: '/leaderboard', label: '🏆 Xếp hạng' },
   { href: '/store', label: 'Sách' },
 ]
 
