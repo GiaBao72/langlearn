@@ -17,7 +17,9 @@ export default function ProfileClient({ user }: Props) {
   const [msgPw, setMsgPw] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
   async function saveName() {
-    if (!name.trim()) return
+    if (!name.trim()) return setMsgName({ type: 'err', text: '❌ Tên không được để trống' })
+    if (name.trim().length < 2) return setMsgName({ type: 'err', text: '❌ Tên tối thiểu 2 ký tự' })
+    if (name.trim().length > 50) return setMsgName({ type: 'err', text: '❌ Tên tối đa 50 ký tự' })
     setLoadingName(true); setMsgName(null)
     const res = await fetch('/api/profile', {
       method: 'PATCH',

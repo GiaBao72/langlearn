@@ -24,6 +24,8 @@ interface Course {
 
 export default function CourseEditClient({ course }: { course: Course }) {
   const router = useRouter()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [form, setForm] = useState({
     title: course.title,
     language: course.language,
@@ -62,9 +64,10 @@ export default function CourseEditClient({ course }: { course: Course }) {
   }
 
   async function deleteCourse() {
-    if (!confirm('Xóa khóa học này? Không thể hoàn tác.')) return
+    if (!confirmDelete) return setConfirmDelete(true)
+    setDeleting(true)
     await fetch('/api/admin/courses/' + course.id, { method: 'DELETE' })
-    router.push('/admin/courses')
+    window.location.href = '/admin/courses'
   }
 
   return (
@@ -83,9 +86,15 @@ export default function CourseEditClient({ course }: { course: Course }) {
             className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50">
             {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : 'Lưu'}
           </button>
-          <button onClick={deleteCourse} className="border border-red-300 text-red-500 px-4 py-2 rounded-lg text-sm hover:bg-red-50 transition-colors">
-            Xóa
+          <button onClick={deleteCourse} disabled={deleting}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors disabled:opacity-50 ${
+              confirmDelete ? 'bg-red-500 text-white border-red-500 hover:bg-red-600' : 'border-red-300 text-red-500 hover:bg-red-50'
+            }`}>
+            {deleting ? 'Đang xóa...' : confirmDelete ? 'Xác nhận xóa?' : 'Xóa'}
           </button>
+          {confirmDelete && !deleting && (
+            <button onClick={() => setConfirmDelete(false)} className="text-sm text-muted-foreground hover:text-foreground">Hủy</button>
+          )}
         </div>
       </div>
 

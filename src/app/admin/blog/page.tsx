@@ -22,6 +22,7 @@ export default async function AdminBlogPage() {
       id: true,
       title: true,
       slug: true,
+      excerpt: true,
       published: true,
       publishedAt: true,
       createdAt: true,
@@ -65,9 +66,12 @@ export default async function AdminBlogPage() {
                 <div key={post.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-foreground text-sm leading-snug mb-1.5">
+                      <h3 className="font-medium text-foreground text-sm leading-snug mb-1">
                         {post.title}
                       </h3>
+                      {post.excerpt && (
+                        <p className="text-xs text-muted-foreground mb-1.5 line-clamp-1">{post.excerpt}</p>
+                      )}
                       <div className="flex items-center gap-2">
                         <Badge className={`text-xs ${post.published ? 'bg-green-100 text-green-600 hover:bg-green-100' : 'bg-slate-100 text-muted-foreground hover:bg-slate-100'}`}>
                           {post.published ? 'Đã đăng' : 'Nháp'}
@@ -98,7 +102,10 @@ export default async function AdminBlogPage() {
                   <TableBody>
                     {posts.map((post) => (
                       <TableRow key={post.id} className="hover:bg-muted/30 transition-colors border-b border-border last:border-0">
-                        <TableCell className="font-medium text-foreground max-w-xs truncate">{post.title}</TableCell>
+                        <TableCell className="font-medium text-foreground max-w-xs">
+                          <div className="truncate">{post.title}</div>
+                          {post.excerpt && <div className="text-xs text-muted-foreground truncate mt-0.5">{post.excerpt}</div>}
+                        </TableCell>
                         <TableCell>
                           <Badge className={`text-xs ${post.published ? 'bg-green-100 text-green-600 hover:bg-green-100' : 'bg-slate-100 text-muted-foreground hover:bg-slate-100'}`}>
                             {post.published ? 'Đã đăng' : 'Nháp'}

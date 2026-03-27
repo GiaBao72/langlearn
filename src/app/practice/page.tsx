@@ -26,6 +26,16 @@ export default async function PracticeIndexPage() {
   })
   const completedSet = new Set(completedIds.map(p => p.exerciseId))
 
+  // Tìm bài tiếp theo chưa hoàn thành
+  let nextLesson: { id: string; title: string } | null = null
+  outer: for (const course of courses) {
+    for (const lesson of course.lessons) {
+      if (lesson.exercises.length === 0) continue
+      const done = lesson.exercises.filter(e => completedSet.has(e.id)).length
+      if (done < lesson.exercises.length) { nextLesson = { id: lesson.id, title: lesson.title }; break outer }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -36,6 +46,19 @@ export default async function PracticeIndexPage() {
           <h1 className="text-3xl font-bold text-[#334155] mb-2">Khu vực luyện tập</h1>
           <p className="text-[#64748B]">Chọn bài học và bắt đầu</p>
         </div>
+
+        {/* Gợi ý bài tiếp theo */}
+        {nextLesson && (
+          <Link href={`/practice/${nextLesson.id}`}
+            className="flex items-center gap-4 bg-[#2563EB] text-white rounded-2xl px-5 py-4 mb-8 hover:bg-blue-700 transition-colors shadow-md group">
+            <span className="text-2xl">▶️</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-blue-200 mb-0.5">Tiếp tục từ chỗ bạn dừng</p>
+              <p className="font-semibold truncate">{nextLesson.title}</p>
+            </div>
+            <span className="text-blue-200 group-hover:text-white transition-colors text-lg">→</span>
+          </Link>
+        )}
 
         {courses.length === 0 ? (
           <div className="text-center py-20 text-[#64748B] bg-white rounded-xl border border-[#E2E8F0] shadow-sm">
