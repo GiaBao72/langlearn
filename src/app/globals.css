@@ -501,3 +501,165 @@ html.dark .min-h-screen {
 }
 .animate-blob { animation: blob 7s infinite; }
 .animation-delay-2000 { animation-delay: 2s; }
+
+/* ===========================
+   Dark Mode — Button & Badge Harmony
+   =========================== */
+
+/* ── Primary button (blue) ── */
+html.dark .bg-\[\#2563EB\] {
+  background-color: #2563EB !important;
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.3);
+}
+html.dark .bg-\[\#2563EB\]:hover,
+html.dark .hover\:bg-blue-700:hover {
+  background-color: #3B82F6 !important;
+}
+
+/* ── Semantic: Success / Green ── */
+html.dark .bg-green-100,
+html.dark .bg-emerald-100 {
+  background-color: rgba(16,185,129,0.15) !important;
+}
+html.dark .text-green-700,
+html.dark .text-green-600,
+html.dark .text-emerald-700 {
+  color: #34D399 !important;
+}
+html.dark .border-green-200,
+html.dark .border-emerald-200 {
+  border-color: rgba(16,185,129,0.3) !important;
+}
+html.dark .hover\:bg-green-50:hover,
+html.dark .hover\:bg-emerald-50:hover {
+  background-color: rgba(16,185,129,0.12) !important;
+}
+/* Published badge on cards */
+html.dark .hover\:bg-green-100:hover {
+  background-color: rgba(16,185,129,0.2) !important;
+}
+
+/* ── Semantic: Error / Red ── */
+html.dark .bg-red-50,
+html.dark .bg-red-100 {
+  background-color: rgba(239,68,68,0.12) !important;
+}
+html.dark .text-red-700,
+html.dark .text-red-600,
+html.dark .text-red-500 {
+  color: #F87171 !important;
+}
+html.dark .border-red-200,
+html.dark .border-red-300,
+html.dark .border-red-100 {
+  border-color: rgba(239,68,68,0.3) !important;
+}
+html.dark .hover\:bg-red-50:hover {
+  background-color: rgba(239,68,68,0.12) !important;
+}
+/* Destructive filled button (confirm delete) */
+html.dark .bg-red-500 {
+  background-color: #DC2626 !important;
+}
+html.dark .bg-red-500:hover,
+html.dark .hover\:bg-red-600:hover {
+  background-color: #EF4444 !important;
+}
+
+/* ── Semantic: Warning / Orange ── */
+html.dark .bg-orange-50,
+html.dark .bg-orange-100 {
+  background-color: rgba(249,115,22,0.12) !important;
+}
+html.dark .text-orange-600,
+html.dark .text-orange-700 {
+  color: #FB923C !important;
+}
+html.dark .border-orange-200 {
+  border-color: rgba(249,115,22,0.3) !important;
+}
+html.dark .hover\:bg-orange-50:hover {
+  background-color: rgba(249,115,22,0.12) !important;
+}
+
+/* ── Semantic: Info / Blue badges ── */
+html.dark .bg-blue-50,
+html.dark .bg-blue-100 {
+  background-color: rgba(59,130,246,0.12) !important;
+}
+html.dark .text-blue-700,
+html.dark .text-blue-600,
+html.dark .text-\[\#2563EB\] {
+  color: #60A5FA !important;
+}
+html.dark .border-blue-100,
+html.dark .border-blue-200 {
+  border-color: rgba(59,130,246,0.25) !important;
+}
+html.dark .hover\:bg-blue-50:hover,
+html.dark .hover\:bg-blue-100:hover {
+  background-color: rgba(59,130,246,0.15) !important;
+}
+
+/* ── Semantic: Purple ── */
+html.dark .bg-purple-100 {
+  background-color: rgba(168,85,247,0.15) !important;
+}
+html.dark .text-purple-700,
+html.dark .text-purple-600 {
+  color: #C084FC !important;
+}
+html.dark .border-purple-200 {
+  border-color: rgba(168,85,247,0.3) !important;
+}
+html.dark .hover\:bg-purple-50:hover {
+  background-color: rgba(168,85,247,0.12) !important;
+}
+html.dark .bg-purple-500 {
+  background-color: #7C3AED !important;
+}
+
+/* ── Slate/Gray badges (unpublished, neutral) ── */
+html.dark .bg-slate-100 {
+  background-color: #1E293B !important;
+}
+html.dark .text-slate-500,
+html.dark .text-muted-foreground {
+  color: #64748B !important;
+}
+
+/* ── Outline ghost buttons (border only) ── */
+html.dark .border-green-200.text-green-600,
+html.dark .border-emerald-200.text-emerald-600 {
+  border-color: rgba(16,185,129,0.4) !important;
+  color: #34D399 !important;
+  background-color: transparent !important;
+}
+html.dark .border-red-200.text-red-500,
+html.dark .border-red-300.text-red-500 {
+  border-color: rgba(239,68,68,0.4) !important;
+  color: #F87171 !important;
+  background-color: transparent !important;
+}
+html.dark .border-purple-200.text-purple-600 {
+  border-color: rgba(168,85,247,0.4) !important;
+  color: #C084FC !important;
+  background-color: transparent !important;
+}
+html.dark .border-orange-200.text-orange-600 {
+  border-color: rgba(249,115,22,0.4) !important;
+  color: #FB923C !important;
+  background-color: transparent !important;
+}
+
+/* ── Roadmap level buttons ── */
+html.dark .bg-emerald-500 { background-color: #059669 !important; }
+html.dark .hover\:bg-emerald-600:hover { background-color: #10B981 !important; }
+html.dark .bg-purple-500 { background-color: #7C3AED !important; }
+html.dark .hover\:bg-purple-600:hover { background-color: #8B5CF6 !important; }
+
+/* ── CTA Section (big blue bg) ── */
+html.dark .bg-\[\#2563EB\].py-12,
+html.dark section.bg-\[\#2563EB\] {
+  background-color: #1D4ED8 !important;
+}
