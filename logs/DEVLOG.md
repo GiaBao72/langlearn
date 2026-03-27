@@ -244,3 +244,27 @@ User, RefreshToken, Course, Lesson, Exercise (JSON data), UserProgress, BlogPost
 - Live: http://118.70.49.57:12431 ✅
 - Latest commit: 8f2e272
 - TODO còn lại: SSL/HTTPS (chờ domain)
+
+---
+
+## 2026-03-27 (batch 3) — Chiến 🕺
+
+### Tính năng mới (commit 304379f)
+
+| Tính năng | Chi tiết |
+|-----------|---------|
+| 🏆 Leaderboard | `/leaderboard` — tab Tuần này / Tất cả, top 20, avatar, medal |
+| 🔥 Streak Banner | Dashboard hiện banner nhắc nhở nếu hôm nay chưa học |
+| ❌ Xem bài sai | Sau làm xong lesson, hiện danh sách câu sai + đáp án đúng |
+| 📊 Lesson History API | `GET /api/lesson-history/[lessonId]` — điểm, % hoàn thành, chi tiết từng bài |
+| Track session results | ExerciseRunner lưu kết quả từng câu trong session |
+
+### Notes
+- Leaderboard: public (không cần login), ẩn email (chỉ hiện tên hoặc prefix email)
+- Streak Banner: chỉ hiện khi `studiedToday = false`, tự biến mất sau khi học
+- Courses search: đã có sẵn từ trước ✅
+
+### Status
+- Live: http://118.70.49.57:12431 ✅
+- Latest commit: 304379f
+- TODO: SSL/HTTPS (chờ domain)
