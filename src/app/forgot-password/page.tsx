@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
     setLoading(false)
     if (!res.ok) return setError(data.error || 'Đặt lại mật khẩu thất bại')
     setStep('done')
-    setTimeout(() => router.push('/login'), 2000)
+    setTimeout(() => { window.location.href = '/login' }, 2000)
   }
 
   return (

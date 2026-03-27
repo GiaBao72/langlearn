@@ -134,6 +134,20 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
   const [expanded, setExpanded] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [publishing, setPublishing] = useState(false)
+  const [deletingLesson, setDeletingLesson] = useState(false)
+  const [confirmDeleteLesson, setConfirmDeleteLesson] = useState(false)
+
+  async function handleDeleteLesson() {
+    if (!confirmDeleteLesson) return setConfirmDeleteLesson(true)
+    setDeletingLesson(true)
+    const res = await fetch(`/api/admin/lessons/${lesson.id}`, { method: 'DELETE' })
+    if (res.ok) {
+      window.location.href = `/admin/courses/${lesson.course.id}`
+    } else {
+      setDeletingLesson(false)
+      setConfirmDeleteLesson(false)
+    }
+  }
 
   async function reload() {
     const res = await fetch(`/api/admin/lessons/${lesson.id}`)
@@ -177,12 +191,23 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{lesson.title}</h1>
           <p className="text-muted-foreground text-sm mt-1">{lesson.exercises.length} bài tập</p>
         </div>
-        <button onClick={togglePublish} disabled={publishing}
-          className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors shrink-0 ${
-            lesson.published ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          }`}>
-          {lesson.published ? '✓ Đã đăng' : 'Chưa đăng'}
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={togglePublish} disabled={publishing}
+            className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors shrink-0 ${
+              lesson.published ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }`}>
+            {lesson.published ? '✓ Đã đăng' : 'Chưa đăng'}
+          </button>
+          <button onClick={handleDeleteLesson} disabled={deletingLesson}
+            className={`text-xs px-3 py-1.5 rounded-lg font-semibold border transition-colors shrink-0 disabled:opacity-50 ${
+              confirmDeleteLesson ? 'bg-red-500 text-white border-red-500' : 'border-red-300 text-red-500 hover:bg-red-50'
+            }`}>
+            {deletingLesson ? 'Đang xóa...' : confirmDeleteLesson ? 'Xác nhận xóa lesson?' : 'Xóa lesson'}
+          </button>
+          {confirmDeleteLesson && !deletingLesson && (
+            <button onClick={() => setConfirmDeleteLesson(false)} className="text-xs text-muted-foreground hover:text-foreground">Hủy</button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">

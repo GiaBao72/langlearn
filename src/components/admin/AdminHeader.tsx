@@ -56,7 +56,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
     document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
     document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   return (

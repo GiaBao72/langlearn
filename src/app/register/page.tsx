@@ -28,7 +28,7 @@ export default function RegisterPage() {
         setError(data.error || 'Đăng ký thất bại')
         return
       }
-      window.location.href = '/dashboard'
+      window.location.href = '/dashboard?welcome=1'
     } catch {
       setError('Lỗi kết nối, thử lại sau')
     } finally {

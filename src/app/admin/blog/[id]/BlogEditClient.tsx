@@ -19,6 +19,8 @@ export default function BlogEditClient({ post }: { post: Post }) {
   const [content, setContent] = useState(post.content)
   const [published, setPublished] = useState(post.published)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
 
@@ -37,14 +39,27 @@ export default function BlogEditClient({ post }: { post: Post }) {
     router.refresh()
   }
 
+  async function handleDelete() {
+    if (!confirmDelete) return setConfirmDelete(true)
+    setDeleting(true)
+    const res = await fetch(`/api/admin/blog/${post.id}`, { method: 'DELETE' })
+    if (res.ok) {
+      window.location.href = '/admin/blog'
+    } else {
+      setDeleting(false)
+      setConfirmDelete(false)
+      setError('Xóa thất bại')
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <Link href="/admin/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← Blog</Link>
           <h1 className="text-2xl font-bold text-foreground mt-1">Sửa bài viết</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
             <input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)}
               className="rounded border-border" />
@@ -54,6 +69,17 @@ export default function BlogEditClient({ post }: { post: Post }) {
             className="bg-[#2563EB] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors">
             {loading ? 'Đang lưu...' : 'Lưu'}
           </button>
+          <button onClick={handleDelete} disabled={deleting}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors disabled:opacity-50 ${
+              confirmDelete ? 'bg-red-500 text-white border-red-500 hover:bg-red-600' : 'border-red-300 text-red-500 hover:bg-red-50'
+            }`}>
+            {deleting ? 'Đang xóa...' : confirmDelete ? 'Xác nhận xóa?' : 'Xóa'}
+          </button>
+          {confirmDelete && !deleting && (
+            <button onClick={() => setConfirmDelete(false)} className="text-sm text-muted-foreground hover:text-foreground">
+              Hủy
+            </button>
+          )}
         </div>
       </div>
 

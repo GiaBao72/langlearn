@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { BookOpen, Flame, Target, Trophy, ArrowRight } from 'lucide-react'
 import useAutoRefresh from '@/hooks/useAutoRefresh'
 import StreakBanner from '@/components/StreakBanner'
@@ -80,6 +81,9 @@ function DashboardSkeleton() {
 
 export default function DashboardClient() {
   useAutoRefresh()
+  const searchParams = useSearchParams()
+  const isWelcome = searchParams.get('welcome') === '1'
+  const [showWelcome, setShowWelcome] = useState(isWelcome)
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -114,6 +118,21 @@ export default function DashboardClient() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      {/* Welcome banner */}
+      {showWelcome && (
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-5 flex items-center justify-between gap-4 mb-6 shadow-md">
+          <div>
+            <p className="font-bold text-lg">🎉 Chào mừng đến với LangLearn!</p>
+            <p className="text-blue-100 text-sm mt-0.5">Tài khoản của bạn đã sẵn sàng. Bắt đầu học ngay thôi!</p>
+          </div>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Link href="/courses" className="bg-white text-[#2563EB] px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors">
+              Xem khóa học
+            </Link>
+            <button onClick={() => setShowWelcome(false)} className="text-blue-200 hover:text-white text-xl leading-none">×</button>
+          </div>
+        </div>
+      )}
       {/* Streak Banner */}
       <StreakBanner
         streak={data.streak}
