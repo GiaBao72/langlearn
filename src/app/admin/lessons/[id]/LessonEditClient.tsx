@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
-import { Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronUp, Upload, Download } from 'lucide-react'
 
 type ExerciseType = 'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'FLASHCARD' | 'DICTATION' | 'SORT_WORDS'
 
@@ -129,6 +129,83 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
   )
 }
 
+function ImportExcelForm({ lessonId, onImported }: { lessonId: string; onImported: () => void }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [result, setResult] = useState<{ imported: number; errors: string[] } | null>(null)
+  const [error, setError] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  async function handleImport() {
+    if (!file) return
+    setUploading(true); setError(''); setResult(null)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('lessonId', lessonId)
+      const res = await fetch('/api/admin/exercises/import', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Import thất bại'); return }
+      setResult(data)
+      setFile(null)
+      if (inputRef.current) inputRef.current.value = ''
+      onImported()
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="bg-white border border-[#E2E8F0] rounded-xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-[#334155] flex items-center gap-2">
+          <Upload className="w-4 h-4" /> Import từ Excel
+        </h3>
+        <a href="/api/admin/exercises/template" download
+          className="flex items-center gap-1 text-xs text-[#2563EB] hover:underline">
+          <Download className="w-3.5 h-3.5" /> Tải file mẫu
+        </a>
+      </div>
+
+      <p className="text-xs text-[#64748B] mb-4">
+        File Excel có các sheet: <code className="bg-slate-100 px-1 rounded">FILL_BLANK</code>, <code className="bg-slate-100 px-1 rounded">MULTIPLE_CHOICE</code>, <code className="bg-slate-100 px-1 rounded">FLASHCARD</code>, <code className="bg-slate-100 px-1 rounded">SORT_WORDS</code>, <code className="bg-slate-100 px-1 rounded">DICTATION</code>. Mỗi sheet một loại bài tập. Options/words ngăn cách bằng <code className="bg-slate-100 px-1 rounded">|</code>.
+      </p>
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          onChange={e => { setFile(e.target.files?.[0] || null); setResult(null); setError('') }}
+          className="text-sm text-[#64748B] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#2563EB] hover:file:bg-blue-100 cursor-pointer"
+        />
+        <button
+          onClick={handleImport}
+          disabled={!file || uploading}
+          className="bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2"
+        >
+          {uploading ? 'Đang import...' : 'Import'}
+        </button>
+      </div>
+
+      {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
+
+      {result && (
+        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-700 text-sm font-semibold">✓ Đã import {result.imported} bài tập</p>
+          {result.errors.length > 0 && (
+            <ul className="mt-2 text-xs text-amber-600 space-y-0.5">
+              {result.errors.map((e, i) => <li key={i}>⚠ {e}</li>)}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }) {
   const [lesson, setLesson] = useState(initial)
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -245,6 +322,7 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
         )}
 
         <ExerciseForm lessonId={lesson.id} onCreated={reload} />
+        <ImportExcelForm lessonId={lesson.id} onImported={reload} />
       </div>
     </div>
   )
