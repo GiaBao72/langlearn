@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
@@ -41,14 +42,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <nav className="border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <Link href="/courses" className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors flex items-center gap-1">
-            ← <span className="hidden sm:inline">Khóa học</span><span className="sm:hidden">Quay lại</span>
-          </Link>
-          <Link href="/dashboard" className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors">Dashboard</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}

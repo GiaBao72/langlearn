@@ -126,7 +126,7 @@ export default function RoadmapPage() {
 
               {/* CTA */}
               <Link
-                href="/register"
+                href="/courses"
                 className={`mt-auto inline-block text-center px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${level.btnColor}`}
               >
                 Bắt đầu cấp này →
