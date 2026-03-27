@@ -663,3 +663,39 @@ html.dark .bg-\[\#2563EB\].py-12,
 html.dark section.bg-\[\#2563EB\] {
   background-color: #1D4ED8 !important;
 }
+
+/* ===========================
+   CTA Bottom Section
+   =========================== */
+
+/* Light mode */
+.cta-bottom {
+  background-color: #2563EB;
+}
+.cta-bottom__btn {
+  background-color: #ffffff;
+  color: #2563EB;
+}
+.cta-bottom__btn:hover {
+  background-color: #EFF6FF;
+}
+
+/* Dark mode — tối hơn, không chói, nút dùng màu accent thay white */
+html.dark .cta-bottom {
+  background-color: #0F172A !important;
+  border-top: 1px solid #1E293B;
+}
+html.dark .cta-bottom__title {
+  color: #E2E8F0 !important;
+}
+html.dark .cta-bottom__sub {
+  color: #94A3B8 !important;
+}
+html.dark .cta-bottom__btn {
+  background-color: #2563EB !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.4);
+}
+html.dark .cta-bottom__btn:hover {
+  background-color: #3B82F6 !important;
+}

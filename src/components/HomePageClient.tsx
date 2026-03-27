@@ -248,10 +248,10 @@ export default function HomePageClient() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-[#2563EB] py-12 sm:py-16 px-4 text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Bắt đầu hôm nay — miễn phí</h2>
-        <p className="text-blue-200 mb-6 sm:mb-8 text-sm sm:text-base">Chỉ cần 5 phút. Không cần thẻ tín dụng.</p>
-        <Link href="/register" className="inline-block bg-white text-[#2563EB] px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-colors text-sm sm:text-base">
+      <section className="cta-bottom py-12 sm:py-16 px-4 text-center">
+        <h2 className="cta-bottom__title text-2xl sm:text-3xl font-bold text-white mb-3">Bắt đầu hôm nay — miễn phí</h2>
+        <p className="cta-bottom__sub text-blue-200 mb-6 sm:mb-8 text-sm sm:text-base">Chỉ cần 5 phút. Không cần thẻ tín dụng.</p>
+        <Link href="/register" className="cta-bottom__btn inline-block bg-white text-[#2563EB] px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-colors text-sm sm:text-base">
           Tạo tài khoản miễn phí →
         </Link>
       </section>
