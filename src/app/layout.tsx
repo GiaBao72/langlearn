@@ -3,6 +3,7 @@ import { Inter, Geist } from 'next/font/google'
 import './globals.css'
 import { cn } from "@/lib/utils";
 import PageTransition from '@/components/PageTransition';
+import MascotLoader from '@/components/MascotLoader';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <PageTransition>{children}</PageTransition>
+        <MascotLoader />
       </body>
     </html>
   )
