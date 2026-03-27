@@ -740,3 +740,12 @@ html.dark .cta-bottom__btn:hover {
 .mascot-sleep { animation: mascot-sleep-anim 2.5s ease-in-out infinite; }
 
 #mascot-container:hover .mascot-close { opacity: 1 !important; }
+
+@keyframes dog-tail {
+  0%, 100% { transform: rotate(-10deg); }
+  50%       { transform: rotate(20deg); }
+}
+@keyframes dog-wave-paw {
+  0%, 100% { transform: rotate(-20deg) translateY(0); }
+  50%       { transform: rotate(20deg) translateY(-4px); }
+}
