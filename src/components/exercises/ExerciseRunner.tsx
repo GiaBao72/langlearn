@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 // @ts-ignore
@@ -51,6 +51,24 @@ function checkCorrectness(exercise: Exercise, answer: string): boolean {
   }
 }
 
+function ScorePopup({ points, onDone }: { points: number; onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 1000)
+    return () => clearTimeout(t)
+  }, [onDone])
+  return (
+    <motion.div
+      initial={{ opacity: 1, y: 0, scale: 1 }}
+      animate={{ opacity: 0, y: -60, scale: 1.2 }}
+      transition={{ duration: 1, ease: 'easeOut' }}
+      className="fixed pointer-events-none z-50 text-2xl font-extrabold text-[#10B981] drop-shadow-lg"
+      style={{ top: '40%', left: '50%', transform: 'translateX(-50%)' }}
+    >
+      +{points}đ ✨
+    </motion.div>
+  )
+}
+
 export default function ExerciseRunner({ exercises, lessonId, courseId }: Props) {
   const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -67,6 +85,8 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
     correctAnswer: string
     correct: boolean
   }>>([])
+  const [scorePopups, setScorePopups] = useState<{id: number; points: number; x: number; y: number}[]>([])
+  const popupIdRef = useRef(0)
 
   useEffect(() => {
     if (finished) {
@@ -108,6 +128,8 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
       setTotalScore(s => s + exercise.points)
       setCorrectCount(c => c + 1)
       confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } })
+      const id = ++popupIdRef.current
+      setScorePopups(prev => [...prev, { id, points: exercise.points, x: 0, y: 0 }])
     }
     const data = exercise.data as Record<string, unknown>
     const correctAnswer =
@@ -214,6 +236,10 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
 
   return (
     <div>
+      {/* Score popups */}
+      {scorePopups.map(p => (
+        <ScorePopup key={p.id} points={p.points} onDone={() => setScorePopups(prev => prev.filter(x => x.id !== p.id))} />
+      ))}
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-[#64748B] mb-2">

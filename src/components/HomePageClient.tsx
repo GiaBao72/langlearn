@@ -5,6 +5,24 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 // @ts-ignore
 import confetti from 'canvas-confetti'
+import ParticleBackground from './ParticleBackground'
+
+function useTypewriter(text: string, speed = 60) {
+  const [displayed, setDisplayed] = useState('')
+  const [done, setDone] = useState(false)
+  useEffect(() => {
+    setDisplayed('')
+    setDone(false)
+    let i = 0
+    const timer = setInterval(() => {
+      i++
+      setDisplayed(text.slice(0, i))
+      if (i >= text.length) { setDone(true); clearInterval(timer) }
+    }, speed)
+    return () => clearInterval(timer)
+  }, [text, speed])
+  return { displayed, done }
+}
 
 const ALL_QUESTIONS = [
   { sentence: 'Ich ___ jeden Tag Deutsch.', answer: 'lerne', hint: 'Động từ "học" chia ngôi thứ nhất số ít' },
@@ -34,6 +52,7 @@ export default function HomePageClient() {
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
   const [showCTA, setShowCTA] = useState(false)
   const [correctCount, setCorrectCount] = useState(0)
+  const { displayed: typedLine2, done: typingDone } = useTypewriter('Kết quả thật.', 80)
 
   useEffect(() => {
     setQuestions(shuffle(ALL_QUESTIONS))
@@ -71,6 +90,8 @@ export default function HomePageClient() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-[#F8FAFC]">
       {/* Hero */}
       <section style={{position:'relative'}} className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 lg:pt-28 pb-10 sm:pb-16 text-center">
+        {/* Particle background */}
+        <ParticleBackground />
         {/* Background blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{zIndex:0}}>
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
@@ -86,7 +107,10 @@ export default function HomePageClient() {
           transition={{ duration: 0.6 }}
         >
           5 phút mỗi ngày.<br />
-          <span className="text-[#2563EB]">Kết quả thật.</span>
+          <span className="text-[#2563EB]">
+            {typedLine2}
+            {!typingDone && <span className="inline-block w-0.5 h-8 bg-[#2563EB] align-middle animate-pulse ml-0.5" />}
+          </span>
         </motion.h1>
         <motion.p
           className="text-[#64748B] text-base sm:text-lg max-w-md mx-auto mb-8 sm:mb-12 leading-relaxed"
