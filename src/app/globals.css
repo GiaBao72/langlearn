@@ -767,3 +767,8 @@ html.dark .cta-bottom__btn:hover {
     scale: 0.75;
   }
 }
+
+@keyframes mascot-zzz {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50%       { transform: translateY(-6px) scale(1.1); opacity: 0.6; }
+}
