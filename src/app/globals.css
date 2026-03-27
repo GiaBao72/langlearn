@@ -759,7 +759,11 @@ html.dark .cta-bottom__btn:hover {
   50%       { transform: rotate(-15deg); }
 }
 
-/* Mascot — ẩn trên mobile */
+/* Mascot — mobile: nhỏ hơn, sat đáy, không bị cắt */
 @media (max-width: 768px) {
-  #mascot-wrap { display: none !important; }
+  #mascot-wrap {
+    bottom: 0 !important;
+    transform-origin: bottom center;
+    scale: 0.75;
+  }
 }
