@@ -31,6 +31,22 @@ interface DashboardData {
   }[]
 }
 
+function useCountUp(target: number, duration = 1000) {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (target === 0) return
+    const start = Date.now()
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - start
+      const progress = Math.min(elapsed / duration, 1)
+      setCount(Math.floor(progress * target))
+      if (progress >= 1) clearInterval(timer)
+    }, 16)
+    return () => clearInterval(timer)
+  }, [target, duration])
+  return count
+}
+
 function Heatmap({ days }: { days: HeatmapDay[] }) {
   function getColor(count: number) {
     if (count === 0) return 'bg-[#E2E8F0]'
@@ -98,6 +114,11 @@ export default function DashboardClient() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
+
+  // Count-up hooks must be called unconditionally (Rules of Hooks)
+  const animatedCompletedCount = useCountUp(data?.completedCount ?? 0)
+  const animatedTotalScore = useCountUp(data?.totalScore ?? 0)
+  const animatedStreak = useCountUp(data?.streak ?? 0)
 
   if (loading) return <DashboardSkeleton />
 
@@ -168,7 +189,7 @@ export default function DashboardClient() {
             <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
               <Target className="w-5 h-5 text-[#2563EB]" />
             </div>
-            <div className="text-2xl font-bold text-[#334155] mb-0.5">{data.completedCount}</div>
+            <div className="text-2xl font-bold text-[#334155] mb-0.5">{animatedCompletedCount}</div>
             <div className="text-[#64748B] text-sm">Bài đã làm</div>
           </CardContent>
         </Card>
@@ -178,7 +199,7 @@ export default function DashboardClient() {
             <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center mb-3">
               <Trophy className="w-5 h-5 text-[#10B981]" />
             </div>
-            <div className="text-2xl font-bold text-[#334155] mb-0.5">{data.totalScore}</div>
+            <div className="text-2xl font-bold text-[#334155] mb-0.5">{animatedTotalScore}</div>
             <div className="text-[#64748B] text-sm">Tổng điểm</div>
           </CardContent>
         </Card>
@@ -188,7 +209,7 @@ export default function DashboardClient() {
             <div className="w-9 h-9 bg-orange-50 rounded-lg flex items-center justify-center mb-3">
               <Flame className="w-5 h-5 text-orange-500" />
             </div>
-            <div className="text-2xl font-bold text-[#334155] mb-0.5">{data.streak}</div>
+            <div className="text-2xl font-bold text-[#334155] mb-0.5">{animatedStreak}</div>
             <div className="text-[#64748B] text-sm">Ngày streak</div>
             <Progress value={Math.min(100, data.streak * 10)} className="mt-2 h-1.5" />
           </CardContent>

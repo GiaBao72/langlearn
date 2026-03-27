@@ -68,9 +68,14 @@ export default function HomePageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-[#F8FAFC]">
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 lg:pt-28 pb-10 sm:pb-16 text-center">
+      <section style={{position:'relative'}} className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 lg:pt-28 pb-10 sm:pb-16 text-center">
+        {/* Background blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{zIndex:0}}>
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
+        </div>
         <p className="text-[#2563EB] text-xs sm:text-sm font-semibold tracking-widest uppercase mb-4">
           Hack não bộ để học ngoại ngữ
         </p>
@@ -94,7 +99,7 @@ export default function HomePageClient() {
 
         {/* Demo Widget */}
         <motion.div
-          className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-8 max-w-md mx-auto shadow-sm mb-8 sm:mb-10"
+          className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl p-5 sm:p-8 max-w-md mx-auto shadow-lg mb-8 sm:mb-10"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.25 }}

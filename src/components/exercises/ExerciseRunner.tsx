@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 // @ts-ignore
 import confetti from 'canvas-confetti'
 import FlashcardExercise from './FlashcardExercise'
@@ -220,9 +221,11 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
           <span>{exercise.points} điểm</span>
         </div>
         <div className="h-2 bg-[#E2E8F0] rounded-full">
-          <div
-            className="h-full bg-[#2563EB] rounded-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
+          <motion.div
+            className="h-full bg-[#2563EB] rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           />
         </div>
       </div>
@@ -239,55 +242,64 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
       </div>
 
       {/* Exercise card */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 mb-4">
-        {exercise.type === 'FLASHCARD' && (
-          <FlashcardExercise
-            data={exercise.data}
-            onAnswer={handleFlashcardAnswer}
-          />
-        )}
-        {exercise.type === 'FILL_BLANK' && (
-          <FillBlankExercise
-            question={exercise.question}
-            data={exercise.data}
-            value={userAnswer}
-            onChange={setUserAnswer}
-            onSubmit={checkAnswer}
-            submitted={submitted}
-            correct={correct}
-          />
-        )}
-        {exercise.type === 'MULTIPLE_CHOICE' && (
-          <MultipleChoiceExercise
-            question={exercise.question}
-            data={exercise.data}
-            value={userAnswer}
-            onChange={setUserAnswer}
-            submitted={submitted}
-            correct={correct}
-          />
-        )}
-        {exercise.type === 'DICTATION' && (
-          <DictationExercise
-            question={exercise.question}
-            data={exercise.data}
-            value={userAnswer}
-            onChange={setUserAnswer}
-            submitted={submitted}
-            correct={correct}
-          />
-        )}
-        {exercise.type === 'SORT_WORDS' && (
-          <SortWordsExercise
-            question={exercise.question}
-            data={exercise.data}
-            value={userAnswer}
-            onChange={setUserAnswer}
-            submitted={submitted}
-            correct={correct}
-          />
-        )}
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
+          className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 mb-4"
+        >
+          {exercise.type === 'FLASHCARD' && (
+            <FlashcardExercise
+              data={exercise.data}
+              onAnswer={handleFlashcardAnswer}
+            />
+          )}
+          {exercise.type === 'FILL_BLANK' && (
+            <FillBlankExercise
+              question={exercise.question}
+              data={exercise.data}
+              value={userAnswer}
+              onChange={setUserAnswer}
+              onSubmit={checkAnswer}
+              submitted={submitted}
+              correct={correct}
+            />
+          )}
+          {exercise.type === 'MULTIPLE_CHOICE' && (
+            <MultipleChoiceExercise
+              question={exercise.question}
+              data={exercise.data}
+              value={userAnswer}
+              onChange={setUserAnswer}
+              submitted={submitted}
+              correct={correct}
+            />
+          )}
+          {exercise.type === 'DICTATION' && (
+            <DictationExercise
+              question={exercise.question}
+              data={exercise.data}
+              value={userAnswer}
+              onChange={setUserAnswer}
+              submitted={submitted}
+              correct={correct}
+            />
+          )}
+          {exercise.type === 'SORT_WORDS' && (
+            <SortWordsExercise
+              question={exercise.question}
+              data={exercise.data}
+              value={userAnswer}
+              onChange={setUserAnswer}
+              submitted={submitted}
+              correct={correct}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Feedback banner */}
       {submitted && !isFlashcard && (
@@ -319,20 +331,26 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
       {!isFlashcard && (
         <div className="flex justify-end">
           {!submitted ? (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring" }}
               onClick={checkAnswer}
               disabled={!canSubmit}
               className="px-6 py-3 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Kiểm tra
-            </button>
+            </motion.button>
           ) : (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring" }}
               onClick={nextExercise}
               className="px-6 py-3 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm"
             >
               {currentIndex + 1 >= exercises.length ? 'Xem kết quả' : 'Tiếp theo →'}
-            </button>
+            </motion.button>
           )}
         </div>
       )}
