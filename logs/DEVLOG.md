@@ -268,3 +268,54 @@ User, RefreshToken, Course, Lesson, Exercise (JSON data), UserProgress, BlogPost
 - Live: http://118.70.49.57:12431 ✅
 - Latest commit: 304379f
 - TODO: SSL/HTTPS (chờ domain)
+
+---
+
+## PROJECT SNAPSHOT — Cuối ngày 27/03/2026
+
+### Live URLs
+- App: http://tuhoctiengduc.giabaobooks.vn:12431
+- Admin: /admin (admin@langlearn.vn / Admin@2026)
+
+### DB State
+- Courses: 1 (Tiếng Đức A1)
+- Lessons: 10 (order 1-10)
+- Exercises: 200 (20/bài × 10 bài, 5 loại)
+- Blog: 10 bài published
+- Users: 1 admin
+
+### Tính năng LIVE
+| Module | URL |
+|--------|-----|
+| Landing + Demo | / |
+| Courses | /courses, /courses/[id] |
+| Practice | /practice/[lessonId] |
+| Dashboard | /dashboard |
+| Leaderboard | /leaderboard |
+| Blog | /blog, /blog/[slug] |
+| Store | /store |
+| Roadmap | /roadmap |
+| Profile | /profile |
+| Forgot password | /forgot-password |
+| Admin CRUD | /admin/** |
+| Import Excel | /admin/lessons/[id] |
+
+### TODO còn lại
+1. Port :12431 trong URL → Cloudflare Tunnel hoặc NAT port 80
+2. SSL/HTTPS
+3. A2/B1/B2 courses chưa có
+4. Email verification
+5. DB backup tự động
+
+### Deploy manual
+```bash
+cd /home/tmc/projects/langlearn
+git fetch && git reset --hard origin/main
+rm -rf .next && npm run build
+pm2 restart langlearn
+```
+
+### Thêm bài tập
+- Excel import: Admin → Lesson → Tải file mẫu → điền → Upload
+- Seed script: `npx ts-node --compiler-options '{"module":"commonjs"}' prisma/seed-a1-full.ts`
+- Admin UI: /admin/lessons/[id] → form thêm từng câu
