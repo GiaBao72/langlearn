@@ -19,15 +19,21 @@ interface Props {
 export default function SortWordsExercise({ question, data, value, onChange, submitted, correct }: Props) {
   const d = data as unknown as SortWordsData
 
-  // Shuffle cố định dựa trên nội dung, không random lại mỗi render
-  const [bank, setBank] = useState<string[]>(() => {
-    const words = [...d.words]
-    // Seeded shuffle dựa trên string content
-    const seed = d.words.join('').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  const shuffleWords = (words: string[]) => {
+    const arr = [...words]
+    const seed = words.join('').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
     let s = seed
-    return words.sort(() => { s = (s * 1103515245 + 12345) & 0x7fffffff; return (s % 3) - 1 })
-  })
+    return arr.sort(() => { s = (s * 1103515245 + 12345) & 0x7fffffff; return (s % 3) - 1 })
+  }
+
+  const [bank, setBank] = useState<string[]>(() => shuffleWords(d.words))
   const [selected, setSelected] = useState<string[]>([])
+
+  // Reset khi chuyển bài mới
+  useEffect(() => {
+    setBank(shuffleWords(d.words))
+    setSelected([])
+  }, [d.words.join('|')])
 
   function pickFromBank(word: string, idx: number) {
     if (submitted) return
