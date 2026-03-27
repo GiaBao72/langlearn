@@ -67,6 +67,131 @@ body {
   --color-text-muted: #94A3B8;
   --color-border: #334155;
   --color-primary: #3B82F6;
+
+  color-scheme: dark;
+}
+
+/* ===========================
+   Dark Mode Global Overrides
+   Override hardcoded Tailwind classes throughout the app
+   =========================== */
+
+/* Backgrounds */
+html.dark .bg-white,
+html.dark .bg-white\/80,
+html.dark .bg-white\/90 {
+  background-color: #1E293B !important;
+}
+html.dark .bg-\[\#F8FAFC\],
+html.dark .bg-\[\#f8fafc\] {
+  background-color: #0F172A !important;
+}
+html.dark .bg-slate-50,
+html.dark .bg-gray-50 {
+  background-color: #1E293B !important;
+}
+html.dark .bg-slate-100,
+html.dark .bg-gray-100 {
+  background-color: #334155 !important;
+}
+
+/* Gradient backgrounds */
+html.dark .bg-gradient-to-b {
+  background-image: none !important;
+  background-color: #0F172A !important;
+}
+html.dark .bg-gradient-to-br,
+html.dark .bg-gradient-to-r {
+  background-image: none !important;
+  background-color: #0F172A !important;
+}
+
+/* Text colors */
+html.dark .text-\[\#334155\],
+html.dark .text-\[\#1E293B\],
+html.dark .text-\[\#1e293b\] {
+  color: #E2E8F0 !important;
+}
+html.dark .text-\[\#64748B\],
+html.dark .text-\[\#64748b\],
+html.dark .text-\[\#475569\],
+html.dark .text-\[\#475569\] {
+  color: #94A3B8 !important;
+}
+html.dark .text-slate-700,
+html.dark .text-gray-700 {
+  color: #CBD5E1 !important;
+}
+html.dark .text-slate-600,
+html.dark .text-gray-600 {
+  color: #94A3B8 !important;
+}
+html.dark .text-slate-500,
+html.dark .text-gray-500 {
+  color: #64748B !important;
+}
+
+/* Borders */
+html.dark .border-\[\#E2E8F0\],
+html.dark .border-\[\#e2e8f0\] {
+  border-color: #334155 !important;
+}
+html.dark .border-slate-200,
+html.dark .border-gray-200 {
+  border-color: #334155 !important;
+}
+html.dark .border-slate-100,
+html.dark .border-gray-100,
+html.dark .border-blue-100 {
+  border-color: #1E3A5F !important;
+}
+
+/* Inputs */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #1E293B !important;
+  color: #E2E8F0 !important;
+  border-color: #334155 !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748B !important;
+}
+html.dark .bg-\[\#F8FAFC\].border {
+  background-color: #1E293B !important;
+}
+
+/* Cards & surfaces */
+html.dark .rounded-xl.border,
+html.dark .rounded-2xl.border,
+html.dark .rounded-lg.border {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+}
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg {
+  --tw-shadow-color: rgba(0,0,0,0.5);
+}
+
+/* Dividers */
+html.dark .border-t,
+html.dark .border-b,
+html.dark .border-y {
+  border-color: #334155 !important;
+}
+
+/* Footer & stats bar */
+html.dark footer {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+  color: #94A3B8 !important;
+}
+
+/* Min-h-screen wrappers */
+html.dark .min-h-screen {
+  background-color: #0F172A !important;
 }
 
 /* Blog rich text content */
