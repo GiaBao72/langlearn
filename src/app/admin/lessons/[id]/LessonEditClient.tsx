@@ -206,13 +206,179 @@ function ImportExcelForm({ lessonId, onImported }: { lessonId: string; onImporte
   )
 }
 
+function EditExerciseForm({ exercise, onSaved, onCancel }: {
+  exercise: Exercise
+  onSaved: () => void
+  onCancel: () => void
+}) {
+  const data = exercise.data as Record<string, unknown>
+  const [question, setQuestion] = useState(exercise.question)
+  const [points, setPoints] = useState(exercise.points)
+  const [answer, setAnswer] = useState(String(data.answer ?? data.back ?? ''))
+  const [sentence, setSentence] = useState(String(data.sentence ?? ''))
+  const [hint, setHint] = useState(String(data.hint ?? ''))
+  const [front, setFront] = useState(String(data.front ?? ''))
+  const [pronunciation, setPronunciation] = useState(String(data.pronunciation ?? ''))
+  const [options, setOptions] = useState<string[]>(
+    Array.isArray(data.options) ? data.options as string[] :
+    Array.isArray(data.words) ? data.words as string[] : ['', '', '', '']
+  )
+  const [audioText, setAudioText] = useState(String(data.audio_text ?? ''))
+  const [saving, setSaving] = useState(false)
+
+  function buildData() {
+    const t = exercise.type
+    if (t === 'FILL_BLANK') return { sentence, answer, hint }
+    if (t === 'MULTIPLE_CHOICE') return { options: options.filter(o => o.trim()), answer, explanation: hint }
+    if (t === 'FLASHCARD') return { front, back: answer, pronunciation }
+    if (t === 'SORT_WORDS') return { words: options.filter(o => o.trim()), answer }
+    if (t === 'DICTATION') return { audio_text: audioText, answer, hint }
+    return {}
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    await fetch(`/api/admin/exercises/${exercise.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, points, data: buildData() }),
+    })
+    setSaving(false)
+    onSaved()
+  }
+
+  return (
+    <div className="mt-3 border-t border-[#E2E8F0] pt-3 space-y-3">
+      <p className="text-xs font-semibold text-[#2563EB] uppercase tracking-wider">Chỉnh sửa</p>
+      <div>
+        <label className="text-xs text-[#64748B] mb-1 block">Câu hỏi</label>
+        <input value={question} onChange={e => setQuestion(e.target.value)}
+          className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+      </div>
+      {exercise.type === 'FILL_BLANK' && <>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Câu có dấu ___</label>
+          <input value={sentence} onChange={e => setSentence(e.target.value)}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Đáp án</label>
+            <input value={answer} onChange={e => setAnswer(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Gợi ý</label>
+            <input value={hint} onChange={e => setHint(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+        </div>
+      </>}
+      {exercise.type === 'MULTIPLE_CHOICE' && <>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Các lựa chọn</label>
+          {options.map((o, i) => <input key={i} value={o} onChange={e => { const n=[...options]; n[i]=e.target.value; setOptions(n) }}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm mb-1.5 focus:outline-none focus:border-[#2563EB]"
+            placeholder={`Lựa chọn ${i+1}`} />)}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Đáp án đúng</label>
+            <input value={answer} onChange={e => setAnswer(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Giải thích</label>
+            <input value={hint} onChange={e => setHint(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+        </div>
+      </>}
+      {exercise.type === 'FLASHCARD' && <>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Mặt trước</label>
+            <input value={front} onChange={e => setFront(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Mặt sau (nghĩa)</label>
+            <input value={answer} onChange={e => setAnswer(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Phiên âm</label>
+          <input value={pronunciation} onChange={e => setPronunciation(e.target.value)}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+        </div>
+      </>}
+      {exercise.type === 'SORT_WORDS' && <>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Các từ (mỗi từ 1 ô)</label>
+          {options.map((o, i) => <input key={i} value={o} onChange={e => { const n=[...options]; n[i]=e.target.value; setOptions(n) }}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm mb-1.5 focus:outline-none focus:border-[#2563EB]"
+            placeholder={`Từ ${i+1}`} />)}
+          <button type="button" onClick={() => setOptions([...options, ''])}
+            className="text-xs text-[#2563EB] hover:underline mt-1">+ Thêm từ</button>
+        </div>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Câu đúng</label>
+          <input value={answer} onChange={e => setAnswer(e.target.value)}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+        </div>
+      </>}
+      {exercise.type === 'DICTATION' && <>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Nội dung nghe</label>
+          <input value={audioText} onChange={e => setAudioText(e.target.value)}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Đáp án</label>
+            <input value={answer} onChange={e => setAnswer(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+          <div>
+            <label className="text-xs text-[#64748B] mb-1 block">Gợi ý</label>
+            <input value={hint} onChange={e => setHint(e.target.value)}
+              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+          </div>
+        </div>
+      </>}
+      <div className="flex items-center gap-2">
+        <div className="w-20">
+          <label className="text-xs text-[#64748B] mb-1 block">Điểm</label>
+          <input type="number" value={points} onChange={e => setPoints(Number(e.target.value))} min={1} max={100}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <button onClick={handleSave} disabled={saving}
+            className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50">
+            {saving ? 'Đang lưu...' : '💾 Lưu'}
+          </button>
+          <button onClick={onCancel}
+            className="border border-[#E2E8F0] text-[#64748B] px-4 py-2 rounded-lg text-sm hover:bg-slate-50 transition-colors">
+            Hủy
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }) {
   const [lesson, setLesson] = useState(initial)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [editing, setEditing] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [publishing, setPublishing] = useState(false)
   const [deletingLesson, setDeletingLesson] = useState(false)
   const [confirmDeleteLesson, setConfirmDeleteLesson] = useState(false)
+  const [showContentEditor, setShowContentEditor] = useState(false)
+  const [content, setContent] = useState(initial.content ?? '')
+  const [savingContent, setSavingContent] = useState(false)
 
   async function handleDeleteLesson() {
     if (!confirmDeleteLesson) return setConfirmDeleteLesson(true)
@@ -243,6 +409,18 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
     })
     await reload()
     setPublishing(false)
+  }
+
+  async function saveContent() {
+    setSavingContent(true)
+    await fetch(`/api/admin/lessons/${lesson.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    })
+    setSavingContent(false)
+    setShowContentEditor(false)
+    await reload()
   }
 
   async function deleteExercise(exId: string) {
@@ -288,12 +466,48 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
       </div>
 
       <div className="space-y-4">
+        {/* Content editor */}
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-[#334155] text-sm">📝 Nội dung bài học (Markdown)</h3>
+            <button onClick={() => setShowContentEditor(!showContentEditor)}
+              className="text-xs text-[#2563EB] hover:underline">
+              {showContentEditor ? 'Thu gọn' : 'Chỉnh sửa'}
+            </button>
+          </div>
+          {showContentEditor ? (
+            <div className="space-y-2">
+              <textarea
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                rows={8}
+                placeholder="Viết nội dung lý thuyết bài học ở đây (Markdown)..."
+                className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#2563EB] resize-y"
+              />
+              <div className="flex gap-2">
+                <button onClick={saveContent} disabled={savingContent}
+                  className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50">
+                  {savingContent ? 'Đang lưu...' : '💾 Lưu nội dung'}
+                </button>
+                <button onClick={() => { setShowContentEditor(false); setContent(lesson.content ?? '') }}
+                  className="border border-[#E2E8F0] text-[#64748B] px-4 py-2 rounded-lg text-sm hover:bg-slate-50 transition-colors">
+                  Hủy
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-[#94A3B8]">
+              {lesson.content ? `${lesson.content.slice(0, 100)}${lesson.content.length > 100 ? '...' : ''}` : 'Chưa có nội dung — bấm "Chỉnh sửa" để thêm.'}
+            </p>
+          )}
+        </div>
+
         {lesson.exercises.length > 0 && (
           <div className="space-y-2">
             {lesson.exercises.map((ex, i) => (
               <div key={ex.id} className="bg-card border border-border rounded-xl overflow-hidden">
                 <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-muted/40 transition-colors"
-                  onClick={() => setExpanded(expanded === ex.id ? null : ex.id)}>
+                  onClick={() => { setExpanded(expanded === ex.id ? null : ex.id); setEditing(null) }}>
                   <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-blue-50 text-[#2563EB] text-xs font-bold flex items-center justify-center flex-shrink-0">
                     {i + 1}
                   </span>
@@ -306,14 +520,30 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
                 </div>
                 {expanded === ex.id && (
                   <div className="px-4 sm:px-5 pb-4 border-t border-border">
-                    <pre className="text-xs text-muted-foreground mt-3 bg-muted rounded p-3 overflow-auto max-h-40">
-                      {JSON.stringify(ex.data ?? {}, null, 2)}
-                    </pre>
-                    <button onClick={() => deleteExercise(ex.id)} disabled={deleting === ex.id}
-                      className="mt-3 flex items-center gap-1 text-xs text-red-500 hover:text-red-700 transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
-                      {deleting === ex.id ? 'Đang xóa...' : 'Xóa bài tập'}
-                    </button>
+                    {editing === ex.id ? (
+                      <EditExerciseForm
+                        exercise={ex}
+                        onSaved={async () => { setEditing(null); await reload() }}
+                        onCancel={() => setEditing(null)}
+                      />
+                    ) : (
+                      <>
+                        <pre className="text-xs text-muted-foreground mt-3 bg-muted rounded p-3 overflow-auto max-h-40">
+                          {JSON.stringify(ex.data ?? {}, null, 2)}
+                        </pre>
+                        <div className="flex items-center gap-4 mt-3">
+                          <button onClick={() => setEditing(ex.id)}
+                            className="flex items-center gap-1 text-xs text-[#2563EB] hover:text-blue-700 transition-colors font-medium">
+                            ✏️ Sửa bài tập
+                          </button>
+                          <button onClick={() => deleteExercise(ex.id)} disabled={deleting === ex.id}
+                            className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                            {deleting === ex.id ? 'Đang xóa...' : 'Xóa'}
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
