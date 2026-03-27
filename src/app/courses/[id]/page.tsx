@@ -76,10 +76,25 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
         {/* Lessons */}
         <div className="space-y-2 sm:space-y-3">
+          {/* Banner nhắc đăng nhập cho guest */}
+          {!user && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3 mb-2">
+              <span className="text-xl">🔒</span>
+              <div className="flex-1 text-sm text-blue-700">
+                <span className="font-semibold">Đăng nhập để bắt đầu học</span>
+                <span className="text-blue-500"> — miễn phí, dưới 1 phút</span>
+              </div>
+              <Link href="/register" className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors shrink-0">
+                Đăng ký ngay
+              </Link>
+            </div>
+          )}
+
           {course.lessons.map((lesson, i) => {
             const done = completedLessons.has(lesson.id)
+            const href = user ? `/practice/${lesson.id}` : `/login?from=${encodeURIComponent(`/practice/${lesson.id}`)}`
             return (
-              <Link key={lesson.id} href={`/practice/${lesson.id}`}
+              <Link key={lesson.id} href={href}
                 className={`flex items-center justify-between p-4 sm:p-5 rounded-xl border transition-all group ${
                   done ? 'border-green-200 bg-green-50' : 'border-[#E2E8F0] bg-white hover:border-blue-200 shadow-sm'
                 }`}>
@@ -94,7 +109,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     <div className="text-[#64748B] text-xs mt-0.5">{lesson._count.exercises} bài tập</div>
                   </div>
                 </div>
-                <span className="text-[#64748B] text-sm group-hover:text-[#2563EB] transition-colors flex-shrink-0 ml-3">→</span>
+                <span className="text-[#64748B] text-sm group-hover:text-[#2563EB] transition-colors flex-shrink-0 ml-3">
+                  {user ? '→' : '🔒'}
+                </span>
               </Link>
             )
           })}
