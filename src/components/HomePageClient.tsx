@@ -51,7 +51,7 @@ export default function HomePageClient() {
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
   const [showCTA, setShowCTA] = useState(false)
   const [correctCount, setCorrectCount] = useState(0)
-  const { displayed: typedLine2, done: typingDone } = useTypewriter('Kết quả thật.', 80)
+  const { displayed: typedLine2, done: typingDone } = useTypewriter('5 Minuten jeden Tag – kết quả thật.', 80)
 
   useEffect(() => {
     setQuestions(shuffle(ALL_QUESTIONS))
