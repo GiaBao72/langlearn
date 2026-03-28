@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
     clearRateLimit(ip)
 
     const payload = { userId: user.id, email: user.email, role: user.role }
-    const accessToken = signAccessToken(payload)
-    const refreshToken = signRefreshToken(payload)
+    const accessToken = await signAccessToken(payload)
+    const refreshToken = await signRefreshToken(payload)
 
     await prisma.refreshToken.create({
       data: {

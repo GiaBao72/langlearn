@@ -7,7 +7,7 @@ import { verifyAccessToken } from '@/lib/auth'
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
   const token = cookieStore.get('access_token')?.value
-  const user = token ? verifyAccessToken(token) : null
+  const user = token ? await verifyAccessToken(token) : null
 
   if (!user || user.role !== 'ADMIN') redirect('/login')
 

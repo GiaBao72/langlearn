@@ -1,9 +1,9 @@
-import jwt from 'jsonwebtoken'
+import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!
+const ACCESS_SECRET  = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!)
+const REFRESH_SECRET = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET!)
 
 export interface JWTPayload {
   userId: string
@@ -11,29 +11,33 @@ export interface JWTPayload {
   role: string
 }
 
-export function signAccessToken(payload: JWTPayload) {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' })
+export async function signAccessToken(payload: JWTPayload): Promise<string> {
+  return new SignJWT({ ...payload })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime('15m')
+    .sign(ACCESS_SECRET)
 }
 
-export function signRefreshToken(payload: JWTPayload) {
-  return jwt.sign(
-    { ...payload, jti: crypto.randomUUID() },
-    REFRESH_SECRET,
-    { expiresIn: '7d' }
-  )
+export async function signRefreshToken(payload: JWTPayload): Promise<string> {
+  return new SignJWT({ ...payload, jti: crypto.randomUUID() })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime('7d')
+    .sign(REFRESH_SECRET)
 }
 
-export function verifyAccessToken(token: string): JWTPayload | null {
+export async function verifyAccessToken(token: string): Promise<JWTPayload | null> {
   try {
-    return jwt.verify(token, ACCESS_SECRET) as JWTPayload
+    const { payload } = await jwtVerify(token, ACCESS_SECRET)
+    return payload as unknown as JWTPayload
   } catch {
     return null
   }
 }
 
-export function verifyRefreshToken(token: string): JWTPayload | null {
+export async function verifyRefreshToken(token: string): Promise<JWTPayload | null> {
   try {
-    return jwt.verify(token, REFRESH_SECRET) as JWTPayload
+    const { payload } = await jwtVerify(token, REFRESH_SECRET)
+    return payload as unknown as JWTPayload
   } catch {
     return null
   }

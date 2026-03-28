@@ -11,7 +11,7 @@ export async function POST() {
     return NextResponse.json({ error: 'No refresh token' }, { status: 401 })
   }
 
-  const payload = verifyRefreshToken(refreshToken)
+  const payload = await verifyRefreshToken(refreshToken)
   if (!payload) {
     return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401 })
   }
@@ -25,8 +25,8 @@ export async function POST() {
   // Rotate: revoke old, issue new
   await prisma.refreshToken.update({ where: { id: stored.id }, data: { revokedAt: new Date() } })
 
-  const newAccessToken = signAccessToken({ userId: payload.userId, email: payload.email, role: payload.role })
-  const newRefreshToken = signRefreshToken({ userId: payload.userId, email: payload.email, role: payload.role })
+  const newAccessToken = await signAccessToken({ userId: payload.userId, email: payload.email, role: payload.role })
+  const newRefreshToken = await signRefreshToken({ userId: payload.userId, email: payload.email, role: payload.role })
 
   await prisma.refreshToken.create({
     data: {
