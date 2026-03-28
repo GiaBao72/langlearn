@@ -103,7 +103,7 @@ export default function HomePageClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          5 phút mỗi ngày.<br />
+          5 Minuten jeden Tag –<br />5 phút mỗi ngày, giỏi ngay tiếng Đức<br />
           <span className="text-[#2563EB]">
             {typedLine2}
             {!typingDone && <span className="inline-block w-0.5 h-8 bg-[#2563EB] align-middle animate-pulse ml-0.5" />}
