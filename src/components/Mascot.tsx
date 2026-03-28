@@ -2,12 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-type Mood = 'walk' | 'idle' | 'sleep' | 'wave'
-
+const LOTTIE_URL = 'https://lottie.host/eccea632-a01d-4f0f-a64f-e19fee566301/5xTW7sGdyf.lottie'
 const SPEED    = 1.8
 const MARGIN   = 20
-const DOG_W    = 72
-const PAUSE_MS = { min: 1800, max: 4200 }
+const DOG_W    = 100
+const PAUSE_MS = { min: 2000, max: 4500 }
 
 const BUBBLES = [
   'Guten Tag! 🐾', 'Woof woof! 🐕',
@@ -17,20 +16,24 @@ const BUBBLES = [
   'Bạn giỏi lắm! 🏆', 'Hallo hallo! 👋',
 ]
 
-// Emoji theo mood
-const BODY: Record<Mood, string> = {
-  walk:  '🐕',
-  idle:  '🐶',
-  wave:  '🐶',
-  sleep: '🐶',
+// Khai báo cho TypeScript biết dotlottie-wc là custom element
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'dotlottie-wc': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        src?: string; autoplay?: boolean | string; loop?: boolean | string;
+        style?: React.CSSProperties;
+      }, HTMLElement>
+    }
+  }
 }
 
 export default function Mascot() {
   const [x, setX]           = useState(150)
   const [flip, setFlip]     = useState(false)
-  const [mood, setMood]     = useState<Mood>('walk')
   const [bubble, setBubble] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
+  const [ready, setReady]   = useState(false)
 
   const xRef   = useRef(x)
   const dirRef = useRef(1)
@@ -41,6 +44,20 @@ export default function Mascot() {
 
   xRef.current = x
 
+  // Load dotlottie-wc script từ CDN
+  useEffect(() => {
+    if (document.querySelector('script[data-lottie-wc]')) {
+      setReady(true)
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js'
+    script.type = 'module'
+    script.dataset.lottieWc = '1'
+    script.onload = () => setReady(true)
+    document.head.appendChild(script)
+  }, [])
+
   function showBubble() {
     const msg = BUBBLES[Math.floor(Math.random() * BUBBLES.length)]
     setBubble(msg)
@@ -50,16 +67,11 @@ export default function Mascot() {
 
   function doPause() {
     paused.current = true
-    const rand = Math.random()
-    if (rand < 0.45)      { setMood('wave');  showBubble() }
-    else if (rand < 0.65) { setMood('sleep') }
-    else                  { setMood('idle') }
-
+    if (Math.random() < 0.5) showBubble()
     const ms = PAUSE_MS.min + Math.random() * (PAUSE_MS.max - PAUSE_MS.min)
     if (pauseTimer.current) clearTimeout(pauseTimer.current)
     pauseTimer.current = setTimeout(() => {
       paused.current = false
-      setMood('walk')
     }, ms)
   }
 
@@ -91,28 +103,19 @@ export default function Mascot() {
 
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation()
+    // Đổi hướng
+    const newDir = dirRef.current * -1
+    dirRef.current = newDir
+    setFlip(newDir === -1)
+    // Resume nếu đang pause
     if (paused.current) {
       paused.current = false
       if (pauseTimer.current) clearTimeout(pauseTimer.current)
-      const newDir = dirRef.current * -1
-      dirRef.current = newDir
-      setFlip(newDir === -1)
-      setMood('walk')
-    } else {
-      const newDir = dirRef.current * -1
-      dirRef.current = newDir
-      setFlip(newDir === -1)
     }
     showBubble()
   }
 
   if (!visible) return null
-
-  // animation class
-  const animClass =
-    mood === 'walk'  ? 'mascot-walk'  :
-    mood === 'wave'  ? 'mascot-wave'  :
-    mood === 'sleep' ? 'mascot-sleep' : 'mascot-idle'
 
   return (
     <div
@@ -120,17 +123,17 @@ export default function Mascot() {
       style={{
         position: 'fixed',
         left: x,
-        bottom: 4,
+        bottom: 0,
         zIndex: 9999,
         userSelect: 'none',
         pointerEvents: 'none',
       }}
     >
-      {/* Bubble */}
+      {/* Speech bubble */}
       {bubble && (
         <div style={{
           position: 'absolute',
-          bottom: 72,
+          bottom: 96,
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'var(--color-surface, #fff)',
@@ -164,42 +167,36 @@ export default function Mascot() {
         </div>
       )}
 
-      {/* Mascot body */}
+      {/* Lottie dog */}
       <div
-        className={animClass}
         onClick={handleClick}
         style={{
-          fontSize: 52,
-          lineHeight: 1,
-          display: 'inline-block',
           cursor: 'pointer',
           pointerEvents: 'auto',
+          display: 'inline-block',
           transform: flip ? 'scaleX(-1)' : 'scaleX(1)',
-          filter: mood === 'sleep' ? 'grayscale(0.2) brightness(0.9)' : 'none',
-          transition: 'filter 0.3s',
-          userSelect: 'none',
+          width: 100,
+          height: 100,
         }}
       >
-        {BODY[mood]}
-        {/* Zzz khi ngủ */}
-        {mood === 'sleep' && (
-          <span style={{
-            position: 'absolute',
-            top: -8, right: -12,
-            fontSize: 16,
-            animation: 'mascot-zzz 1.5s ease-in-out infinite',
-            pointerEvents: 'none',
-          }}>💤</span>
-        )}
-        {/* Paw khi wave */}
-        {mood === 'wave' && (
-          <span style={{
-            position: 'absolute',
-            top: -10, right: -16,
-            fontSize: 20,
-            animation: 'dog-wave-paw 0.5s ease-in-out infinite',
-            pointerEvents: 'none',
-          }}>🐾</span>
+        {ready ? (
+          <div
+            ref={(el) => {
+              if (el && !el.querySelector('dotlottie-wc')) {
+                const lottie = document.createElement('dotlottie-wc')
+                lottie.setAttribute('src', LOTTIE_URL)
+                lottie.setAttribute('autoplay', '')
+                lottie.setAttribute('loop', '')
+                lottie.style.width = '100px'
+                lottie.style.height = '100px'
+                lottie.style.display = 'block'
+                el.appendChild(lottie)
+              }
+            }}
+            style={{ width: 100, height: 100 }}
+          />
+        ) : (
+          <span style={{ fontSize: 52, lineHeight: 1, display: 'block' }}>🐕</span>
         )}
       </div>
 
@@ -209,7 +206,7 @@ export default function Mascot() {
         className="mascot-close"
         style={{
           position: 'absolute',
-          top: 0, right: -8,
+          top: 4, right: -8,
           width: 20, height: 20,
           borderRadius: '50%',
           background: '#ef4444',
