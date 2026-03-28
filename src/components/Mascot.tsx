@@ -16,24 +16,11 @@ const BUBBLES = [
   'Bạn giỏi lắm! 🏆', 'Hallo hallo! 👋',
 ]
 
-// Khai báo cho TypeScript biết dotlottie-wc là custom element
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'dotlottie-wc': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
-        src?: string; autoplay?: boolean | string; loop?: boolean | string;
-        style?: React.CSSProperties;
-      }, HTMLElement>
-    }
-  }
-}
-
 export default function Mascot() {
   const [x, setX]           = useState(150)
   const [flip, setFlip]     = useState(false)
   const [bubble, setBubble] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
-  const [ready, setReady]   = useState(false)
 
   const xRef   = useRef(x)
   const dirRef = useRef(1)
@@ -43,20 +30,6 @@ export default function Mascot() {
   const pauseTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   xRef.current = x
-
-  // Load dotlottie-wc script từ CDN
-  useEffect(() => {
-    if (document.querySelector('script[data-lottie-wc]')) {
-      setReady(true)
-      return
-    }
-    const script = document.createElement('script')
-    script.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js'
-    script.type = 'module'
-    script.dataset.lottieWc = '1'
-    script.onload = () => setReady(true)
-    document.head.appendChild(script)
-  }, [])
 
   function showBubble() {
     const msg = BUBBLES[Math.floor(Math.random() * BUBBLES.length)]
@@ -70,9 +43,7 @@ export default function Mascot() {
     if (Math.random() < 0.5) showBubble()
     const ms = PAUSE_MS.min + Math.random() * (PAUSE_MS.max - PAUSE_MS.min)
     if (pauseTimer.current) clearTimeout(pauseTimer.current)
-    pauseTimer.current = setTimeout(() => {
-      paused.current = false
-    }, ms)
+    pauseTimer.current = setTimeout(() => { paused.current = false }, ms)
   }
 
   useEffect(() => {
@@ -82,7 +53,6 @@ export default function Mascot() {
         const cur  = xRef.current
         const dir  = dirRef.current
         const next = cur + SPEED * dir
-
         if (next >= maxX) {
           setX(maxX); dirRef.current = -1; setFlip(true); doPause()
         } else if (next <= MARGIN) {
@@ -103,11 +73,9 @@ export default function Mascot() {
 
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation()
-    // Đổi hướng
     const newDir = dirRef.current * -1
     dirRef.current = newDir
     setFlip(newDir === -1)
-    // Resume nếu đang pause
     if (paused.current) {
       paused.current = false
       if (pauseTimer.current) clearTimeout(pauseTimer.current)
@@ -133,9 +101,9 @@ export default function Mascot() {
       {bubble && (
         <div style={{
           position: 'absolute',
-          bottom: 96,
+          bottom: 104,
           left: '50%',
-          transform: 'translateX(-50%)',
+          transform: flip ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%)',
           background: 'var(--color-surface, #fff)',
           color: 'var(--color-text-main, #334155)',
           border: '2px solid var(--color-border, #e2e8f0)',
@@ -167,7 +135,7 @@ export default function Mascot() {
         </div>
       )}
 
-      {/* Lottie dog */}
+      {/* Lottie dog — flip toàn bộ wrapper */}
       <div
         onClick={handleClick}
         style={{
@@ -175,30 +143,11 @@ export default function Mascot() {
           pointerEvents: 'auto',
           display: 'inline-block',
           transform: flip ? 'scaleX(-1)' : 'scaleX(1)',
-          width: 100,
-          height: 100,
         }}
-      >
-        {ready ? (
-          <div
-            ref={(el) => {
-              if (el && !el.querySelector('dotlottie-wc')) {
-                const lottie = document.createElement('dotlottie-wc')
-                lottie.setAttribute('src', LOTTIE_URL)
-                lottie.setAttribute('autoplay', '')
-                lottie.setAttribute('loop', '')
-                lottie.style.width = '100px'
-                lottie.style.height = '100px'
-                lottie.style.display = 'block'
-                el.appendChild(lottie)
-              }
-            }}
-            style={{ width: 100, height: 100 }}
-          />
-        ) : (
-          <span style={{ fontSize: 52, lineHeight: 1, display: 'block' }}>🐕</span>
-        )}
-      </div>
+        dangerouslySetInnerHTML={{
+          __html: `<dotlottie-wc src="${LOTTIE_URL}" autoplay loop style="width:100px;height:100px;display:block"></dotlottie-wc>`
+        }}
+      />
 
       {/* Close btn */}
       <button
@@ -220,6 +169,7 @@ export default function Mascot() {
           pointerEvents: 'auto',
           opacity: 0,
           transition: 'opacity 0.2s',
+          transform: flip ? 'scaleX(-1)' : 'none',
         }}
       >×</button>
     </div>

@@ -37,6 +37,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Lottie web component — load một lần, dùng cho mascot */}
+        <script
+          src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js"
+          type="module"
+          async
+        />
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <PageTransition>{children}</PageTransition>
