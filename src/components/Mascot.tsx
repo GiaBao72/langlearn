@@ -18,12 +18,12 @@ const BUBBLES = [
 
 export default function Mascot() {
   const [x, setX]           = useState(150)
-  const [flip, setFlip]     = useState(false)
+  const [flip, setFlip]     = useState(true)  // Lottie mặc định nhìn trái → flip=true để nhìn phải
   const [bubble, setBubble] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
 
   const xRef   = useRef(x)
-  const dirRef = useRef(1)
+  const dirRef = useRef(1)   // bắt đầu đi phải
   const paused = useRef(false)
   const rafRef = useRef<number>(0)
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -54,9 +54,9 @@ export default function Mascot() {
         const dir  = dirRef.current
         const next = cur + SPEED * dir
         if (next >= maxX) {
-          setX(maxX); dirRef.current = -1; setFlip(true); doPause()
+          setX(maxX); dirRef.current = -1; setFlip(false); doPause()  // đi trái → không flip (nhìn trái = mặc định lottie)
         } else if (next <= MARGIN) {
-          setX(MARGIN); dirRef.current = 1; setFlip(false); doPause()
+          setX(MARGIN); dirRef.current = 1; setFlip(true); doPause()  // đi phải → flip (nhìn phải)
         } else {
           setX(next)
         }
@@ -75,7 +75,7 @@ export default function Mascot() {
     e.stopPropagation()
     const newDir = dirRef.current * -1
     dirRef.current = newDir
-    setFlip(newDir === -1)
+    setFlip(newDir === 1)  // đi phải → flip=true, đi trái → flip=false
     if (paused.current) {
       paused.current = false
       if (pauseTimer.current) clearTimeout(pauseTimer.current)
@@ -96,14 +96,13 @@ export default function Mascot() {
         userSelect: 'none',
         pointerEvents: 'none',
       }}
-    >
-      {/* Speech bubble */}
+    >      {/* Speech bubble — KHÔNG flip */}
       {bubble && (
         <div style={{
           position: 'absolute',
           bottom: 104,
           left: '50%',
-          transform: flip ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%)',
+          transform: 'translateX(-50%)',
           background: 'var(--color-surface, #fff)',
           color: 'var(--color-text-main, #334155)',
           border: '2px solid var(--color-border, #e2e8f0)',
@@ -135,7 +134,7 @@ export default function Mascot() {
         </div>
       )}
 
-      {/* Lottie dog — flip toàn bộ wrapper */}
+      {/* Lottie dog — CHỈ flip con chó, không flip bubble */}
       <div
         onClick={handleClick}
         style={{
