@@ -108,7 +108,7 @@ export default function Mascot() {
       style={{
         position: 'fixed',
         left: x,
-        bottom: -8,
+        bottom: 0,
         zIndex: 9999,
         userSelect: 'none',
         pointerEvents: 'none',
