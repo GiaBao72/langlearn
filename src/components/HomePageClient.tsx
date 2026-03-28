@@ -51,7 +51,7 @@ export default function HomePageClient() {
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
   const [showCTA, setShowCTA] = useState(false)
   const [correctCount, setCorrectCount] = useState(0)
-  const { displayed: typedLine2, done: typingDone } = useTypewriter('5 Minuten jeden Tag – kết quả thật.', 80)
+  const { displayed: typedLine2, done: typingDone } = useTypewriter('Giỏi ngay tiếng Đức', 80)
 
   useEffect(() => {
     setQuestions(shuffle(ALL_QUESTIONS))
@@ -103,7 +103,7 @@ export default function HomePageClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          5 Minuten jeden Tag –<br />5 phút mỗi ngày, giỏi ngay tiếng Đức<br />
+          5 Phút Mỗi Ngày<br />
           <span className="text-[#2563EB]">
             {typedLine2}
             {!typingDone && <span className="inline-block w-0.5 h-8 bg-[#2563EB] align-middle animate-pulse ml-0.5" />}
