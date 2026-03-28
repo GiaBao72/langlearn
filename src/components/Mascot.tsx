@@ -14,15 +14,15 @@ function LottieDog() {
     lottie.setAttribute('src', LOTTIE_URL)
     lottie.setAttribute('autoplay', '')
     lottie.setAttribute('loop', '')
-    lottie.style.cssText = 'width:100px;height:100px;display:block'
+    lottie.style.cssText = 'width:72px;height:72px;display:block'
     el.appendChild(lottie)
     return () => { el.innerHTML = '' }
   }, [])
-  return <div ref={ref} style={{ width: 100, height: 100 }} />
+  return <div ref={ref} style={{ width: 72, height: 72 }} />
 }
 const SPEED    = 0.9
 const MARGIN   = 20
-const DOG_W    = 100
+const DOG_W    = 72
 const PAUSE_MS = { min: 800, max: 1800 }
 
 const BUBBLES = [
@@ -108,7 +108,7 @@ export default function Mascot() {
       style={{
         position: 'fixed',
         left: x,
-        bottom: 0,
+        bottom: -8,
         zIndex: 9999,
         userSelect: 'none',
         pointerEvents: 'none',
@@ -117,7 +117,7 @@ export default function Mascot() {
       {bubble && (
         <div style={{
           position: 'absolute',
-          bottom: 104,
+          bottom: 76,
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'var(--color-surface, #fff)',
