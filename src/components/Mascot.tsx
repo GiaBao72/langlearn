@@ -3,6 +3,23 @@
 import { useEffect, useRef, useState } from 'react'
 
 const LOTTIE_URL = 'https://lottie.host/eccea632-a01d-4f0f-a64f-e19fee566301/5xTW7sGdyf.lottie'
+
+// Mount dotlottie-wc một lần duy nhất — không re-render khi parent state thay đổi
+function LottieDog() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const lottie = document.createElement('dotlottie-wc')
+    lottie.setAttribute('src', LOTTIE_URL)
+    lottie.setAttribute('autoplay', '')
+    lottie.setAttribute('loop', '')
+    lottie.style.cssText = 'width:100px;height:100px;display:block'
+    el.appendChild(lottie)
+    return () => { el.innerHTML = '' }
+  }, [])
+  return <div ref={ref} style={{ width: 100, height: 100 }} />
+}
 const SPEED    = 1.8
 const MARGIN   = 20
 const DOG_W    = 100
@@ -143,10 +160,9 @@ export default function Mascot() {
           display: 'inline-block',
           transform: flip ? 'scaleX(-1)' : 'scaleX(1)',
         }}
-        dangerouslySetInnerHTML={{
-          __html: `<dotlottie-wc src="${LOTTIE_URL}" autoplay loop style="width:100px;height:100px;display:block"></dotlottie-wc>`
-        }}
-      />
+      >
+        <LottieDog />
+      </div>
 
       {/* Close btn */}
       <button
