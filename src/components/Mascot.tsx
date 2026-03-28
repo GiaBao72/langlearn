@@ -20,10 +20,10 @@ function LottieDog() {
   }, [])
   return <div ref={ref} style={{ width: 100, height: 100 }} />
 }
-const SPEED    = 1.8
+const SPEED    = 0.9
 const MARGIN   = 20
 const DOG_W    = 100
-const PAUSE_MS = { min: 2000, max: 4500 }
+const PAUSE_MS = { min: 800, max: 1800 }
 
 const BUBBLES = [
   'Guten Tag! 🐾', 'Woof woof! 🐕',
