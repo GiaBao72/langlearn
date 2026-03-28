@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 // @ts-ignore
 import confetti from 'canvas-confetti'
-import ParticleBackground from './ParticleBackground'
 
 function useTypewriter(text: string, speed = 60) {
   const [displayed, setDisplayed] = useState('')
@@ -90,8 +89,6 @@ export default function HomePageClient() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-[#F8FAFC]">
       {/* Hero */}
       <section style={{position:'relative'}} className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 lg:pt-28 pb-10 sm:pb-16 text-center">
-        {/* Particle background */}
-        <ParticleBackground />
         {/* Background blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{zIndex:0}}>
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
