@@ -88,12 +88,13 @@ export default function HomePageClient() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-[#F8FAFC]">
       {/* Hero */}
-      <section style={{position:'relative'}} className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 lg:pt-28 pb-10 sm:pb-16 text-center">
-        {/* Background blobs */}
+      <section className="relative pt-12 sm:pt-20 lg:pt-28 pb-10 sm:pb-16">
+        {/* Background blobs — full width */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{zIndex:0}}>
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
         </div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{zIndex:1}}>
         <p className="text-[#2563EB] text-xs sm:text-sm font-semibold tracking-widest uppercase mb-4">
           Hack não bộ để học ngoại ngữ
         </p>
@@ -200,6 +201,7 @@ export default function HomePageClient() {
             Xem khóa học
           </Link>
         </motion.div>
+        </div>{/* end max-w-4xl */}
       </section>
 
       {/* Stats bar */}
