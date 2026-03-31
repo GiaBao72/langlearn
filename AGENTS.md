@@ -45,6 +45,13 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - When you make a mistake → document it so future-you doesn't repeat it
 - **Text > Brain** 📝
 
+## Task Logging
+
+After every project task (fix bug, deploy, update config, new feature, infra change):
+- Append an entry to `/home/tmc/.openclaw/workspace/logs/chien-tasks.md`
+- Format: `## [YYYY-MM-DD HH:mm] Task name` → what was done → result/status
+- Create the file/directory if it doesn't exist
+
 ## Red Lines
 
 - Don't exfiltrate private data. Ever.

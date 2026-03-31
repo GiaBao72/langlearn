@@ -167,10 +167,16 @@ Clone: `git clone https://[GITHUB_PAT]@github.com/GiaBao72/<repo>.git`
 
 ## Chó ↔ Chiến Giao Tiếp (verified 2026-03-27)
 
+### Shared Context File
+- **File:** `/home/tmc/.openclaw/workspace/giao-tiep.md`
+- Chó đọc/ghi được trực tiếp qua VPS (Tailscale)
+- **Khi Gia Bảo bảo "nói chuyện với Chó":** đọc file này trước → nhắn Chó → ghi kết quả vào file
+
 ### Chiến → Chó (gateway, stateless)
 - **Endpoint:** `http://100.73.204.7:18789/v1/chat/completions`
 - **Token:** `[OPENCLAW_TOKEN_CHO]`
 - Chó có tool access thật (read/write/exec), không có memory giữa các lần gọi
+- ⚠️ **2026-03-27:** Gateway Chó đổi bind=tailnet → bind=loopback (browser tool cần loopback). Không còn expose qua Tailscale IP trực tiếp. Chỉ gọi được qua Tailscale Serve hoặc khi 2 máy cùng mạng.
 
 ### Chiến → Chó (Telegram, khi cần memory)
 - Gửi qua bot Chó: `https://api.telegram.org/bot[TELEGRAM_TOKEN_CHO]/sendMessage`
