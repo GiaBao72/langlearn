@@ -176,11 +176,11 @@ export default function NewExercisePage() {
               onChange={(e) => handleTypeChange(e.target.value as ExerciseType)}
               className="w-full bg-white border border-[#E2E8F0] rounded-lg px-4 py-3 text-[#334155] focus:outline-none focus:border-blue-400 transition-colors h-12 text-sm"
             >
-              <option value="FLASHCARD">FLASHCARD</option>
-              <option value="FILL_BLANK">FILL_BLANK</option>
-              <option value="MULTIPLE_CHOICE">MULTIPLE_CHOICE</option>
-              <option value="DICTATION">DICTATION</option>
-              <option value="SORT_WORDS">SORT_WORDS</option>
+              <option value="FLASHCARD">Thẻ từ vựng (Flashcard)</option>
+              <option value="FILL_BLANK">Điền vào chỗ trống</option>
+              <option value="MULTIPLE_CHOICE">Trắc nghiệm</option>
+              <option value="DICTATION">Nghe và viết lại</option>
+              <option value="SORT_WORDS">Sắp xếp từ</option>
             </select>
           </div>
 
