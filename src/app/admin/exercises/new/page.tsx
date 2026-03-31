@@ -8,36 +8,58 @@ type ExerciseType = 'FLASHCARD' | 'FILL_BLANK' | 'MULTIPLE_CHOICE' | 'DICTATION'
 
 const TYPE_PLACEHOLDERS: Record<ExerciseType, string> = {
   FLASHCARD: JSON.stringify(
-    { front: '', back: '', audioText: '', example: '', exampleTranslation: '' },
+    {
+      front: 'der Hund',
+      back: 'con chó',
+      audioText: 'der Hund',
+      example: 'Das ist mein Hund.',
+      exampleTranslation: 'Đây là con chó của tôi.',
+    },
     null,
     2
   ),
   FILL_BLANK: JSON.stringify(
-    { sentence: 'Ich ___ ...', answer: '', hint: '', fullSentence: '', translation: '' },
+    {
+      sentence: 'Ich ___ Student.',
+      answer: 'bin',
+      hint: 'Động từ "sein" (thì/là) chia cho "ich"',
+      fullSentence: 'Ich bin Student.',
+      translation: 'Tôi là sinh viên.',
+    },
     null,
     2
   ),
   MULTIPLE_CHOICE: JSON.stringify(
     {
       options: [
-        { label: 'A', text: '' },
-        { label: 'B', text: '' },
-        { label: 'C', text: '' },
-        { label: 'D', text: '' },
+        { label: 'A', text: 'der' },
+        { label: 'B', text: 'die' },
+        { label: 'C', text: 'das' },
+        { label: 'D', text: 'den' },
       ],
-      answer: 'A',
-      explanation: '',
+      answer: 'B',
+      explanation: '"die Katze" — danh từ giống cái dùng mạo từ "die"',
     },
     null,
     2
   ),
   DICTATION: JSON.stringify(
-    { audioText: '', answer: '', translation: '', hint: '' },
+    {
+      audioText: 'Guten Morgen! Wie geht es Ihnen?',
+      answer: 'Guten Morgen! Wie geht es Ihnen?',
+      translation: 'Chào buổi sáng! Bạn có khỏe không?',
+      hint: 'Câu chào hỏi buổi sáng lịch sự',
+    },
     null,
     2
   ),
   SORT_WORDS: JSON.stringify(
-    { words: [], answer: '', translation: '', hint: '' },
+    {
+      words: ['ich', 'heiße', 'Max', 'und', 'komme', 'aus', 'Deutschland'],
+      answer: 'ich heiße Max und komme aus Deutschland',
+      translation: 'Tôi tên là Max và đến từ Đức.',
+      hint: 'Động từ luôn đứng vị trí thứ 2 trong câu',
+    },
     null,
     2
   ),
@@ -233,7 +255,7 @@ export default function NewExercisePage() {
               className="w-full bg-white border border-[#E2E8F0] rounded-lg px-4 py-3 text-[#334155] placeholder-[#94a3b8] focus:outline-none focus:border-blue-400 transition-colors resize-y font-mono text-sm"
             />
             <p className="text-xs text-[#64748B] mt-1">
-              Phai la JSON hop le. Placeholder thay doi theo loai bai tap.
+              Phải là JSON hợp lệ. Chỉnh sửa nội dung trong dấu <code className="bg-slate-100 px-1 rounded">""</code> theo bài tập của bạn, giữ nguyên cấu trúc.
             </p>
           </div>
 
