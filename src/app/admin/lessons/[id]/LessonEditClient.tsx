@@ -37,32 +37,72 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
   const [type, setType] = useState<ExerciseType>('MULTIPLE_CHOICE')
   const [question, setQuestion] = useState('')
   const [options, setOptions] = useState(['', '', '', ''])
+  const [words, setWords] = useState(['', '', '', '', ''])
   const [answer, setAnswer] = useState('')
+  const [hint, setHint] = useState('')
+  const [sentence, setSentence] = useState('')
+  const [audioText, setAudioText] = useState('')
+  const [pronunciation, setPronunciation] = useState('')
   const [points, setPoints] = useState(10)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  // Reset all fields when type changes
+  function handleTypeChange(t: ExerciseType) {
+    setType(t)
+    setQuestion(''); setAnswer(''); setHint(''); setSentence('')
+    setAudioText(''); setPronunciation('')
+    setOptions(['', '', '', '']); setWords(['', '', '', '', ''])
+    setError(''); setSuccess(false)
+  }
 
   function buildData() {
-    if (type === 'MULTIPLE_CHOICE') return { options: options.filter(o => o.trim()), answer }
-    if (type === 'FILL_BLANK') return { answer }
-    if (type === 'FLASHCARD') return { front: question, back: answer }
-    if (type === 'DICTATION') return { answer, audioText: question }
-    if (type === 'SORT_WORDS') return { words: options.filter(o => o.trim()), answer }
+    if (type === 'MULTIPLE_CHOICE') {
+      const filtered = options.filter(o => o.trim())
+      return { options: filtered, answer, explanation: hint }
+    }
+    if (type === 'FILL_BLANK') return { sentence: sentence || question, answer, hint }
+    if (type === 'FLASHCARD') return { front: question, back: answer, pronunciation }
+    if (type === 'DICTATION') return { audioText, answer, hint }
+    if (type === 'SORT_WORDS') return { words: words.filter(w => w.trim()), answer }
     return { answer }
+  }
+
+  function validate(): string | null {
+    if (!question.trim() && type !== 'DICTATION') return 'Vui lòng điền câu hỏi / nội dung'
+    if (type === 'DICTATION' && !audioText.trim()) return 'Vui lòng điền nội dung nghe'
+    if (!answer.trim()) return 'Vui lòng điền đáp án đúng'
+    if (type === 'MULTIPLE_CHOICE') {
+      const filled = options.filter(o => o.trim())
+      if (filled.length < 2) return 'Cần ít nhất 2 lựa chọn'
+      if (!filled.includes(answer.trim())) return 'Đáp án đúng phải khớp chính xác với 1 trong các lựa chọn'
+    }
+    if (type === 'SORT_WORDS') {
+      const filled = words.filter(w => w.trim())
+      if (filled.length < 2) return 'Cần ít nhất 2 từ để sắp xếp'
+    }
+    return null
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!question.trim() || !answer.trim()) { setError('Vui lòng điền đủ câu hỏi và đáp án'); return }
-    setSaving(true); setError('')
+    const err = validate()
+    if (err) { setError(err); return }
+    setSaving(true); setError(''); setSuccess(false)
     try {
       const res = await fetch(`/api/admin/lessons/${lessonId}/exercises`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, question, data: buildData(), points }),
+        body: JSON.stringify({ type, question: type === 'DICTATION' ? audioText : question, data: buildData(), points }),
       })
       if (!res.ok) throw new Error(await res.text())
-      setQuestion(''); setAnswer(''); setOptions(['', '', '', '']); setPoints(10)
+      // Reset
+      setQuestion(''); setAnswer(''); setHint(''); setSentence('')
+      setAudioText(''); setPronunciation('')
+      setOptions(['', '', '', '']); setWords(['', '', '', '', ''])
+      setPoints(10); setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
       onCreated()
     } catch (err) {
       setError(String(err))
@@ -71,51 +111,150 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
     }
   }
 
+  const inputCls = 'w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm text-[#334155] focus:outline-none focus:border-[#2563EB]'
+
   return (
     <form onSubmit={handleSubmit} className="bg-white border border-[#E2E8F0] rounded-xl p-6">
-      <h3 className="font-semibold text-[#334155] mb-4">Thêm bài tập mới</h3>
-      {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+      <h3 className="font-semibold text-[#334155] mb-4">➕ Thêm bài tập mới</h3>
+      {error && <p className="text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
+      {success && <p className="text-green-600 text-sm mb-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2">✓ Đã thêm bài tập thành công!</p>}
       <div className="grid gap-4">
+        {/* Loại bài tập */}
         <div>
           <label className="block text-sm font-medium text-[#334155] mb-1">Loại bài tập</label>
-          <select value={type} onChange={e => setType(e.target.value as ExerciseType)}
-            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm text-[#334155] focus:outline-none focus:border-[#2563EB]">
+          <select value={type} onChange={e => handleTypeChange(e.target.value as ExerciseType)} className={inputCls}>
             {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-[#334155] mb-1">
-            {type === 'FLASHCARD' ? 'Mặt trước (Front)' : 'Câu hỏi / Nội dung'}
-          </label>
-          <input value={question} onChange={e => setQuestion(e.target.value)}
-            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm text-[#334155] focus:outline-none focus:border-[#2563EB]"
-            placeholder='"Guten Morgen" có nghĩa là gì?' />
-        </div>
-        {(type === 'MULTIPLE_CHOICE' || type === 'SORT_WORDS') && (
+
+        {/* FLASHCARD */}
+        {type === 'FLASHCARD' && <>
           <div>
-            <label className="block text-sm font-medium text-[#334155] mb-1">
-              {type === 'SORT_WORDS' ? 'Các từ (mỗi từ 1 ô)' : 'Các đáp án (4 lựa chọn)'}
-            </label>
-            {options.map((opt, i) => (
-              <input key={i} value={opt} onChange={e => { const n = [...options]; n[i] = e.target.value; setOptions(n) }}
-                className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm text-[#334155] focus:outline-none focus:border-[#2563EB] mb-2"
-                placeholder={`Đáp án ${i + 1}`} />
-            ))}
+            <label className="block text-sm font-medium text-[#334155] mb-1">Mặt trước (từ / cụm từ)</label>
+            <input value={question} onChange={e => setQuestion(e.target.value)} className={inputCls} placeholder='VD: Guten Morgen' />
           </div>
-        )}
-        <div>
-          <label className="block text-sm font-medium text-[#334155] mb-1">
-            {type === 'FLASHCARD' ? 'Mặt sau (Nghĩa / Back)' : 'Đáp án đúng'}
-          </label>
-          <input value={answer} onChange={e => setAnswer(e.target.value)}
-            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm text-[#334155] focus:outline-none focus:border-[#2563EB]"
-            placeholder={type === 'MULTIPLE_CHOICE' ? 'Phải khớp chính xác 1 trong 4 đáp án trên' : 'Đáp án đúng'} />
-        </div>
-        <div className="flex items-end gap-3">
-          <div className="flex-1">
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Mặt sau (nghĩa / giải thích)</label>
+            <input value={answer} onChange={e => setAnswer(e.target.value)} className={inputCls} placeholder='VD: Chào buổi sáng / Good morning' />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Phiên âm <span className="text-muted-foreground font-normal">(tuỳ chọn)</span></label>
+            <input value={pronunciation} onChange={e => setPronunciation(e.target.value)} className={inputCls} placeholder='VD: GOO-ten MOR-gen' />
+          </div>
+        </>}
+
+        {/* MULTIPLE_CHOICE */}
+        {type === 'MULTIPLE_CHOICE' && <>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Câu hỏi</label>
+            <input value={question} onChange={e => setQuestion(e.target.value)} className={inputCls} placeholder='VD: "Guten Morgen" có nghĩa là gì?' />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Các lựa chọn</label>
+            {options.map((opt, i) => (
+              <div key={i} className="flex gap-2 mb-2">
+                <input value={opt} onChange={e => { const n = [...options]; n[i] = e.target.value; setOptions(n) }}
+                  className={inputCls} placeholder={`Lựa chọn ${i + 1}`} />
+                {options.length > 2 && (
+                  <button type="button" onClick={() => setOptions(options.filter((_, j) => j !== i))}
+                    className="text-red-400 hover:text-red-600 text-lg leading-none px-1">×</button>
+                )}
+              </div>
+            ))}
+            {options.length < 6 && (
+              <button type="button" onClick={() => setOptions([...options, ''])}
+                className="text-xs text-[#2563EB] hover:underline">+ Thêm lựa chọn</button>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Đáp án đúng <span className="text-xs text-muted-foreground">(phải khớp chính xác với 1 lựa chọn ở trên)</span></label>
+            <select value={answer} onChange={e => setAnswer(e.target.value)} className={inputCls}>
+              <option value="">-- Chọn đáp án đúng --</option>
+              {options.filter(o => o.trim()).map((o, i) => <option key={i} value={o}>{o}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Giải thích <span className="text-muted-foreground font-normal">(tuỳ chọn)</span></label>
+            <input value={hint} onChange={e => setHint(e.target.value)} className={inputCls} placeholder='VD: Morgen = buổi sáng' />
+          </div>
+        </>}
+
+        {/* FILL_BLANK */}
+        {type === 'FILL_BLANK' && <>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Câu có dấu ___ (chỗ trống)</label>
+            <input value={question} onChange={e => { setQuestion(e.target.value); setSentence(e.target.value) }}
+              className={inputCls} placeholder='VD: Ich ___ gestern ins Kino gegangen. (sein)' />
+            <p className="text-xs text-muted-foreground mt-1">Dùng ___ để đánh dấu chỗ trống</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-[#334155] mb-1">Đáp án đúng</label>
+              <input value={answer} onChange={e => setAnswer(e.target.value)} className={inputCls} placeholder='VD: bin' />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#334155] mb-1">Gợi ý <span className="text-muted-foreground font-normal">(tuỳ chọn)</span></label>
+              <input value={hint} onChange={e => setHint(e.target.value)} className={inputCls} placeholder='VD: sein → ich bin' />
+            </div>
+          </div>
+        </>}
+
+        {/* SORT_WORDS */}
+        {type === 'SORT_WORDS' && <>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Câu hỏi / Hướng dẫn</label>
+            <input value={question} onChange={e => setQuestion(e.target.value)} className={inputCls} placeholder='VD: Sắp xếp thành câu đúng' />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Các từ cần sắp xếp <span className="text-xs text-muted-foreground">(mỗi từ 1 ô)</span></label>
+            {words.map((w, i) => (
+              <div key={i} className="flex gap-2 mb-2">
+                <input value={w} onChange={e => { const n = [...words]; n[i] = e.target.value; setWords(n) }}
+                  className={inputCls} placeholder={`Từ ${i + 1}`} />
+                {words.length > 2 && (
+                  <button type="button" onClick={() => setWords(words.filter((_, j) => j !== i))}
+                    className="text-red-400 hover:text-red-600 text-lg leading-none px-1">×</button>
+                )}
+              </div>
+            ))}
+            <button type="button" onClick={() => setWords([...words, ''])}
+              className="text-xs text-[#2563EB] hover:underline">+ Thêm từ</button>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Câu đúng hoàn chỉnh</label>
+            <input value={answer} onChange={e => setAnswer(e.target.value)} className={inputCls} placeholder='VD: Das Haus wird gerade gebaut' />
+            <p className="text-xs text-muted-foreground mt-1">Câu hoàn chỉnh khi sắp xếp đúng thứ tự</p>
+          </div>
+        </>}
+
+        {/* DICTATION */}
+        {type === 'DICTATION' && <>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Nội dung nghe (sẽ được đọc thành tiếng)</label>
+            <input value={audioText} onChange={e => setAudioText(e.target.value)} className={inputCls} placeholder='VD: Guten Morgen, wie geht es Ihnen?' />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#334155] mb-1">Câu hỏi / Hướng dẫn</label>
+            <input value={question} onChange={e => setQuestion(e.target.value)} className={inputCls} placeholder='VD: Nghe và viết lại câu vừa nghe' />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-[#334155] mb-1">Đáp án đúng</label>
+              <input value={answer} onChange={e => setAnswer(e.target.value)} className={inputCls} placeholder='VD: Guten Morgen, wie geht es Ihnen?' />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#334155] mb-1">Gợi ý <span className="text-muted-foreground font-normal">(tuỳ chọn)</span></label>
+              <input value={hint} onChange={e => setHint(e.target.value)} className={inputCls} placeholder='VD: Câu chào hỏi buổi sáng' />
+            </div>
+          </div>
+        </>}
+
+        {/* Điểm + Submit */}
+        <div className="flex items-end gap-3 pt-1">
+          <div className="w-24">
             <label className="block text-sm font-medium text-[#334155] mb-1">Điểm</label>
             <input type="number" value={points} onChange={e => setPoints(Number(e.target.value))} min={1} max={100}
-              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm text-[#334155] focus:outline-none focus:border-[#2563EB]" />
+              className={inputCls} />
           </div>
           <div className="flex-1">
             <button type="submit" disabled={saving}
