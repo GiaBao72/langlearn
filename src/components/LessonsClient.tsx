@@ -71,6 +71,7 @@ export default function LessonsClient({ courseGroups: initial }: Props) {
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'published' | 'draft'>('ALL')
   const [showBulkModal, setShowBulkModal] = useState(false)
   const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [bulkPublishing, setBulkPublishing] = useState(false)
 
   const allLessons: Lesson[] = useMemo(() =>
     groups.flatMap(g => g.lessons), [groups])
@@ -137,6 +138,23 @@ export default function LessonsClient({ courseGroups: initial }: Props) {
     setBulkDeleting(false)
   }
 
+  async function bulkSetPublish(published: boolean) {
+    setBulkPublishing(true)
+    const ids = Array.from(selected)
+    await Promise.all(ids.map(id =>
+      fetch(`/api/admin/lessons/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published }),
+      })
+    ))
+    setGroups(prev => prev.map(g => ({
+      ...g,
+      lessons: g.lessons.map(l => ids.includes(l.id) ? { ...l, published } : l),
+    })))
+    setBulkPublishing(false)
+  }
+
   const selectedLessons = allLessons.filter(l => selected.has(l.id))
   const totalExDeleting = selectedLessons.reduce((s, l) => s + l.exerciseCount, 0)
   const totalLessons = allLessons.length
@@ -150,10 +168,20 @@ export default function LessonsClient({ courseGroups: initial }: Props) {
           <p className="text-sm text-muted-foreground mt-1">Quản lý bài học theo khóa học</p>
         </div>
         {selected.size > 0 && (
-          <button onClick={() => setShowBulkModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors">
-            🗑 Xóa {selected.size} bài học
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button onClick={() => bulkSetPublish(true)} disabled={bulkPublishing}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-green-500 hover:bg-green-600 text-white transition-colors disabled:opacity-50">
+              {bulkPublishing ? '...' : `✓ Đăng ${selected.size} bài`}
+            </button>
+            <button onClick={() => bulkSetPublish(false)} disabled={bulkPublishing}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-slate-500 hover:bg-slate-600 text-white transition-colors disabled:opacity-50">
+              {bulkPublishing ? '...' : `Hủy đăng ${selected.size} bài`}
+            </button>
+            <button onClick={() => setShowBulkModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors">
+              🗑 Xóa {selected.size} bài
+            </button>
+          </div>
         )}
       </div>
 
