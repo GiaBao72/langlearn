@@ -37,13 +37,13 @@ function scoreAnswer(
     }
 
     case 'SORT_WORDS': {
-      // userAnswer should be array of words in correct order
-      const expected = (data.words ?? []).join(' ').toLowerCase()
+      // data.answer is the correct full sentence; data.words are the shuffled pieces
+      const expected = String(data.answer ?? '').toLowerCase().trim().replace(/[.!?,]/g, '')
       const given = Array.isArray(userAnswer)
-        ? (userAnswer as string[]).join(' ').toLowerCase()
-        : String(userAnswer).toLowerCase()
+        ? (userAnswer as string[]).join(' ').toLowerCase().trim().replace(/[.!?,]/g, '')
+        : String(userAnswer).toLowerCase().trim().replace(/[.!?,]/g, '')
       const correct = given === expected
-      return { correct, score: correct ? 1 : 0, correctAnswer: data.words }
+      return { correct, score: correct ? 1 : 0, correctAnswer: data.answer }
     }
 
     case 'DICTATION': {
@@ -116,11 +116,37 @@ export async function POST(
     })
   }
 
+  // Check lesson completion after progress upsert
+  let lessonCompleted = false
+  try {
+    const lessonId = exercise.lessonId
+    const [allExercises, allProgress] = await Promise.all([
+      prisma.exercise.findMany({ where: { lessonId }, select: { id: true, points: true } }),
+      prisma.userProgress.findMany({ where: { userId: user.userId, exercise: { lessonId } }, select: { exerciseId: true, score: true } }),
+    ])
+    const progressMap = new Map(allProgress.map(p => [p.exerciseId, p.score]))
+    const allDone = allExercises.every(e => progressMap.has(e.id))
+    if (allDone) {
+      const totalMax = allExercises.reduce((s, e) => s + e.points, 0)
+      const totalEarned = allExercises.reduce((s, e) => s + (progressMap.get(e.id) ?? 0), 0)
+      await (prisma as any).lesson_completions.upsert({
+        where: { userId_lessonId: { userId: user.userId, lessonId } },
+        create: { userId: user.userId, lessonId, score: totalEarned, maxScore: totalMax },
+        update: { score: totalEarned, maxScore: totalMax, completedAt: new Date() },
+      })
+      lessonCompleted = true
+    }
+  } catch (e) {
+    // Non-fatal — lesson completion tracking is best-effort
+    console.error('lesson completion error:', e)
+  }
+
   return NextResponse.json({
     correct,
     score: earnedPoints,
     maxPoints: exercise.points,
-    correctAnswer: correct ? null : correctAnswer, // only reveal if wrong
+    correctAnswer: correct ? null : correctAnswer,
     message: correct ? '🎉 Chính xác!' : '❌ Chưa đúng, thử lại nhé!',
+    lessonCompleted,
   })
 }

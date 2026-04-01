@@ -115,7 +115,7 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
       correctAnswer: String(data.back ?? ''),
       correct: isCorrect,
     }])
-    saveProgress(exercise.id, isCorrect ? exercise.points : 0)
+    saveProgress(exercise.id, userAnswer)
     setTimeout(() => nextExercise(), 600)
   }
 
@@ -144,14 +144,14 @@ export default function ExerciseRunner({ exercises, lessonId, courseId }: Props)
       correctAnswer,
       correct: isCorrect,
     }])
-    saveProgress(exercise.id, isCorrect ? exercise.points : 0)
+    saveProgress(exercise.id, userAnswer)
   }
 
-  function saveProgress(exerciseId: string, score: number) {
-    fetch('/api/progress', {
+  function saveProgress(exerciseId: string, answer: string) {
+    fetch(`/api/exercises/${exerciseId}/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ exerciseId, score }),
+      body: JSON.stringify({ answer }),
     }).catch(() => {})
   }
 

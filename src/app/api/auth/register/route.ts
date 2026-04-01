@@ -3,8 +3,26 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { signAccessToken, signRefreshToken } from '@/lib/auth'
 
+// Rate limit: max 10 registrations per IP per hour
+const registerAttempts = new Map<string, { count: number; resetAt: number }>()
+function checkRegisterLimit(ip: string): boolean {
+  const now = Date.now()
+  const rec = registerAttempts.get(ip)
+  if (!rec || now > rec.resetAt) {
+    registerAttempts.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 })
+    return true
+  }
+  if (rec.count >= 10) return false
+  rec.count++
+  return true
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
+    if (!checkRegisterLimit(ip)) {
+      return NextResponse.json({ error: 'Quá nhiều yêu cầu đăng ký. Thử lại sau.' }, { status: 429 })
+    }
     const { email, password, name } = await req.json()
 
     if (!email || !password) {

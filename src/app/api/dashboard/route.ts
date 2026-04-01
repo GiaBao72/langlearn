@@ -39,12 +39,19 @@ export async function GET() {
     else break
   }
 
-  // Find next unfinished lesson
+  // Find next unfinished lesson — order by level A1→A2→B1→B2→C1→C2 then lesson order
   const completedExerciseIds = new Set(progress.map(p => p.exerciseId))
+  const LEVEL_ORDER: Record<string, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 }
   const allLessons = await prisma.lesson.findMany({
     where: { published: true, course: { published: true } },
-    include: { exercises: { select: { id: true } }, course: { select: { id: true, title: true } } },
-    orderBy: [{ course: { createdAt: 'asc' } }, { order: 'asc' }]
+    include: { exercises: { select: { id: true } }, course: { select: { id: true, title: true, level: true } } },
+    orderBy: [{ order: 'asc' }]
+  })
+  allLessons.sort((a, b) => {
+    const la = LEVEL_ORDER[a.course.level] ?? 99
+    const lb = LEVEL_ORDER[b.course.level] ?? 99
+    if (la !== lb) return la - lb
+    return a.order - b.order
   })
 
   let nextLesson: { id: string; title: string; courseTitle: string } | null = null
@@ -58,7 +65,7 @@ export async function GET() {
 
   // inProgress: lessons đã làm ít nhất 1 bài nhưng chưa xong
   const userExerciseIds = completedExerciseIds
-  const inProgressLessons = allLessons
+  const inProgressLessons = [...allLessons]
     .filter(l => {
       const total = l.exercises.length
       if (total === 0) return false

@@ -32,6 +32,7 @@ model User {
   refreshTokens RefreshToken[]
   progress            UserProgress[]
   passwordResetTokens PasswordResetToken[]
+  lessonCompletions   LessonCompletion[]
 
   @@map("users")
 }
@@ -74,8 +75,9 @@ model Lesson {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  exercises Exercise[]
+  course      Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  exercises   Exercise[]
+  completions LessonCompletion[]
 
   @@map("lessons")
 }
@@ -133,4 +135,19 @@ model BlogPost {
   updatedAt   DateTime  @updatedAt
 
   @@map("blog_posts")
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  score       Int      @default(0)
+  maxScore    Int      @default(0)
+  completedAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@map("lesson_completions")
 }
