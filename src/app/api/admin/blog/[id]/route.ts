@@ -11,9 +11,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   const body = await req.json()
 
-  // Validate title nếu có update
+  // Validate title
   if (body.title !== undefined && !body.title?.trim()) {
     return NextResponse.json({ error: 'Tiêu đề không được để trống' }, { status: 400 })
+  }
+
+  // Validate + unique slug
+  if (body.slug !== undefined) {
+    const slugVal = body.slug?.trim()
+    if (!slugVal) return NextResponse.json({ error: 'Slug không được để trống' }, { status: 400 })
+    const existing = await prisma.blogPost.findFirst({ where: { slug: slugVal, NOT: { id } } })
+    if (existing) return NextResponse.json({ error: 'Slug đã tồn tại, hãy dùng slug khác' }, { status: 400 })
+    body.slug = slugVal
   }
 
   const post = await prisma.blogPost.update({

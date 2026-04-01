@@ -10,12 +10,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { title, excerpt, content, published } = await req.json()
+    const { title, slug: customSlug, excerpt, content, published } = await req.json()
     if (!title?.trim() || !content?.trim()) {
       return NextResponse.json({ error: 'Title and content are required' }, { status: 400 })
     }
 
-    let slug = slugify(title)
+    let slug = customSlug?.trim() ? customSlug.trim() : slugify(title)
     // Ensure unique slug
     const existing = await prisma.blogPost.findUnique({ where: { slug } })
     if (existing) slug = `${slug}-${Date.now()}`
