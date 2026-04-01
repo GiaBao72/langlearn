@@ -515,12 +515,12 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
   const [publishing, setPublishing] = useState(false)
   const [deletingLesson, setDeletingLesson] = useState(false)
   const [confirmDeleteLesson, setConfirmDeleteLesson] = useState(false)
+  const [pendingDeleteEx, setPendingDeleteEx] = useState<string | null>(null)
   const [showContentEditor, setShowContentEditor] = useState(false)
   const [content, setContent] = useState(initial.content ?? '')
   const [savingContent, setSavingContent] = useState(false)
 
   async function handleDeleteLesson() {
-    if (!confirmDeleteLesson) return setConfirmDeleteLesson(true)
     setDeletingLesson(true)
     const res = await fetch(`/api/admin/lessons/${lesson.id}`, { method: 'DELETE' })
     if (res.ok) {
@@ -563,14 +563,15 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
   }
 
   async function deleteExercise(exId: string) {
-    if (!confirm('Xóa bài tập này?')) return
     setDeleting(exId)
     await fetch(`/api/admin/exercises/${exId}`, { method: 'DELETE' })
     await reload()
     setDeleting(null)
+    setPendingDeleteEx(null)
   }
 
   return (
+    <>
     <div className="max-w-3xl space-y-6">
       {/* Breadcrumb + publish toggle */}
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -583,7 +584,19 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
             <span className="text-foreground font-medium truncate max-w-[100px] sm:max-w-none">{lesson.title}</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{lesson.title}</h1>
-          <p className="text-muted-foreground text-sm mt-1">{lesson.exercises.length} bài tập</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            {lesson.exercises.length} bài tập
+            {lesson.exercises.length > 0 && (() => {
+              const counts: Record<string, number> = {}
+              lesson.exercises.forEach(e => { counts[e.type] = (counts[e.type] ?? 0) + 1 })
+              const labels: Record<string, string> = { MULTIPLE_CHOICE:'Trắc nghiệm', FILL_BLANK:'Điền từ', FLASHCARD:'Flashcard', DICTATION:'Nghe chép', SORT_WORDS:'Sắp xếp' }
+              return (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  ({Object.entries(counts).map(([k,v]) => `${labels[k]??k}: ${v}`).join(' · ')})
+                </span>
+              )
+            })()}
+          </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={togglePublish} disabled={publishing}
@@ -592,15 +605,10 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
             }`}>
             {lesson.published ? '✓ Đã đăng' : 'Chưa đăng'}
           </button>
-          <button onClick={handleDeleteLesson} disabled={deletingLesson}
-            className={`text-xs px-3 py-1.5 rounded-lg font-semibold border transition-colors shrink-0 disabled:opacity-50 ${
-              confirmDeleteLesson ? 'bg-red-500 text-white border-red-500' : 'border-red-300 text-red-500 hover:bg-red-50'
-            }`}>
-            {deletingLesson ? 'Đang xóa...' : confirmDeleteLesson ? 'Xác nhận xóa lesson?' : 'Xóa lesson'}
+          <button onClick={() => setConfirmDeleteLesson(true)} disabled={deletingLesson}
+            className="text-xs px-3 py-1.5 rounded-lg font-semibold border border-red-300 text-red-500 hover:bg-red-50 transition-colors shrink-0 disabled:opacity-50">
+            Xóa bài học
           </button>
-          {confirmDeleteLesson && !deletingLesson && (
-            <button onClick={() => setConfirmDeleteLesson(false)} className="text-xs text-muted-foreground hover:text-foreground">Hủy</button>
-          )}
         </div>
       </div>
 
@@ -667,15 +675,46 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
                       />
                     ) : (
                       <>
-                        <pre className="text-xs text-muted-foreground mt-3 bg-muted rounded p-3 overflow-auto max-h-40">
-                          {JSON.stringify(ex.data ?? {}, null, 2)}
-                        </pre>
+                        <div className="mt-3 bg-muted rounded-lg p-3 space-y-1.5">
+                          {(() => {
+                            const d = ex.data as Record<string, unknown>
+                            const rows: { label: string; value: string }[] = []
+                            if (ex.type === 'FLASHCARD') {
+                              rows.push({ label: 'Mặt trước', value: String(d.front ?? '') })
+                              rows.push({ label: 'Mặt sau', value: String(d.back ?? '') })
+                              if (d.pronunciation) rows.push({ label: 'Phiên âm', value: String(d.pronunciation) })
+                            } else if (ex.type === 'MULTIPLE_CHOICE') {
+                              if (Array.isArray(d.options)) (d.options as string[]).forEach((o, i) => rows.push({ label: `Lựa chọn ${i+1}`, value: o }))
+                              rows.push({ label: '✓ Đáp án', value: String(d.answer ?? '') })
+                              if (d.explanation) rows.push({ label: 'Giải thích', value: String(d.explanation) })
+                            } else if (ex.type === 'FILL_BLANK') {
+                              rows.push({ label: 'Câu', value: String(d.sentence ?? ex.question) })
+                              rows.push({ label: '✓ Đáp án', value: String(d.answer ?? '') })
+                              if (d.hint) rows.push({ label: 'Gợi ý', value: String(d.hint) })
+                            } else if (ex.type === 'SORT_WORDS') {
+                              if (Array.isArray(d.words)) rows.push({ label: 'Các từ', value: (d.words as string[]).join(' | ') })
+                              rows.push({ label: '✓ Câu đúng', value: String(d.answer ?? '') })
+                            } else if (ex.type === 'DICTATION') {
+                              rows.push({ label: 'Nội dung nghe', value: String(d.audioText ?? d.audio_text ?? '') })
+                              rows.push({ label: '✓ Đáp án', value: String(d.answer ?? '') })
+                              if (d.hint) rows.push({ label: 'Gợi ý', value: String(d.hint) })
+                            } else {
+                              rows.push({ label: 'Data', value: JSON.stringify(d, null, 2) })
+                            }
+                            return rows.map((r, i) => (
+                              <div key={i} className="flex gap-2 text-xs">
+                                <span className="text-muted-foreground w-24 shrink-0">{r.label}</span>
+                                <span className="text-foreground font-medium break-all">{r.value}</span>
+                              </div>
+                            ))
+                          })()}
+                        </div>
                         <div className="flex items-center gap-4 mt-3">
                           <button onClick={() => setEditing(ex.id)}
                             className="flex items-center gap-1 text-xs text-[#2563EB] hover:text-blue-700 transition-colors font-medium">
                             ✏️ Sửa bài tập
                           </button>
-                          <button onClick={() => deleteExercise(ex.id)} disabled={deleting === ex.id}
+                          <button onClick={() => setPendingDeleteEx(ex.id)} disabled={deleting === ex.id}
                             className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 transition-colors">
                             <Trash2 className="w-3.5 h-3.5" />
                             {deleting === ex.id ? 'Đang xóa...' : 'Xóa'}
@@ -694,5 +733,59 @@ export default function LessonEditClient({ lesson: initial }: { lesson: Lesson }
         <ImportExcelForm lessonId={lesson.id} onImported={reload} />
       </div>
     </div>
+
+      {/* Delete lesson modal */}
+      {confirmDeleteLesson && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="font-bold text-[#1E293B] text-lg mb-2">⚠️ Xóa bài học?</h3>
+            <p className="text-sm font-medium text-foreground mb-1">{lesson.title}</p>
+            <p className="text-sm text-muted-foreground mb-3">Khóa học: {lesson.course.title}</p>
+            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2.5 text-sm mb-4">
+              Toàn bộ <strong>{lesson.exercises.length} bài tập</strong> và tiến độ học của người dùng sẽ bị xóa vĩnh viễn.
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setConfirmDeleteLesson(false)} disabled={deletingLesson}
+                className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:bg-slate-50 text-sm">
+                Hủy
+              </button>
+              <button onClick={handleDeleteLesson} disabled={deletingLesson}
+                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50">
+                {deletingLesson ? 'Đang xóa...' : 'Xóa bài học'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete exercise modal */}
+      {pendingDeleteEx && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <h3 className="font-bold text-[#1E293B] text-lg mb-2">Xóa bài tập?</h3>
+            {(() => {
+              const ex = lesson.exercises.find(e => e.id === pendingDeleteEx)
+              return ex ? (
+                <p className="text-sm text-muted-foreground mb-4">
+                  <span className="font-medium text-foreground">{ex.question}</span>
+                  <br /><span className="text-xs">{({MULTIPLE_CHOICE:'Trắc nghiệm',FILL_BLANK:'Điền từ',FLASHCARD:'Flashcard',DICTATION:'Nghe chép',SORT_WORDS:'Sắp xếp từ'} as Record<string,string>)[ex.type] ?? ex.type}</span>
+                </p>
+              ) : null
+            })()}
+            <p className="text-sm text-red-600 mb-4">Hành động này không thể hoàn tác.</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setPendingDeleteEx(null)}
+                className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:bg-slate-50 text-sm">
+                Hủy
+              </button>
+              <button onClick={() => deleteExercise(pendingDeleteEx)} disabled={deleting === pendingDeleteEx}
+                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50">
+                {deleting === pendingDeleteEx ? 'Đang xóa...' : 'Xóa bài tập'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
