@@ -76,14 +76,19 @@ export default function CourseEditClient({ course }: { course: Course }) {
     setAddingLesson(false)
   }
 
+  async function deleteLesson(lessonId: string) {
+    const res = await fetch('/api/admin/lessons/' + lessonId, { method: 'DELETE' })
+    if (res.ok) setLessons(prev => prev.filter(l => l.id !== lessonId))
+  }
+
   async function deleteCourse() {
-    if (!confirmDelete) return setConfirmDelete(true)
     setDeleting(true)
     await fetch('/api/admin/courses/' + course.id, { method: 'DELETE' })
     window.location.href = '/admin/courses'
   }
 
   return (
+    <>
     <div className="max-w-5xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -101,15 +106,10 @@ export default function CourseEditClient({ course }: { course: Course }) {
             }`}>
             {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : isDirty ? '💾 Lưu thay đổi' : 'Đã lưu'}
           </button>
-          <button onClick={deleteCourse} disabled={deleting}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors disabled:opacity-50 ${
-              confirmDelete ? 'bg-red-500 text-white border-red-500 hover:bg-red-600' : 'border-red-300 text-red-500 hover:bg-red-50'
-            }`}>
-            {deleting ? 'Đang xóa...' : confirmDelete ? 'Xác nhận xóa?' : 'Xóa'}
+          <button onClick={() => setConfirmDelete(true)} disabled={deleting}
+            className="px-4 py-2 rounded-lg text-sm font-semibold border border-red-300 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
+            Xóa khóa học
           </button>
-          {confirmDelete && !deleting && (
-            <button onClick={() => setConfirmDelete(false)} className="text-sm text-muted-foreground hover:text-foreground">Hủy</button>
-          )}
         </div>
       </div>
 
@@ -160,19 +160,27 @@ export default function CourseEditClient({ course }: { course: Course }) {
 
           <div className="space-y-2 mb-4">
             {lessons.map(lesson => (
-              <Link key={lesson.id} href={`/admin/lessons/${lesson.id}`}
-                className="flex items-center justify-between bg-slate-50 border border-[#E2E8F0] rounded-xl px-5 py-4 hover:border-blue-200 transition-colors group">
-                <div>
-                  <span className="text-[#64748B] text-xs mr-2">{lesson.order}.</span>
-                  <span className="text-sm group-hover:text-[#2563EB] transition-colors">{lesson.title}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[#64748B] text-xs">{lesson._count.exercises} bài tập</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${lesson.published ? 'bg-green-500/20 text-green-400' : 'bg-white text-[#64748B]'}`}>
-                    {lesson.published ? 'Live' : 'Nháp'}
-                  </span>
-                </div>
-              </Link>
+              <div key={lesson.id} className="flex items-center gap-2 group">
+                <Link href={`/admin/lessons/${lesson.id}`}
+                  className="flex-1 flex items-center justify-between bg-slate-50 border border-[#E2E8F0] rounded-xl px-5 py-3 hover:border-blue-200 transition-colors">
+                  <div>
+                    <span className="text-[#64748B] text-xs mr-2">{lesson.order}.</span>
+                    <span className="text-sm group-hover:text-[#2563EB] transition-colors">{lesson.title}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#64748B] text-xs">{lesson._count.exercises} bài tập</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${lesson.published ? 'bg-green-500/20 text-green-700' : 'bg-white text-[#64748B]'}`}>
+                      {lesson.published ? 'Live' : 'Nháp'}
+                    </span>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => { if (confirm(`Xóa bài "${lesson.title}"? Toàn bộ bài tập trong bài này sẽ bị xóa.`)) deleteLesson(lesson.id) }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50"
+                  title="Xóa bài học">
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
 
@@ -190,5 +198,29 @@ export default function CourseEditClient({ course }: { course: Course }) {
         </div>
       </div>
     </div>
+
+      {/* Delete course modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="font-bold text-[#1E293B] text-lg mb-2">⚠️ Xóa khóa học?</h3>
+            <p className="text-sm text-muted-foreground mb-3 font-medium">{course.title}</p>
+            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2.5 text-sm mb-4">
+              Toàn bộ <strong>{lessons.length} bài học</strong> và tất cả bài tập, tiến độ học của người dùng sẽ bị xóa vĩnh viễn.
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setConfirmDelete(false)} disabled={deleting}
+                className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:bg-slate-50 text-sm">
+                Hủy
+              </button>
+              <button onClick={deleteCourse} disabled={deleting}
+                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50">
+                {deleting ? 'Đang xóa...' : 'Xóa khóa học'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
