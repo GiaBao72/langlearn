@@ -26,14 +26,17 @@ type Course = {
   exerciseCount: number
   lessonCount: number
   completedLessons?: number
+  enrolled: boolean
 }
 
 export default function CoursesClient({
   courses,
   userId,
+  isAdmin,
 }: {
   courses: Course[]
   userId?: string | null
+  isAdmin?: boolean
 }) {
   const languages = [...new Set(courses.map(c => c.language))]
   const levels = [...new Set(courses.map(c => c.level))].sort(
@@ -43,6 +46,7 @@ export default function CoursesClient({
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLang, setSelectedLang] = useState('')
   const [selectedLevel, setSelectedLevel] = useState('')
+  const [enrollFilter, setEnrollFilter] = useState<'all' | 'enrolled' | 'not-enrolled'>('all')
 
   const filtered = courses
     .filter(c => {
@@ -51,19 +55,24 @@ export default function CoursesClient({
         (c.description ?? '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchLang = selectedLang ? c.language === selectedLang : true
       const matchLevel = selectedLevel ? c.level === selectedLevel : true
-      return matchSearch && matchLang && matchLevel
+      const matchEnroll =
+        enrollFilter === 'all' ? true :
+        enrollFilter === 'enrolled' ? c.enrolled :
+        !c.enrolled
+      return matchSearch && matchLang && matchLevel && matchEnroll
     })
     .sort((a, b) => (LEVEL_ORDER[a.level] ?? 99) - (LEVEL_ORDER[b.level] ?? 99))
 
   const inProgress = userId
-    ? courses.filter(c => (c.completedLessons ?? 0) > 0 && (c.completedLessons ?? 0) < c.lessonCount)
+    ? courses.filter(c => c.enrolled && (c.completedLessons ?? 0) > 0 && (c.completedLessons ?? 0) < c.lessonCount)
     : []
-  const hasFilters = !!(searchQuery || selectedLang || selectedLevel)
+  const hasFilters = !!(searchQuery || selectedLang || selectedLevel || enrollFilter !== 'all')
 
   function resetFilters() {
     setSearchQuery('')
     setSelectedLang('')
     setSelectedLevel('')
+    setEnrollFilter('all')
   }
 
   return (
@@ -113,10 +122,11 @@ export default function CoursesClient({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="🔍 Tìm khóa học..."
-            className="w-full sm:w-80 px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-sm text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent bg-white"
+            className="w-full sm:w-80 px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-sm text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
           />
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Language filter */}
             {languages.length > 1 && (
               <>
                 <button onClick={() => setSelectedLang('')}
@@ -131,10 +141,11 @@ export default function CoursesClient({
                     {lang}
                   </button>
                 ))}
-                {levels.length > 1 && <div className="w-px h-9 bg-slate-200 mx-1" />}
+                {levels.length > 1 && <div className="w-px h-7 bg-slate-200 mx-0.5" />}
               </>
             )}
 
+            {/* Level filter */}
             {levels.length > 1 && (
               <>
                 <button onClick={() => setSelectedLevel('')}
@@ -155,6 +166,20 @@ export default function CoursesClient({
                     </button>
                   )
                 })}
+              </>
+            )}
+
+            {/* Enrollment filter (only for logged-in non-admin) */}
+            {userId && !isAdmin && (
+              <>
+                <div className="w-px h-7 bg-slate-200 mx-0.5" />
+                {(['all', 'enrolled', 'not-enrolled'] as const).map(f => (
+                  <button key={f} onClick={() => setEnrollFilter(f)}
+                    className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center transition-colors ${
+                      enrollFilter === f ? 'bg-teal-600 border-teal-600 text-white' : 'border-[#E2E8F0] text-[#334155] hover:border-teal-300'}`}>
+                    {f === 'all' ? 'Tất cả' : f === 'enrolled' ? '✓ Đã đăng ký' : '🔒 Chưa đăng ký'}
+                  </button>
+                ))}
               </>
             )}
           </div>
@@ -180,25 +205,37 @@ export default function CoursesClient({
                 const lc = LEVEL_COLOR[c.level]
                 const icon = LEVEL_ICON[c.level] ?? '📚'
                 const pct = c.lessonCount > 0 && (c.completedLessons ?? 0) > 0
-                  ? Math.round(((c.completedLessons ?? 0) / c.lessonCount) * 100)
-                  : 0
-                const done = pct === 100
+                  ? Math.round(((c.completedLessons ?? 0) / c.lessonCount) * 100) : 0
+                const done = pct === 100 && c.enrolled
 
                 return (
                   <motion.div key={c.id} whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400 }}>
                     <Link href={`/courses/${c.id}`}
-                      className="flex flex-col bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 hover:border-blue-300 hover:shadow-md transition-all group h-full shadow-sm">
+                      className={`flex flex-col bg-white border rounded-2xl p-5 sm:p-6 transition-all group h-full shadow-sm ${
+                        c.enrolled
+                          ? 'border-[#E2E8F0] hover:border-blue-300 hover:shadow-md'
+                          : 'border-dashed border-slate-300 hover:border-slate-400 opacity-80'
+                      }`}>
 
-                      {/* Top row: language + level badge */}
+                      {/* Top: language + level badge + enrollment */}
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-xs text-[#94A3B8] uppercase tracking-widest">{c.language}</span>
-                        <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${lc?.bg ?? 'bg-slate-100'} ${lc?.text ?? 'text-slate-600'}`}>
-                          {icon} {c.level}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {userId && !isAdmin && (
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                              c.enrolled ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                              {c.enrolled ? '✓ Đã đăng ký' : '🔒 Chưa đăng ký'}
+                            </span>
+                          )}
+                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${lc?.bg ?? 'bg-slate-100'} ${lc?.text ?? 'text-slate-600'}`}>
+                            {icon} {c.level}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Title */}
-                      <h2 className="font-semibold text-base sm:text-lg mb-2 group-hover:text-[#2563EB] transition-colors leading-snug text-[#334155]">
+                      <h2 className={`font-semibold text-base sm:text-lg mb-2 transition-colors leading-snug ${
+                        c.enrolled ? 'text-[#334155] group-hover:text-[#2563EB]' : 'text-[#94A3B8]'}`}>
                         {c.title}
                       </h2>
 
@@ -207,22 +244,22 @@ export default function CoursesClient({
                         <p className="text-[#64748B] text-sm line-clamp-2 mb-4 flex-1">{c.description}</p>
                       )}
 
-                      {/* Stats row */}
+                      {/* Stats */}
                       <div className="flex items-center gap-3 text-xs text-[#94A3B8] mt-auto pt-3 border-t border-[#F1F5F9]">
                         <span>📖 {c.lessonCount} bài</span>
                         <span>✏️ {c.exerciseCount} bài tập</span>
                         {done && <span className="ml-auto text-green-600 font-semibold">✓ Hoàn thành</span>}
                       </div>
 
-                      {/* Progress bar (only for logged in users who started) */}
-                      {userId && pct > 0 && !done && (
+                      {/* Progress bar */}
+                      {userId && c.enrolled && pct > 0 && !done && (
                         <div className="mt-3">
                           <div className="flex justify-between text-[10px] text-[#94A3B8] mb-1">
                             <span>{c.completedLessons}/{c.lessonCount} bài</span>
                             <span>{pct}%</span>
                           </div>
                           <div className="h-1.5 bg-slate-100 rounded-full">
-                            <div className="h-full bg-[#2563EB] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                            <div className="h-full bg-[#2563EB] rounded-full" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
                       )}

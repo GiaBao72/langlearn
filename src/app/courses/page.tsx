@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 
 export default async function CoursesPage() {
   const user = await getCurrentUser()
+  const isAdmin = user?.role === 'ADMIN'
 
   const courses = await prisma.course.findMany({
     where: { published: true },
@@ -34,7 +35,17 @@ export default async function CoursesPage() {
     },
   })
 
-  // Fetch user's lesson completions if logged in
+  // Fetch enrollments for current user
+  let enrolledSet = new Set<string>()
+  if (user && !isAdmin) {
+    const enrollments = await prisma.courseEnrollment.findMany({
+      where: { userId: user.userId },
+      select: { courseId: true },
+    })
+    enrolledSet = new Set(enrollments.map(e => e.courseId))
+  }
+
+  // Fetch lesson completions
   let completionMap: Record<string, number> = {}
   if (user) {
     const completions = await prisma.lessonCompletion.findMany({
@@ -42,7 +53,6 @@ export default async function CoursesPage() {
       select: { lessonId: true },
     })
     const completedSet = new Set(completions.map(c => c.lessonId))
-    // Group by course
     for (const course of courses) {
       completionMap[course.id] = course.lessons.filter(l => completedSet.has(l.id)).length
     }
@@ -57,12 +67,14 @@ export default async function CoursesPage() {
     lessonCount: c._count.lessons,
     exerciseCount: c.lessons.reduce((s, l) => s + l._count.exercises, 0),
     completedLessons: completionMap[c.id] ?? 0,
+    // Admin sees all as enrolled; regular users check enrolledSet
+    enrolled: isAdmin ? true : enrolledSet.has(c.id),
   }))
 
   return (
     <>
       <Navbar />
-      <CoursesClient courses={coursesData} userId={user?.userId ?? null} />
+      <CoursesClient courses={coursesData} userId={user?.userId ?? null} isAdmin={isAdmin} />
     </>
   )
 }

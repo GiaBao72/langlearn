@@ -33,6 +33,7 @@ model User {
   progress            UserProgress[]
   passwordResetTokens PasswordResetToken[]
   lessonCompletions   LessonCompletion[]
+  enrollments         CourseEnrollment[]
 
   @@map("users")
 }
@@ -60,7 +61,8 @@ model Course {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  lessons Lesson[]
+  lessons     Lesson[]
+  enrollments CourseEnrollment[]
 
   @@map("courses")
 }
@@ -150,4 +152,17 @@ model LessonCompletion {
 
   @@unique([userId, lessonId])
   @@map("lesson_completions")
+}
+
+model CourseEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
 }

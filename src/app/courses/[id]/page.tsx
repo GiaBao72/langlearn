@@ -7,7 +7,6 @@ import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
-const LEVEL_ORDER: Record<string, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 }
 const LEVEL_COLOR: Record<string, string> = {
   A1: 'text-emerald-700 bg-emerald-50 border-emerald-200',
   A2: 'text-teal-700 bg-teal-50 border-teal-200',
@@ -38,6 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser()
   const { id } = await params
+  const isAdmin = user?.role === 'ADMIN'
 
   const course = await prisma.course.findUnique({
     where: { id, published: true },
@@ -51,11 +51,19 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   })
   if (!course) notFound()
 
-  // Lesson completions (use correct table)
+  // Check enrollment (ADMIN bypasses)
+  let isEnrolled = isAdmin
+  if (user && !isAdmin) {
+    const enrollment = await prisma.courseEnrollment.findUnique({
+      where: { userId_courseId: { userId: user.userId, courseId: id } },
+    })
+    isEnrolled = !!enrollment
+  }
+
+  // Lesson completions
   const lessonIds = course.lessons.map(l => l.id)
   let completionMap: Record<string, { score: number; maxScore: number }> = {}
-
-  if (user && lessonIds.length > 0) {
+  if (user && isEnrolled && lessonIds.length > 0) {
     const completions = await prisma.lessonCompletion.findMany({
       where: { userId: user.userId, lessonId: { in: lessonIds } },
       select: { lessonId: true, score: true, maxScore: true },
@@ -68,15 +76,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const completedCount = Object.keys(completionMap).length
   const totalLessons = course.lessons.length
   const pct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
-
-  // Find "next" lesson (first not completed, in order)
   const nextLesson = course.lessons.find(l => !completionMap[l.id])
-
+  const totalExercises = course.lessons.reduce((s, l) => s + l._count.exercises, 0)
   const lc = LEVEL_COLOR[course.level] ?? 'text-slate-700 bg-slate-50 border-slate-200'
   const icon = LEVEL_ICON[course.level] ?? '📚'
-
-  // Total exercises across all lessons
-  const totalExercises = course.lessons.reduce((s, l) => s + l._count.exercises, 0)
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -97,11 +100,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-[#94A3B8] uppercase tracking-widest">{course.language}</span>
               <span className="text-[#94A3B8]">·</span>
-              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${lc}`}>
-                {icon} {course.level}
-              </span>
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${lc}`}>{icon} {course.level}</span>
             </div>
-            {pct === 100 && (
+            {pct === 100 && isEnrolled && (
               <span className="text-xs font-semibold text-green-600 bg-green-50 border border-green-200 px-3 py-1 rounded-full shrink-0">
                 🏅 Hoàn thành
               </span>
@@ -109,50 +110,44 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-[#334155]">{course.title}</h1>
-          {course.description && (
-            <p className="text-[#64748B] text-sm sm:text-base mb-5">{course.description}</p>
-          )}
+          {course.description && <p className="text-[#64748B] text-sm sm:text-base mb-5">{course.description}</p>}
 
-          {/* Stats row */}
+          {/* Stats */}
           <div className="flex items-center gap-4 text-sm text-[#64748B] mb-5 flex-wrap">
             <span>📖 {totalLessons} bài học</span>
             <span>✏️ {totalExercises} bài tập</span>
-            {user && completedCount > 0 && (
+            {isEnrolled && completedCount > 0 && (
               <span className="text-[#2563EB] font-medium">✓ {completedCount} đã hoàn thành</span>
             )}
           </div>
 
           {/* Progress bar */}
-          {user ? (
+          {isEnrolled && user ? (
             <div>
               <div className="flex justify-between text-xs text-[#94A3B8] mb-2">
                 <span>{completedCount}/{totalLessons} bài học</span>
                 <span className={pct === 100 ? 'text-green-600 font-semibold' : ''}>{pct}%</span>
               </div>
               <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${pct === 100 ? 'bg-green-500' : 'bg-[#2563EB]'}`}
-                  style={{ width: `${pct}%` }}
-                />
+                <div className={`h-full rounded-full transition-all duration-500 ${pct === 100 ? 'bg-green-500' : 'bg-[#2563EB]'}`}
+                  style={{ width: `${pct}%` }} />
               </div>
             </div>
           ) : (
             <div className="h-2.5 bg-slate-100 rounded-full" />
           )}
 
-          {/* CTA: Continue / Start / Login */}
-          {user && nextLesson && (
+          {/* CTA buttons */}
+          {isEnrolled && user && nextLesson && (
             <div className="mt-5">
-              <Link
-                href={`/practice/${nextLesson.id}`}
-                className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm"
-              >
+              <Link href={`/practice/${nextLesson.id}`}
+                className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
                 {completedCount === 0 ? '🚀 Bắt đầu học' : '▶ Tiếp tục học'}
                 <span className="font-normal opacity-80 text-xs truncate max-w-[160px]">{nextLesson.title}</span>
               </Link>
             </div>
           )}
-          {pct === 100 && user && (
+          {isEnrolled && pct === 100 && user && (
             <div className="mt-5">
               <Link href={`/practice/${course.lessons[0]?.id}`}
                 className="inline-flex items-center gap-2 border border-[#2563EB] text-[#2563EB] px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-50 transition-colors">
@@ -162,7 +157,18 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           )}
         </div>
 
-        {/* Login banner for guests */}
+        {/* Not enrolled banner */}
+        {!isEnrolled && user && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-5 flex items-start gap-4">
+            <span className="text-2xl">🔒</span>
+            <div>
+              <p className="font-semibold text-amber-800 mb-1">Bạn chưa đăng ký khóa học này</p>
+              <p className="text-sm text-amber-700">Liên hệ quản trị viên để được cấp quyền truy cập.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Guest login banner */}
         {!user && (
           <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3 mb-5">
             <span className="text-2xl">🔓</span>
@@ -170,8 +176,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <p className="text-sm font-semibold text-blue-700">Đăng nhập để bắt đầu học</p>
               <p className="text-xs text-blue-500 mt-0.5">Miễn phí · Theo dõi tiến độ · Lưu kết quả</p>
             </div>
-            <Link href="/register"
-              className="bg-[#2563EB] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition-colors shrink-0">
+            <Link href="/register" className="bg-[#2563EB] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition-colors shrink-0">
               Đăng ký ngay
             </Link>
           </div>
@@ -179,49 +184,50 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
         {/* Lessons list */}
         <div className="space-y-2.5">
-          <h2 className="text-sm font-semibold text-[#64748B] uppercase tracking-wider mb-3">
-            Danh sách bài học
-          </h2>
+          <h2 className="text-sm font-semibold text-[#64748B] uppercase tracking-wider mb-3">Danh sách bài học</h2>
 
           {course.lessons.map((lesson, i) => {
             const completion = completionMap[lesson.id]
             const done = !!completion
             const scoreStr = done && completion.maxScore > 0
-              ? `${completion.score}/${completion.maxScore} điểm`
-              : null
+              ? `${completion.score}/${completion.maxScore} điểm` : null
             const scorePct = done && completion.maxScore > 0
-              ? Math.round((completion.score / completion.maxScore) * 100)
-              : null
-            const isNext = !done && nextLesson?.id === lesson.id
-            const href = user
-              ? `/practice/${lesson.id}`
-              : `/login?from=${encodeURIComponent(`/practice/${lesson.id}`)}`
+              ? Math.round((completion.score / completion.maxScore) * 100) : null
+            const isNext = isEnrolled && !done && nextLesson?.id === lesson.id
+
+            // Determine href based on enrollment
+            const locked = !isEnrolled || !user
+            const href = locked
+              ? (user ? '#' : `/login?from=${encodeURIComponent(`/courses/${course.id}`)}`)
+              : `/practice/${lesson.id}`
 
             return (
               <Link key={lesson.id} href={href}
                 className={`flex items-center gap-4 p-4 sm:p-5 rounded-xl border transition-all group ${
-                  done
+                  locked
+                    ? 'border-[#E2E8F0] bg-slate-50 cursor-not-allowed opacity-70'
+                    : done
                     ? 'border-green-200 bg-green-50 hover:border-green-300'
                     : isNext
                     ? 'border-blue-300 bg-blue-50 hover:border-blue-400 shadow-sm'
                     : 'border-[#E2E8F0] bg-white hover:border-blue-200 hover:shadow-sm'
                 }`}>
 
-                {/* Index / status indicator */}
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                  done
-                    ? 'bg-green-100 text-green-600'
-                    : isNext
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-slate-100 text-[#94A3B8]'
+                  locked ? 'bg-slate-200 text-slate-400'
+                  : done ? 'bg-green-100 text-green-600'
+                  : isNext ? 'bg-blue-100 text-blue-600'
+                  : 'bg-slate-100 text-[#94A3B8]'
                 }`}>
-                  {done ? '✓' : isNext ? '▶' : i + 1}
+                  {locked ? '🔒' : done ? '✓' : isNext ? '▶' : i + 1}
                 </div>
 
-                {/* Title + meta */}
                 <div className="flex-1 min-w-0">
                   <div className={`font-medium text-sm sm:text-base truncate transition-colors ${
-                    done ? 'text-green-800' : isNext ? 'text-blue-700' : 'text-[#334155] group-hover:text-[#2563EB]'
+                    locked ? 'text-[#94A3B8]'
+                    : done ? 'text-green-800'
+                    : isNext ? 'text-blue-700'
+                    : 'text-[#334155] group-hover:text-[#2563EB]'
                   }`}>
                     {lesson.title}
                     {isNext && <span className="ml-2 text-[10px] font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full align-middle">Tiếp theo</span>}
@@ -239,12 +245,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   </div>
                 </div>
 
-                {/* Arrow */}
                 <span className={`text-sm shrink-0 transition-colors ${
-                  done ? 'text-green-400' : isNext ? 'text-blue-400' : 'text-[#CBD5E1] group-hover:text-[#2563EB]'
-                }`}>
-                  {user ? '→' : '🔒'}
-                </span>
+                  locked ? 'text-[#CBD5E1]'
+                  : done ? 'text-green-400'
+                  : isNext ? 'text-blue-400'
+                  : 'text-[#CBD5E1] group-hover:text-[#2563EB]'
+                }`}>→</span>
               </Link>
             )
           })}
@@ -256,7 +262,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </div>
         )}
 
-        {/* Other courses in same level */}
         <div className="mt-12 pt-8 border-t border-[#E2E8F0]">
           <Link href="/courses" className="inline-flex items-center gap-1 text-sm text-[#64748B] hover:text-[#2563EB] transition-colors">
             ← Xem tất cả khóa học

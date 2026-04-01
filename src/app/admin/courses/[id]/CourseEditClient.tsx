@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import EnrollmentTab from '@/components/EnrollmentTab'
 
 interface Lesson {
   id: string
@@ -22,8 +23,11 @@ interface Course {
   lessons: Lesson[]
 }
 
+type Tab = 'info' | 'students'
+
 export default function CourseEditClient({ course }: { course: Course }) {
   const router = useRouter()
+  const [tab, setTab] = useState<Tab>('info')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const initialForm = {
@@ -90,6 +94,7 @@ export default function CourseEditClient({ course }: { course: Course }) {
   return (
     <>
     <div className="max-w-5xl space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -100,12 +105,14 @@ export default function CourseEditClient({ course }: { course: Course }) {
           <h1 className="text-xl font-bold text-foreground">Chỉnh sửa khóa học</h1>
         </div>
         <div className="flex gap-2">
-          <button onClick={saveChanges} disabled={saving || !isDirty}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 ${
-              isDirty ? 'bg-[#2563EB] hover:bg-blue-700 text-white' : saved ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-500'
-            }`}>
-            {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : isDirty ? '💾 Lưu thay đổi' : 'Đã lưu'}
-          </button>
+          {tab === 'info' && (
+            <button onClick={saveChanges} disabled={saving || !isDirty}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 ${
+                isDirty ? 'bg-[#2563EB] hover:bg-blue-700 text-white' : saved ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-500'
+              }`}>
+              {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : isDirty ? '💾 Lưu thay đổi' : 'Đã lưu'}
+            </button>
+          )}
           <button onClick={() => setConfirmDelete(true)} disabled={deleting}
             className="px-4 py-2 rounded-lg text-sm font-semibold border border-red-300 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
             Xóa khóa học
@@ -113,114 +120,142 @@ export default function CourseEditClient({ course }: { course: Course }) {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-5 gap-8">
-        {/* Left: course info */}
-        <div className="md:col-span-2 space-y-5">
-          <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Thông tin khóa học</h2>
-
-          {isDirty && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-lg px-3 py-2">
-              ⚠ Có thay đổi chưa lưu
-            </div>
-          )}
-          <div>
-            <label className="block text-sm text-[#64748B] mb-1.5">Tên khóa học</label>
-            <input type="text" value={form.title} onChange={e => updateForm({ title: e.target.value })}
-              className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm text-[#64748B] mb-1.5">Ngôn ngữ</label>
-            <input type="text" value={form.language} onChange={e => updateForm({ language: e.target.value })}
-              className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm text-[#64748B] mb-1.5">Cấp độ</label>
-            <select value={form.level} onChange={e => updateForm({ level: e.target.value })}
-              className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm">
-              {['A1','A2','B1','B2','C1','C2'].map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm text-[#64748B] mb-1.5">Mô tả</label>
-            <textarea rows={4} value={form.description} onChange={e => updateForm({ description: e.target.value })}
-              className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm resize-none" />
-          </div>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.published} onChange={e => updateForm({ published: e.target.checked })}
-              className="w-4 h-4 accent-blue-600" />
-            <span className="text-sm text-[#334155]">Công khai</span>
-          </label>
-        </div>
-
-        {/* Right: lessons */}
-        <div className="md:col-span-3">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Bài học ({lessons.length})</h2>
-          </div>
-
-          <div className="space-y-2 mb-4">
-            {lessons.map(lesson => (
-              <div key={lesson.id} className="flex items-center gap-2 group">
-                <Link href={`/admin/lessons/${lesson.id}`}
-                  className="flex-1 flex items-center justify-between bg-slate-50 border border-[#E2E8F0] rounded-xl px-5 py-3 hover:border-blue-200 transition-colors">
-                  <div>
-                    <span className="text-[#64748B] text-xs mr-2">{lesson.order}.</span>
-                    <span className="text-sm group-hover:text-[#2563EB] transition-colors">{lesson.title}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#64748B] text-xs">{lesson._count.exercises} bài tập</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${lesson.published ? 'bg-green-500/20 text-green-700' : 'bg-white text-[#64748B]'}`}>
-                      {lesson.published ? 'Live' : 'Nháp'}
-                    </span>
-                  </div>
-                </Link>
-                <button
-                  onClick={() => { if (confirm(`Xóa bài "${lesson.title}"? Toàn bộ bài tập trong bài này sẽ bị xóa.`)) deleteLesson(lesson.id) }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50"
-                  title="Xóa bài học">
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Add lesson */}
-          <div className="flex gap-2">
-            <input type="text" value={newLesson} onChange={e => setNewLesson(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && addLesson()}
-              placeholder="Tên bài học mới..."
-              className="flex-1 bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 transition-colors" />
-            <button onClick={addLesson} disabled={addingLesson || !newLesson.trim()}
-              className="bg-white hover:bg-white/20 px-4 py-2.5 rounded-lg text-sm transition-colors disabled:opacity-40">
-              + Thêm
-            </button>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex border-b border-border">
+        {([
+          { key: 'info', label: '📋 Nội dung' },
+          { key: 'students', label: '👥 Học viên' },
+        ] as const).map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              tab === t.key
+                ? 'border-[#2563EB] text-[#2563EB]'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
-    </div>
 
-      {/* Delete course modal */}
-      {confirmDelete && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
-            <h3 className="font-bold text-[#1E293B] text-lg mb-2">⚠️ Xóa khóa học?</h3>
-            <p className="text-sm text-muted-foreground mb-3 font-medium">{course.title}</p>
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2.5 text-sm mb-4">
-              Toàn bộ <strong>{lessons.length} bài học</strong> và tất cả bài tập, tiến độ học của người dùng sẽ bị xóa vĩnh viễn.
+      {/* Tab: Info + Lessons */}
+      {tab === 'info' && (
+        <div className="grid md:grid-cols-5 gap-8">
+          {/* Left: course info */}
+          <div className="md:col-span-2 space-y-5">
+            <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Thông tin khóa học</h2>
+
+            {isDirty && (
+              <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-lg px-3 py-2">
+                ⚠ Có thay đổi chưa lưu
+              </div>
+            )}
+            <div>
+              <label className="block text-sm text-[#64748B] mb-1.5">Tên khóa học</label>
+              <input type="text" value={form.title} onChange={e => updateForm({ title: e.target.value })}
+                className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm" />
             </div>
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setConfirmDelete(false)} disabled={deleting}
-                className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:bg-slate-50 text-sm">
-                Hủy
-              </button>
-              <button onClick={deleteCourse} disabled={deleting}
-                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50">
-                {deleting ? 'Đang xóa...' : 'Xóa khóa học'}
+            <div>
+              <label className="block text-sm text-[#64748B] mb-1.5">Ngôn ngữ</label>
+              <input type="text" value={form.language} onChange={e => updateForm({ language: e.target.value })}
+                className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm text-[#64748B] mb-1.5">Cấp độ</label>
+              <select value={form.level} onChange={e => updateForm({ level: e.target.value })}
+                className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm">
+                {['A1','A2','B1','B2','C1','C2'].map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-[#64748B] mb-1.5">Mô tả</label>
+              <textarea rows={4} value={form.description} onChange={e => updateForm({ description: e.target.value })}
+                className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm resize-none" />
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={form.published} onChange={e => updateForm({ published: e.target.checked })}
+                className="w-4 h-4 accent-blue-600" />
+              <span className="text-sm text-[#334155]">Công khai</span>
+            </label>
+          </div>
+
+          {/* Right: lessons */}
+          <div className="md:col-span-3">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Bài học ({lessons.length})</h2>
+            </div>
+
+            <div className="space-y-2 mb-4">
+              {lessons.map(lesson => (
+                <div key={lesson.id} className="flex items-center gap-2 group">
+                  <Link href={`/admin/lessons/${lesson.id}`}
+                    className="flex-1 flex items-center justify-between bg-slate-50 border border-[#E2E8F0] rounded-xl px-5 py-3 hover:border-blue-200 transition-colors">
+                    <div>
+                      <span className="text-[#64748B] text-xs mr-2">{lesson.order}.</span>
+                      <span className="text-sm group-hover:text-[#2563EB] transition-colors">{lesson.title}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#64748B] text-xs">{lesson._count.exercises} bài tập</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${lesson.published ? 'bg-green-500/20 text-green-700' : 'bg-white text-[#64748B]'}`}>
+                        {lesson.published ? 'Live' : 'Nháp'}
+                      </span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => { if (confirm(`Xóa bài "${lesson.title}"? Toàn bộ bài tập trong bài này sẽ bị xóa.`)) deleteLesson(lesson.id) }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50"
+                    title="Xóa bài học">
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add lesson */}
+            <div className="flex gap-2">
+              <input type="text" value={newLesson} onChange={e => setNewLesson(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addLesson()}
+                placeholder="Tên bài học mới..."
+                className="flex-1 bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 transition-colors" />
+              <button onClick={addLesson} disabled={addingLesson || !newLesson.trim()}
+                className="bg-white hover:bg-white/20 px-4 py-2.5 rounded-lg text-sm transition-colors disabled:opacity-40">
+                + Thêm
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Tab: Students / Enrollment */}
+      {tab === 'students' && (
+        <EnrollmentTab courseId={course.id} />
+      )}
+    </div>
+
+    {/* Delete course modal */}
+    {confirmDelete && (
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+          <h3 className="font-bold text-[#1E293B] text-lg mb-2">⚠️ Xóa khóa học?</h3>
+          <p className="text-sm text-muted-foreground mb-3 font-medium">{course.title}</p>
+          <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2.5 text-sm mb-4">
+            Toàn bộ <strong>{lessons.length} bài học</strong> và tất cả bài tập, tiến độ học của người dùng sẽ bị xóa vĩnh viễn.
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button onClick={() => setConfirmDelete(false)} disabled={deleting}
+              className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:bg-slate-50 text-sm">
+              Hủy
+            </button>
+            <button onClick={deleteCourse} disabled={deleting}
+              className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50">
+              {deleting ? 'Đang xóa...' : 'Xóa khóa học'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   )
 }
