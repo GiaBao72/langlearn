@@ -12,7 +12,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const body = await req.json()
   const data: Record<string, unknown> = {}
 
-  if (body.role) data.role = body.role
+  if (body.role) {
+    if (!["USER","ADMIN"].includes(body.role)) return NextResponse.json({ error: "Invalid role" }, { status: 400 })
+    data.role = body.role
+  }
   if (body.name !== undefined) data.name = body.name
   if (body.password) {
     if (body.password.length < 6) return NextResponse.json({ error: "Mật khẩu tối thiểu 6 ký tự" }, { status: 400 })
