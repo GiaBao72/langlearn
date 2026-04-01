@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Download } from 'lucide-react'
 
 interface NavbarClientProps {
   user: { name: string; email: string; role: string } | null
@@ -36,9 +36,41 @@ function useDarkMode() {
   return { dark, toggle }
 }
 
+function useInstallPrompt() {
+  const [prompt, setPrompt] = useState<Event | null>(null)
+  const [installed, setInstalled] = useState(false)
+
+  useEffect(() => {
+    // Đã cài rồi thì ẩn nút
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setInstalled(true)
+      return
+    }
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  async function install() {
+    if (!prompt) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await (prompt as any).prompt()
+    if (result?.outcome === 'accepted' || (await (prompt as any).userChoice)?.outcome === 'accepted') {
+      setInstalled(true)
+      setPrompt(null)
+    }
+  }
+
+  return { canInstall: !!prompt && !installed, install }
+}
+
 export default function NavbarClient({ user }: NavbarClientProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { dark, toggle } = useDarkMode()
+  const { canInstall, install } = useInstallPrompt()
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -49,6 +81,19 @@ export default function NavbarClient({ user }: NavbarClientProps) {
     <>
       {/* Desktop right side */}
       <div className="hidden md:flex items-center gap-3">
+        {/* Install PWA button */}
+        {canInstall && (
+          <button
+            onClick={install}
+            aria-label="Tải ứng dụng"
+            title="Tải ứng dụng về máy"
+            className="flex items-center gap-1.5 text-sm text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded-full hover:bg-[#2563EB] hover:text-white transition-colors font-medium"
+          >
+            <Download size={14} />
+            Tải về
+          </button>
+        )}
+
         <button onClick={toggle} aria-label="Toggle dark mode"
           className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
           {dark ? '☀️' : '🌙'}
@@ -115,6 +160,17 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             ))}
 
             <div className="border-t border-[var(--color-border)] my-2" />
+
+            {/* Install PWA - mobile */}
+            {canInstall && (
+              <button
+                onClick={() => { setMenuOpen(false); install() }}
+                className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[#2563EB] font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2"
+              >
+                <Download size={16} />
+                Tải ứng dụng về máy
+              </button>
+            )}
 
             {/* Dark mode toggle mobile */}
             <button onClick={toggle}
