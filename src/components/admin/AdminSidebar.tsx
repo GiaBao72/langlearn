@@ -23,7 +23,6 @@ const navItems = [
   { href: '/admin/users', label: 'Người dùng', icon: Users },
   { href: '/admin/courses', label: 'Khóa học', icon: BookOpen },
   { href: '/admin/lessons', label: 'Bài học', icon: GraduationCap },
-  { href: '/admin/exercises', label: 'Bài tập', icon: Pencil },
   { href: '/admin/blog', label: 'Blog', icon: FileText },
   { href: '/admin/stats', label: 'Thống kê', icon: BarChart2 },
 ]
