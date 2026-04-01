@@ -32,7 +32,19 @@ export async function PATCH(
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const data = await req.json()
+  const body = await req.json()
+
+  // Whitelist allowed fields — prevent courseId injection etc.
+  const allowed = ['title', 'content', 'order', 'published'] as const
+  const data: Record<string, unknown> = {}
+  for (const key of allowed) {
+    if (key in body) data[key] = body[key]
+  }
+
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
+  }
+
   const lesson = await prisma.lesson.update({ where: { id }, data })
   return NextResponse.json(lesson)
 }

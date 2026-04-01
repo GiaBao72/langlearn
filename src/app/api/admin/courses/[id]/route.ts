@@ -30,7 +30,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await params
-  const data = await req.json()
+  const body = await req.json()
+  const allowed = ['title', 'language', 'level', 'description', 'published', 'imageUrl']
+  const data: Record<string, unknown> = {}
+  for (const key of allowed) { if (key in body) data[key] = body[key] }
+  if (!Object.keys(data).length) return NextResponse.json({ error: 'No valid fields' }, { status: 400 })
   const course = await prisma.course.update({ where: { id }, data })
   return NextResponse.json(course)
 }

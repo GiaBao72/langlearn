@@ -26,7 +26,11 @@ export async function PATCH(
 
   const { id } = await params
   const body = await req.json()
-  const exercise = await prisma.exercise.update({ where: { id }, data: body })
+  const allowed = ['type', 'question', 'data', 'points', 'order']
+  const data: Record<string, unknown> = {}
+  for (const key of allowed) { if (key in body) data[key] = body[key] }
+  if (!Object.keys(data).length) return NextResponse.json({ error: 'No valid fields' }, { status: 400 })
+  const exercise = await prisma.exercise.update({ where: { id }, data })
   return NextResponse.json(exercise)
 }
 

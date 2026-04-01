@@ -26,17 +26,26 @@ export default function CourseEditClient({ course }: { course: Course }) {
   const router = useRouter()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [form, setForm] = useState({
+  const initialForm = {
     title: course.title,
     language: course.language,
     level: course.level,
     description: course.description || '',
     published: course.published,
-  })
+  }
+  const [form, setForm] = useState(initialForm)
+  const [lessons, setLessons] = useState<Lesson[]>(course.lessons)
+  const [isDirty, setIsDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [newLesson, setNewLesson] = useState('')
   const [addingLesson, setAddingLesson] = useState(false)
+
+  function updateForm(patch: Partial<typeof form>) {
+    setForm(f => ({ ...f, ...patch }))
+    setIsDirty(true)
+    setSaved(false)
+  }
 
   async function saveChanges() {
     setSaving(true)
@@ -47,20 +56,24 @@ export default function CourseEditClient({ course }: { course: Course }) {
     })
     setSaving(false)
     setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    setIsDirty(false)
+    setTimeout(() => setSaved(false), 3000)
   }
 
   async function addLesson() {
     if (!newLesson.trim()) return
     setAddingLesson(true)
-    await fetch('/api/admin/courses/' + course.id + '/lessons', {
+    const res = await fetch('/api/admin/courses/' + course.id + '/lessons', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: newLesson, order: course.lessons.length + 1 }),
+      body: JSON.stringify({ title: newLesson, order: lessons.length + 1 }),
     })
+    if (res.ok) {
+      const created = await res.json()
+      setLessons(prev => [...prev, { ...created, _count: { exercises: 0 } }])
+    }
     setNewLesson('')
     setAddingLesson(false)
-    router.refresh()
   }
 
   async function deleteCourse() {
@@ -82,9 +95,11 @@ export default function CourseEditClient({ course }: { course: Course }) {
           <h1 className="text-xl font-bold text-foreground">Chỉnh sửa khóa học</h1>
         </div>
         <div className="flex gap-2">
-          <button onClick={saveChanges} disabled={saving}
-            className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50">
-            {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : 'Lưu'}
+          <button onClick={saveChanges} disabled={saving || !isDirty}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 ${
+              isDirty ? 'bg-[#2563EB] hover:bg-blue-700 text-white' : saved ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-500'
+            }`}>
+            {saving ? 'Đang lưu...' : saved ? '✓ Đã lưu' : isDirty ? '💾 Lưu thay đổi' : 'Đã lưu'}
           </button>
           <button onClick={deleteCourse} disabled={deleting}
             className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors disabled:opacity-50 ${
@@ -103,30 +118,35 @@ export default function CourseEditClient({ course }: { course: Course }) {
         <div className="md:col-span-2 space-y-5">
           <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Thông tin khóa học</h2>
 
+          {isDirty && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-lg px-3 py-2">
+              ⚠ Có thay đổi chưa lưu
+            </div>
+          )}
           <div>
             <label className="block text-sm text-[#64748B] mb-1.5">Tên khóa học</label>
-            <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
+            <input type="text" value={form.title} onChange={e => updateForm({ title: e.target.value })}
               className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm" />
           </div>
           <div>
             <label className="block text-sm text-[#64748B] mb-1.5">Ngôn ngữ</label>
-            <input type="text" value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}
+            <input type="text" value={form.language} onChange={e => updateForm({ language: e.target.value })}
               className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm" />
           </div>
           <div>
             <label className="block text-sm text-[#64748B] mb-1.5">Cấp độ</label>
-            <select value={form.level} onChange={e => setForm({ ...form, level: e.target.value })}
+            <select value={form.level} onChange={e => updateForm({ level: e.target.value })}
               className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm">
               {['A1','A2','B1','B2','C1','C2'].map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm text-[#64748B] mb-1.5">Mô tả</label>
-            <textarea rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
+            <textarea rows={4} value={form.description} onChange={e => updateForm({ description: e.target.value })}
               className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm resize-none" />
           </div>
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.published} onChange={e => setForm({ ...form, published: e.target.checked })}
+            <input type="checkbox" checked={form.published} onChange={e => updateForm({ published: e.target.checked })}
               className="w-4 h-4 accent-blue-600" />
             <span className="text-sm text-[#334155]">Công khai</span>
           </label>
@@ -135,11 +155,11 @@ export default function CourseEditClient({ course }: { course: Course }) {
         {/* Right: lessons */}
         <div className="md:col-span-3">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Bài học ({course.lessons.length})</h2>
+            <h2 className="font-semibold text-[#334155] text-sm uppercase tracking-wider">Bài học ({lessons.length})</h2>
           </div>
 
           <div className="space-y-2 mb-4">
-            {course.lessons.map(lesson => (
+            {lessons.map(lesson => (
               <Link key={lesson.id} href={`/admin/lessons/${lesson.id}`}
                 className="flex items-center justify-between bg-slate-50 border border-[#E2E8F0] rounded-xl px-5 py-4 hover:border-blue-200 transition-colors group">
                 <div>
