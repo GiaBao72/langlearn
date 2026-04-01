@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Menu, X, Download, Smartphone } from 'lucide-react'
+import { Menu, X, Download } from 'lucide-react'
 
 interface NavbarClientProps {
   user: { name: string; email: string; role: string } | null
@@ -76,95 +76,10 @@ function useInstallPrompt() {
   return { canNativeInstall: !!prompt && !installed, install, installed }
 }
 
-function InstallModal({ onClose }: { onClose: () => void }) {
-  const platform = detectPlatform()
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-[var(--color-surface)] rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm mx-0 sm:mx-4 p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-192.png" alt="LangLearn" className="w-12 h-12 rounded-xl" />
-            <div>
-              <div className="font-bold text-[var(--color-text-main)]">LangLearn</div>
-              <div className="text-xs text-[var(--color-text-muted)]">Thêm vào màn hình chính</div>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-border)]">
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="border-t border-[var(--color-border)]" />
-
-        {platform === 'ios' && (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-[var(--color-text-main)]">Trên Safari (iOS):</p>
-            <div className="space-y-2 text-sm text-[var(--color-text-muted)]">
-              {[
-                <>Nhấn nút <strong className="text-[var(--color-text-main)]">Chia sẻ</strong> <span className="text-base">⎙</span> ở thanh dưới Safari</>,
-                <>Cuộn xuống, chọn <strong className="text-[var(--color-text-main)]">"Thêm vào màn hình chính"</strong></>,
-                <>Nhấn <strong className="text-[var(--color-text-main)]">Thêm</strong> là xong 🎉</>,
-              ].map((step, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="bg-[#2563eb] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shrink-0 mt-0.5">{i+1}</span>
-                  <span>{step}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {platform === 'android' && (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-[var(--color-text-main)]">Trên Chrome (Android):</p>
-            <div className="space-y-2 text-sm text-[var(--color-text-muted)]">
-              {[
-                <>Nhấn <strong className="text-[var(--color-text-main)]">⋮</strong> (menu 3 chấm) góc trên phải</>,
-                <>Chọn <strong className="text-[var(--color-text-main)]">"Thêm vào màn hình chính"</strong></>,
-                <>Nhấn <strong className="text-[var(--color-text-main)]">Thêm</strong> là xong 🎉</>,
-              ].map((step, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="bg-[#2563eb] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shrink-0 mt-0.5">{i+1}</span>
-                  <span>{step}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {platform === 'desktop' && (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-[var(--color-text-main)]">Trên Chrome / Edge (Desktop):</p>
-            <div className="space-y-2 text-sm text-[var(--color-text-muted)]">
-              {[
-                <>Nhấn biểu tượng <strong className="text-[var(--color-text-main)]">⊕</strong> ở thanh địa chỉ</>,
-                <>Chọn <strong className="text-[var(--color-text-main)]">"Cài đặt LangLearn"</strong></>,
-                <>Nhấn <strong className="text-[var(--color-text-main)]">Cài đặt</strong> là xong 🎉</>,
-              ].map((step, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="bg-[#2563eb] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shrink-0 mt-0.5">{i+1}</span>
-                  <span>{step}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <button onClick={onClose}
-          className="w-full py-2.5 rounded-xl bg-[#2563eb] text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-          Đã hiểu
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export default function NavbarClient({ user }: NavbarClientProps) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [showModal, setShowModal] = useState(false)
   const { dark, toggle } = useDarkMode()
   const { canNativeInstall, install, installed } = useInstallPrompt()
 
@@ -174,18 +89,13 @@ export default function NavbarClient({ user }: NavbarClientProps) {
   }
 
   async function handleInstallClick() {
-    if (canNativeInstall) {
-      await install()
-    } else {
-      setShowModal(true)
-    }
+    await install()
   }
 
-  const showInstallBtn = !installed
+  const showInstallBtn = canNativeInstall
 
   return (
     <>
-      {showModal && <InstallModal onClose={() => setShowModal(false)} />}
 
       {/* Desktop right side */}
       <div className="hidden md:flex items-center gap-3">
@@ -193,7 +103,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
         {showInstallBtn && (
           <button
             onClick={handleInstallClick}
-            title={canNativeInstall ? 'Cài đặt ứng dụng' : 'Hướng dẫn thêm vào màn hình'}
+            title='Cài đặt ứng dụng'
             className="flex items-center gap-1.5 text-sm text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded-full hover:bg-[#2563EB] hover:text-white transition-colors font-medium"
           >
             <Download size={14} />
@@ -260,7 +170,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                 onClick={() => { setMenuOpen(false); handleInstallClick() }}
                 className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[#2563EB] font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2"
               >
-                <Smartphone size={16} />
+                <Download size={16} />
                 Tải ứng dụng về máy
               </button>
             )}
