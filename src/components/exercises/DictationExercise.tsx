@@ -47,6 +47,7 @@ export default function DictationExercise({
   data: DictationData
   value: string
   submitted: boolean
+  correct?: boolean
   onChange: (v: string) => void
 }) {
   const audioText    = data.audio_text ?? data.sentence ?? ''
