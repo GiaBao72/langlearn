@@ -53,7 +53,7 @@ function scoreAnswer(
     }
 
     case 'FILL_BLANK': {
-      const normalize = (s: string) => s.toLowerCase().trim().replace(/[.!?,;:]/g, '')
+      const normalize = (s: string) => s.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[.!?,;:]/g, '').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
       const given = normalize(String(userAnswer ?? ''))
       const allAnswers: string[] = Array.isArray(data.answers) && data.answers.length > 0
         ? data.answers
@@ -71,7 +71,7 @@ function scoreAnswer(
 
     case 'SORT_WORDS': {
       // data.answer is the correct full sentence; data.words are the shuffled pieces
-      const normalize = (s: string) => s.toLowerCase().trim().replace(/[.!?,;:]/g, '')
+      const normalize = (s: string) => s.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[.!?,;:]/g, '').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
       const expected = normalize(String(data.answer ?? ''))
       const given = Array.isArray(userAnswer)
         ? normalize((userAnswer as string[]).join(' '))
@@ -81,7 +81,7 @@ function scoreAnswer(
     }
 
     case 'DICTATION': {
-      const normalize = (s: string) => s.toLowerCase().trim().replace(/[.!?,;:]/g, '')
+      const normalize = (s: string) => s.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[.!?,;:]/g, '').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
       const expected = normalize(data.audio_text ?? data.sentence ?? data.answer ?? '')
       const given = normalize(String(userAnswer ?? ''))
       // Partial scoring: word-level match

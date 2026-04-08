@@ -53,6 +53,27 @@ export default async function PracticePage({ params, searchParams }: {
     )
   }
 
+  // Check enrollment — user phải được enroll vào khóa này
+  const enrollment = await prisma.courseEnrollment.findUnique({
+    where: { userId_courseId: { userId: user.userId, courseId: lesson.course.id } },
+  })
+  if (!enrollment && user.role !== 'ADMIN') {
+    return (
+      <div className='min-h-screen bg-[#F8FAFC]'>
+        <Navbar />
+        <div className='max-w-md mx-auto px-4 py-16 text-center'>
+          <div className='text-5xl mb-4'>🚫</div>
+          <h2 className='text-xl font-bold text-[#334155] mb-2'>Bạn chưa đăng ký khóa này</h2>
+          <p className='text-[#64748B] text-sm mb-6'>Hãy đăng ký khóa học để truy cập bài tập.</p>
+          <Link href={`/courses/${lesson.course.id}`}
+            className='inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm'>
+            Xem khóa học
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   // Load all files for logged-in users (including view_only)
   const allFiles = await prisma.lessonFile.findMany({
     where: { lessonId },

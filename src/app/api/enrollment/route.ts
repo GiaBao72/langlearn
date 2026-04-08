@@ -13,9 +13,14 @@ export async function POST(req: NextRequest) {
 
   const course = await prisma.course.findUnique({
     where: { id: courseId, published: true },
-    select: { id: true },
+    select: { id: true, freeForAll: true },
   })
   if (!course) return NextResponse.json({ error: 'Course not found' }, { status: 404 })
+
+  // Chỉ cho phép tự enroll nếu khóa là freeForAll — các khóa khác phải do admin enroll
+  if (!course.freeForAll && user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Khóa học này cần được admin cấp quyền truy cập' }, { status: 403 })
+  }
 
   await prisma.courseEnrollment.upsert({
     where: { userId_courseId: { userId: user.userId, courseId } },

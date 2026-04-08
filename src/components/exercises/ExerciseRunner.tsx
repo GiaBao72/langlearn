@@ -33,6 +33,7 @@ function checkCorrectness(exercise: Exercise, answer: string): boolean {
   const normalize = (s: string) => s
     .trim()
     .toLowerCase()
+    .replace(/\s+/g, ' ')
     .replace(/[.!?,;:]/g, '')
     .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   switch (exercise.type) {
@@ -62,7 +63,7 @@ function checkCorrectness(exercise: Exercise, answer: string): boolean {
       const net = Math.max(0, correctSelected - wrongSelected)
       return net > 0 && correctSelected === correctAnswers.length && wrongSelected === 0
     }
-    case 'DICTATION':   return normalize(answer) === normalize(data.answer as string)
+    case 'DICTATION':   return normalize(answer) === normalize(String(data.audio_text ?? data.answer ?? ''))
     case 'SORT_WORDS':  return normalize(answer) === normalize(data.answer as string)
     default: return false
   }

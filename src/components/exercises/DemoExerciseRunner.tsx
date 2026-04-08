@@ -41,7 +41,11 @@ function checkCorrectness(exercise: Exercise, userAnswer: string): boolean {
   const data = exercise.data
   if (exercise.type === 'FLASHCARD') return true
   if (exercise.type === 'FILL_BLANK') {
-    return String(data.answer ?? '').trim().toLowerCase() === userAnswer.trim().toLowerCase()
+    const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!?,;:]/g, '').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    const correctAnswers: string[] = Array.isArray(data.answers) && (data.answers as string[]).length > 0
+      ? (data.answers as string[])
+      : [String(data.answer ?? '')]
+    return correctAnswers.some(a => normalize(a) === normalize(userAnswer))
   }
   if (exercise.type === 'MULTIPLE_CHOICE') {
     return String(data.answer ?? '') === userAnswer
@@ -59,12 +63,14 @@ function checkCorrectness(exercise: Exercise, userAnswer: string): boolean {
     return selected.every(s => correct.includes(s)) && correct.every(c => selected.includes(c))
   }
   if (exercise.type === 'DICTATION') {
-    const target = String(data.audio_text ?? data.sentence ?? '').trim().toLowerCase()
-    return target === userAnswer.trim().toLowerCase()
+    const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!?,;:]/g, '').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    const target = normalize(String(data.audio_text ?? data.answer ?? ''))
+    return target === normalize(userAnswer)
   }
   if (exercise.type === 'SORT_WORDS') {
-    const correct = Array.isArray(data.words) ? (data.words as string[]).join(' ') : ''
-    return correct.trim().toLowerCase() === userAnswer.trim().toLowerCase()
+    const correct = String(data.answer ?? '')
+    const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!?,;:]/g, '')
+    return normalize(correct) === normalize(userAnswer)
   }
   return false
 }

@@ -6,6 +6,7 @@ type ExerciseType = 'MULTIPLE_CHOICE' | 'MULTIPLE_CHOICE_PARTIAL' | 'MULTIPLE_CH
 
 function checkAnswer(type: ExerciseType, data: Record<string, unknown>, userAnswer: string | string[], points: number): number {
   const normalize = (s: string) => s.trim().toLowerCase()
+    .replace(/\s+/g, ' ')
     .replace(/[.!?,;:]/g, '')
     .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
 
