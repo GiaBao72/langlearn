@@ -56,8 +56,8 @@ function DemoToggle({ course, onChange }: {
     <button onClick={toggle} disabled={loading} title={course.isDemo ? 'Đang là Demo — click để tắt' : 'Bật Demo'}
       className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all disabled:opacity-50 ${
         course.isDemo
-          ? 'bg-amber-50 border-amber-300 text-amber-600 hover:bg-amber-100'
-          : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-amber-300 hover:text-amber-500'
+          ? 'bg-amber-50 border-amber-300 text-[#2563EB] hover:bg-amber-100'
+          : 'bg-white border-[#E2E8F0] text-[#94A3B8] hover:border-blue-200 hover:text-[#2563EB]'
       }`}>
       {course.isDemo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
       {course.isDemo ? 'Demo ON' : 'Demo OFF'}
@@ -139,7 +139,7 @@ function CourseRow({ course, onChange }: {
           <div className="flex items-center gap-2">
             <p className="font-semibold text-[#334155] text-sm truncate">{course.title}</p>
             {course.isDemo && (
-              <span className="text-xs bg-amber-100 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded-full shrink-0">🎓 Demo</span>
+              <span className="text-xs bg-amber-100 text-[#2563EB] border border-amber-200 px-1.5 py-0.5 rounded-full shrink-0">🎓 Demo</span>
             )}
           </div>
           <div className="flex items-center gap-3 mt-0.5 text-xs text-[#94A3B8]">
@@ -192,7 +192,7 @@ function CourseRow({ course, onChange }: {
               <div className="space-y-1.5">
                 {demoLessons.map((lesson, idx) => (
                   <div key={lesson.id} className="flex items-center gap-3 bg-white border border-[#E2E8F0] rounded-xl px-4 py-2.5">
-                    <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-amber-100 text-[#2563EB] flex items-center justify-center text-xs font-bold shrink-0">
                       {idx + 1}
                     </span>
                     <div className="flex-1 min-w-0">
@@ -262,12 +262,12 @@ export default function AdminDemoPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-amber-100 border border-amber-200">
-            <GraduationCap className="text-amber-600" size={22} />
+          <div className="p-2 rounded-lg bg-blue-50 border border-blue-200">
+            <GraduationCap className="text-[#2563EB]" size={22} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">Quản lý Demo</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl font-bold text-[#334155]">Quản lý Demo</h1>
+            <p className="text-sm text-[#64748B]">
               {demoCount} khóa đang bật Demo · Guest vào{' '}
               <a href="/demo" target="_blank" className="text-[#2563EB] hover:underline">/demo</a>
             </p>
@@ -287,7 +287,7 @@ export default function AdminDemoPage() {
           { key: 'all',  label: `📋 Tất cả (${courses.length})` },
         ] as const).map(t => (
           <button key={t.key} onClick={() => setFilter(t.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === t.key ? 'bg-white text-[#334155] shadow-sm' : 'text-[#64748B] hover:text-[#334155]'}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === t.key ? 'bg-white text-[#1E293B] shadow-sm font-semibold' : 'text-[#64748B] hover:text-[#334155]'}`}>
             {t.label}
           </button>
         ))}

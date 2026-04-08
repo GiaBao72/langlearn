@@ -33,12 +33,12 @@ export default function NewCoursePage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+        <div className="flex items-center gap-2 text-sm text-[#64748B] mb-1">
           <Link href="/admin/courses" className="hover:text-[#2563EB] transition-colors">Khóa học</Link>
           <span>/</span>
-          <span className="text-foreground">Tạo mới</span>
+          <span className="text-[#334155]">Tạo mới</span>
         </div>
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tạo khóa học mới</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-[#334155]">Tạo khóa học mới</h1>
       </div>
 
         {error && (

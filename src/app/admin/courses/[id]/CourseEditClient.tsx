@@ -340,12 +340,12 @@ export default function CourseEditClient({ course }: { course: Course }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <div className="flex items-center gap-2 text-sm text-[#64748B] mb-1">
             <Link href="/admin/courses" className="hover:text-[#2563EB] transition-colors">Khóa học</Link>
             <span>/</span>
-            <span className="text-foreground truncate max-w-xs">{course.title}</span>
+            <span className="text-[#334155] truncate max-w-xs">{course.title}</span>
           </div>
-          <h1 className="text-xl font-bold text-foreground">Chỉnh sửa khóa học</h1>
+          <h1 className="text-xl font-bold text-[#334155]">Chỉnh sửa khóa học</h1>
         </div>
         <div className="flex gap-2">
           {tab === 'info' && (
@@ -368,7 +368,7 @@ export default function CourseEditClient({ course }: { course: Course }) {
         {([{ key: 'info', label: '📋 Nội dung' }, { key: 'students', label: '👥 Học viên' }] as const).map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              tab === t.key ? 'border-[#2563EB] text-[#2563EB]' : 'border-transparent text-muted-foreground hover:text-foreground'
+              tab === t.key ? 'border-[#2563EB] text-[#2563EB]' : 'border-transparent text-[#64748B] hover:text-[#334155]'
             }`}>{t.label}</button>
         ))}
       </div>
@@ -407,7 +407,7 @@ export default function CourseEditClient({ course }: { course: Course }) {
             </label>
             <div className="border-t border-[#E2E8F0] pt-4 space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={form.isDemo} onChange={e => updateForm({ isDemo: e.target.checked })} className="w-4 h-4 accent-amber-500" />
+                <input type="checkbox" checked={form.isDemo} onChange={e => updateForm({ isDemo: e.target.checked })} className="w-4 h-4 accent-blue-600" />
                 <span className="text-sm text-[#334155]">🎓 Khóa học thử (Demo)</span>
               </label>
               {form.isDemo && (
@@ -415,7 +415,7 @@ export default function CourseEditClient({ course }: { course: Course }) {
                   <label className="block text-sm text-[#64748B] mb-1.5">Số bài thử miễn phí</label>
                   <input type="number" min={1} max={100} value={form.demoLessonLimit}
                     onChange={e => updateForm({ demoLessonLimit: parseInt(e.target.value) || 1 })}
-                    className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-amber-400 transition-colors text-sm" />
+                    className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-400 transition-colors text-sm" />
                   <p className="text-xs text-[#94A3B8] mt-1">Guest có thể học {form.demoLessonLimit} bài đầu tiên mà không cần đăng ký.</p>
                 </div>
               )}
@@ -518,13 +518,13 @@ export default function CourseEditClient({ course }: { course: Course }) {
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
           <h3 className="font-bold text-[#1E293B] text-lg mb-2">⚠️ Xóa khóa học?</h3>
-          <p className="text-sm text-muted-foreground mb-3 font-medium">{course.title}</p>
+          <p className="text-sm text-[#64748B] mb-3 font-medium">{course.title}</p>
           <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2.5 text-sm mb-4">
             Toàn bộ <strong>{lessons.length} bài học</strong> và tất cả bài tập, tiến độ học của người dùng sẽ bị xóa vĩnh viễn.
           </div>
           <div className="flex gap-2 justify-end">
             <button onClick={() => setConfirmDelete(false)} disabled={deleting}
-              className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:bg-slate-50 text-sm">Hủy</button>
+              className="px-4 py-2 rounded-lg border border-border text-[#64748B] hover:bg-slate-50 text-sm">Hủy</button>
             <button onClick={deleteCourse} disabled={deleting}
               className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50">
               {deleting ? 'Đang xóa...' : 'Xóa khóa học'}

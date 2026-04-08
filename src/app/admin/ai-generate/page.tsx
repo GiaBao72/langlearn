@@ -5,13 +5,13 @@ import { Sparkles, Download, Loader2, AlertCircle, CheckCircle2, Copy, Trash2, C
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1']
 const EXERCISE_TYPES = [
-  { value: 'FLASHCARD', label: 'Flashcard', desc: 'Học từ vựng mặt trước/sau', color: 'bg-blue-500/10 border-blue-500/30 text-blue-400' },
-  { value: 'FILL_BLANK', label: 'Điền từ', desc: 'Điền vào chỗ trống', color: 'bg-green-500/10 border-green-500/30 text-green-400' },
-  { value: 'MULTIPLE_CHOICE', label: 'Trắc nghiệm (1 đáp án)', desc: 'Chọn 1 đáp án đúng', color: 'bg-purple-500/10 border-purple-500/30 text-purple-400' },
-  { value: 'MULTIPLE_CHOICE_PARTIAL', label: 'Nhiều đáp án (tỉ lệ)', desc: 'Điểm theo tỉ lệ đáp án đúng', color: 'bg-violet-500/10 border-violet-500/30 text-violet-400' },
-  { value: 'MULTIPLE_CHOICE_ALL', label: 'Nhiều đáp án (toàn bộ)', desc: 'Toàn điểm hoặc 0', color: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' },
-  { value: 'SORT_WORDS', label: 'Sắp xếp từ', desc: 'Sắp xếp thành câu đúng', color: 'bg-orange-500/10 border-orange-500/30 text-orange-400' },
-  { value: 'DICTATION', label: 'Nghe chép', desc: 'Nghe và viết lại', color: 'bg-pink-500/10 border-pink-500/30 text-pink-400' },
+  { value: 'FLASHCARD', label: 'Flashcard', desc: 'Học từ vựng mặt trước/sau', color: 'bg-blue-50 border-blue-200 text-blue-600' },
+  { value: 'FILL_BLANK', label: 'Điền từ', desc: 'Điền vào chỗ trống', color: 'bg-green-50 border-green-200 text-green-600' },
+  { value: 'MULTIPLE_CHOICE', label: 'Trắc nghiệm (1 đáp án)', desc: 'Chọn 1 đáp án đúng', color: 'bg-purple-500/10 border-purple-500/30 text-indigo-500' },
+  { value: 'MULTIPLE_CHOICE_PARTIAL', label: 'Nhiều đáp án (tỉ lệ)', desc: 'Điểm theo tỉ lệ đáp án đúng', color: 'bg-violet-50 border-violet-200 text-violet-600' },
+  { value: 'MULTIPLE_CHOICE_ALL', label: 'Nhiều đáp án (toàn bộ)', desc: 'Toàn điểm hoặc 0', color: 'bg-indigo-50 border-indigo-200 text-indigo-600' },
+  { value: 'SORT_WORDS', label: 'Sắp xếp từ', desc: 'Sắp xếp thành câu đúng', color: 'bg-orange-50 border-orange-200 text-orange-600' },
+  { value: 'DICTATION', label: 'Nghe chép', desc: 'Nghe và viết lại', color: 'bg-pink-50 border-pink-200 text-pink-600' },
 ]
 
 const DEFAULT_COUNT = 10
@@ -186,26 +186,26 @@ export default function AIGeneratePage() {
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
-          <Sparkles className="text-purple-400" size={24} />
+        <div className="p-2 rounded-lg bg-indigo-50 border border-indigo-200">
+          <Sparkles className="text-indigo-500" size={24} />
         </div>
         <div>
           <h1 className="text-xl font-bold">AI Tạo Đề Bài</h1>
-          <p className="text-sm text-muted-foreground">Sinh file Excel từ AI, sau đó import vào bài học</p>
+          <p className="text-sm text-[#64748B]">Sinh file Excel từ AI, sau đó import vào bài học</p>
         </div>
       </div>
 
       {/* Preset picker */}
       {presets.length > 0 && (
-        <div className="rounded-xl border bg-card overflow-hidden">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden">
           <button
             onClick={() => setShowPresets(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-accent/50 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
           >
             <span className="flex items-center gap-2">
-              <Copy size={15} className="text-purple-400" />
+              <Copy size={15} className="text-indigo-500" />
               Dùng lại cấu trúc đã lưu
-              <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-semibold">
+              <span className="text-xs bg-blue-100 text-[#2563EB] px-1.5 py-0.5 rounded-full font-semibold">
                 {presets.length}
               </span>
             </span>
@@ -215,37 +215,37 @@ export default function AIGeneratePage() {
           {showPresets && (
             <div className="border-t divide-y">
               {presets.map(preset => (
-                <div key={preset.id} className="flex items-center gap-2 px-4 py-2.5 hover:bg-accent/30 group">
+                <div key={preset.id} className="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 group">
                   <button
                     onClick={() => applyPreset(preset)}
                     className="flex-1 text-left min-w-0"
                   >
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium truncate">{preset.name}</span>
-                      <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                      <span className="text-xs text-[#64748B] bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
                         {preset.level}
                       </span>
                     </div>
                     <div className="flex gap-1 mt-1 flex-wrap">
                       {Object.entries(preset.typeCounts).map(([type, count]) => (
-                        <span key={type} className="text-xs text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
+                        <span key={type} className="text-xs text-[#64748B] bg-slate-100 px-1.5 py-0.5 rounded">
                           {typeLabels[type] ?? type}: {count}
                         </span>
                       ))}
                       {preset.topic && (
-                        <span className="text-xs text-muted-foreground italic truncate">— {preset.topic.slice(0, 30)}</span>
+                        <span className="text-xs text-[#64748B] italic truncate">— {preset.topic.slice(0, 30)}</span>
                       )}
                     </div>
                   </button>
                   <button
                     onClick={() => applyPreset(preset)}
-                    className="shrink-0 text-xs px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 font-medium transition-colors"
+                    className="shrink-0 text-xs px-3 py-1.5 rounded-lg bg-purple-50 text-[#2563EB] hover:bg-blue-50 font-medium transition-colors"
                   >
                     Dùng
                   </button>
                   <button
                     onClick={() => deletePreset(preset.id)}
-                    className="shrink-0 p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    className="shrink-0 p-1.5 text-[#64748B] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                     title="Xóa preset này"
                   >
                     <Trash2 size={13} />
@@ -258,7 +258,7 @@ export default function AIGeneratePage() {
       )}
 
       {/* Form */}
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 space-y-5">
 
         {/* Topic */}
         <div className="space-y-1.5">
@@ -270,7 +270,7 @@ export default function AIGeneratePage() {
             value={topic}
             onChange={e => setTopic(e.target.value)}
             placeholder="VD: chào hỏi, số đếm, gia đình, màu sắc..."
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
         </div>
 
@@ -278,16 +278,16 @@ export default function AIGeneratePage() {
         <div className="space-y-1.5">
           <label className="text-sm font-medium flex items-center gap-2">
             Mô tả chi tiết
-            <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Tùy chọn</span>
+            <span className="text-xs font-normal text-[#64748B] bg-slate-100 px-1.5 py-0.5 rounded">Tùy chọn</span>
           </label>
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
             rows={3}
             placeholder="VD: Tập trung vào từ vựng phòng bếp thường dùng hàng ngày, ưu tiên danh từ và động từ cơ bản, tránh từ chuyên ngành kỹ thuật. Mỗi câu nên ngắn gọn, dễ hiểu cho người mới."
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none leading-relaxed"
+            className="w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none leading-relaxed"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-[#64748B]">
             💡 Mô tả càng chi tiết, AI càng tạo đúng ý — phong cách, trọng tâm, những gì cần tránh.
           </p>
         </div>
@@ -302,8 +302,8 @@ export default function AIGeneratePage() {
                 onClick={() => setLevel(l)}
                 className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-all ${
                   level === l
-                    ? 'bg-purple-500/10 border-purple-500/40 text-purple-400'
-                    : 'border-border bg-background text-muted-foreground hover:bg-accent'
+                    ? 'bg-purple-500/10 border-purple-500/40 text-indigo-500'
+                    : 'border-[#E2E8F0] bg-slate-50 text-[#64748B] hover:bg-slate-50'
                 }`}
               >
                 {l}
@@ -319,8 +319,8 @@ export default function AIGeneratePage() {
               Loại bài tập <span className="text-red-400">*</span>
             </label>
             {selectedTypes.length > 0 && (
-              <span className="text-xs text-muted-foreground">
-                Tổng: <span className="font-semibold text-foreground">{totalCount}</span> câu
+              <span className="text-xs text-[#64748B]">
+                Tổng: <span className="font-semibold text-[#334155]">{totalCount}</span> câu
               </span>
             )}
           </div>
@@ -331,7 +331,7 @@ export default function AIGeneratePage() {
               return (
                 <div
                   key={t.value}
-                  className={`rounded-lg border transition-all ${isSelected ? t.color : 'border-border bg-background'}`}
+                  className={`rounded-lg border transition-all ${isSelected ? t.color : 'border-[#E2E8F0] bg-slate-50'}`}
                 >
                   <div className="flex items-center gap-3 px-3 py-2.5">
                     <button
@@ -351,8 +351,8 @@ export default function AIGeneratePage() {
                     </button>
 
                     <div className="flex-1 min-w-0 cursor-pointer select-none" onClick={() => toggleType(t.value)}>
-                      <div className={`text-sm font-medium leading-tight ${isSelected ? '' : 'text-foreground'}`}>{t.label}</div>
-                      <div className={`text-xs mt-0.5 ${isSelected ? 'opacity-60' : 'text-muted-foreground'}`}>{t.desc}</div>
+                      <div className={`text-sm font-medium leading-tight ${isSelected ? '' : 'text-[#334155]'}`}>{t.label}</div>
+                      <div className={`text-xs mt-0.5 ${isSelected ? 'opacity-60' : 'text-[#64748B]'}`}>{t.desc}</div>
                     </div>
 
                     {isSelected && (
@@ -381,12 +381,12 @@ export default function AIGeneratePage() {
           </div>
 
           {selectedTypes.length === 0 && (
-            <p className="text-xs text-muted-foreground pt-1">Chọn ít nhất 1 loại bài tập để tiếp tục.</p>
+            <p className="text-xs text-[#64748B] pt-1">Chọn ít nhất 1 loại bài tập để tiếp tục.</p>
           )}
         </div>
 
         {/* Save preset row */}
-        <div className="pt-1 border-t border-dashed border-border">
+        <div className="pt-1 border-t border-dashed border-[#E2E8F0]">
           {showSaveInput ? (
             <div className="flex items-center gap-2">
               <input
@@ -396,21 +396,21 @@ export default function AIGeneratePage() {
                 onChange={e => setSavePresetName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') saveCurrentAsPreset(); if (e.key === 'Escape') setShowSaveInput(false) }}
                 placeholder={`${topic.slice(0, 20) || 'Không tên'} · ${level}`}
-                className="flex-1 rounded-lg border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="flex-1 rounded-lg border bg-slate-50 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
               <button onClick={saveCurrentAsPreset}
-                className="text-sm px-3 py-1.5 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors shrink-0">
+                className="text-sm px-3 py-1.5 rounded-lg bg-[#2563EB] text-white font-medium hover:bg-blue-700 transition-colors shrink-0">
                 Lưu
               </button>
               <button onClick={() => { setShowSaveInput(false); setSavePresetName('') }}
-                className="text-sm px-3 py-1.5 rounded-lg border text-muted-foreground hover:bg-accent transition-colors shrink-0">
+                className="text-sm px-3 py-1.5 rounded-lg border text-[#64748B] hover:bg-slate-50 transition-colors shrink-0">
                 Hủy
               </button>
             </div>
           ) : (
             <button
               onClick={() => setShowSaveInput(true)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-purple-600 transition-colors py-1"
+              className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#2563EB] transition-colors py-1"
             >
               <Copy size={13} />
               Lưu cấu trúc này để dùng lại sau
@@ -420,13 +420,13 @@ export default function AIGeneratePage() {
 
         {/* Error / Success */}
         {error && (
-          <div className="flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2.5 text-sm text-red-400">
+          <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-600">
             <AlertCircle size={16} className="shrink-0 mt-0.5" />
             {error}
           </div>
         )}
         {success && (
-          <div className="flex items-start gap-2 rounded-lg bg-green-500/10 border border-green-500/20 px-3 py-2.5 text-sm text-green-400">
+          <div className="flex items-start gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2.5 text-sm text-green-600">
             <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
             {success}
           </div>
@@ -436,7 +436,7 @@ export default function AIGeneratePage() {
         <button
           onClick={handleGenerate}
           disabled={loading || selectedTypes.length === 0}
-          className="w-full flex items-center justify-center gap-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium px-4 py-2.5 text-sm transition-colors"
+          className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-4 py-2.5 text-sm transition-colors"
         >
           {loading ? (
             <>
@@ -456,14 +456,14 @@ export default function AIGeneratePage() {
       </div>
 
       {/* Guide */}
-      <div className="rounded-xl border bg-card p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Hướng dẫn</h3>
-        <ol className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex gap-2"><span className="text-purple-400 font-bold shrink-0">1.</span> Nhập chủ đề — thêm mô tả chi tiết để AI hiểu đúng ý hơn</li>
-          <li className="flex gap-2"><span className="text-purple-400 font-bold shrink-0">2.</span> Chọn loại bài và đặt số câu cho từng loại</li>
-          <li className="flex gap-2"><span className="text-purple-400 font-bold shrink-0">3.</span> Nhấn <strong>Lưu cấu trúc</strong> nếu muốn dùng lại setup này</li>
-          <li className="flex gap-2"><span className="text-purple-400 font-bold shrink-0">4.</span> Nhấn "Tạo đề &amp; Tải Excel" — AI sinh file .xlsx (cấu trúc tự lưu sau khi tạo)</li>
-          <li className="flex gap-2"><span className="text-purple-400 font-bold shrink-0">5.</span> Vào <strong>Bài học → Import Excel</strong> để nhập vào DB</li>
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 space-y-3">
+        <h3 className="text-sm font-semibold text-[#64748B] uppercase tracking-wide">Hướng dẫn</h3>
+        <ol className="space-y-2 text-sm text-[#64748B]">
+          <li className="flex gap-2"><span className="text-indigo-500 font-bold shrink-0">1.</span> Nhập chủ đề — thêm mô tả chi tiết để AI hiểu đúng ý hơn</li>
+          <li className="flex gap-2"><span className="text-indigo-500 font-bold shrink-0">2.</span> Chọn loại bài và đặt số câu cho từng loại</li>
+          <li className="flex gap-2"><span className="text-indigo-500 font-bold shrink-0">3.</span> Nhấn <strong>Lưu cấu trúc</strong> nếu muốn dùng lại setup này</li>
+          <li className="flex gap-2"><span className="text-indigo-500 font-bold shrink-0">4.</span> Nhấn "Tạo đề &amp; Tải Excel" — AI sinh file .xlsx (cấu trúc tự lưu sau khi tạo)</li>
+          <li className="flex gap-2"><span className="text-indigo-500 font-bold shrink-0">5.</span> Vào <strong>Bài học → Import Excel</strong> để nhập vào DB</li>
         </ol>
       </div>
     </div>
