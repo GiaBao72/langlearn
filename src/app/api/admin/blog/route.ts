@@ -38,10 +38,18 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // slugCheck: kiểm tra slug đã tồn tại chưa
+  const { searchParams } = new URL(req.url)
+  const slugCheck = searchParams.get('slugCheck')
+  if (slugCheck) {
+    const existing = await prisma.blogPost.findUnique({ where: { slug: slugCheck }, select: { id: true } })
+    return NextResponse.json({ exists: !!existing })
   }
 
   const posts = await prisma.blogPost.findMany({

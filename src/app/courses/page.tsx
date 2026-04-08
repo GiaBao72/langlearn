@@ -7,13 +7,8 @@ import type { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Khóa học — LangLearn',
+  title: 'Khóa học — G-Deutsch',
   description: 'Khám phá các khóa học ngoại ngữ từ A1 đến C2. Học tiếng Đức và nhiều ngôn ngữ khác với phương pháp Spaced Repetition.',
-  openGraph: {
-    title: 'Khóa học — LangLearn',
-    description: 'Học ngoại ngữ hiệu quả từ A1 đến C2 với Spaced Repetition.',
-    type: 'website',
-  },
 }
 
 export default async function CoursesPage() {
@@ -22,20 +17,17 @@ export default async function CoursesPage() {
 
   const courses = await prisma.course.findMany({
     where: { published: true },
-    orderBy: { title: 'asc' },
+    orderBy: [{ level: 'asc' }, { title: 'asc' }],
     include: {
-      _count: { select: { lessons: true } },
       lessons: {
         where: { published: true },
-        select: {
-          id: true,
-          _count: { select: { exercises: true } },
-        },
+        orderBy: { order: 'asc' },
+        include: { _count: { select: { exercises: true } } },
       },
     },
   })
 
-  // Fetch enrollments for current user
+  // Enrolled set
   let enrolledSet = new Set<string>()
   if (user && !isAdmin) {
     const enrollments = await prisma.courseEnrollment.findMany({
@@ -45,36 +37,61 @@ export default async function CoursesPage() {
     enrolledSet = new Set(enrollments.map(e => e.courseId))
   }
 
-  // Fetch lesson completions
-  let completionMap: Record<string, number> = {}
+  // Completed lessons
+  let completedSet = new Set<string>()
   if (user) {
     const completions = await prisma.lessonCompletion.findMany({
       where: { userId: user.userId },
       select: { lessonId: true },
     })
-    const completedSet = new Set(completions.map(c => c.lessonId))
-    for (const course of courses) {
-      completionMap[course.id] = course.lessons.filter(l => completedSet.has(l.id)).length
-    }
+    completedSet = new Set(completions.map(c => c.lessonId))
   }
 
-  const coursesData = courses.map(c => ({
-    id: c.id,
-    title: c.title,
-    description: c.description,
-    language: c.language,
-    level: c.level,
-    lessonCount: c._count.lessons,
-    exerciseCount: c.lessons.reduce((s, l) => s + l._count.exercises, 0),
-    completedLessons: completionMap[c.id] ?? 0,
-    // Admin sees all as enrolled; regular users check enrolledSet
-    enrolled: isAdmin ? true : enrolledSet.has(c.id),
-  }))
+  const coursesData = courses.map(c => {
+    const enrolledStatus = isAdmin ? 'admin' : enrolledSet.has(c.id) ? 'enrolled' : 'not-enrolled'
+    return {
+      id: c.id,
+      title: c.title,
+      description: c.description,
+      language: c.language,
+      level: c.level,
+      enrolledStatus: enrolledStatus as 'admin' | 'enrolled' | 'not-enrolled',
+      lessons: c.lessons.map(l => ({
+        id: l.id,
+        title: l.title,
+        order: l.order,
+        section: l.section ?? null,
+        exerciseCount: l._count.exercises,
+        completed: completedSet.has(l.id),
+      })),
+    }
+  })
 
   return (
-    <>
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
-      <CoursesClient courses={coursesData} userId={user?.userId ?? null} isAdmin={isAdmin} />
-    </>
+
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-[#1E3A5F] to-[#2563EB] text-white">
+        <div className="max-w-5xl mx-auto px-4 py-10 text-center">
+          <div className="text-4xl mb-3">📚</div>
+          <h1 className="text-3xl font-bold mb-2">Khóa Học</h1>
+          <p className="text-blue-200 text-sm">
+            {courses.length} khóa học · Chọn khóa học và bắt đầu ngay hôm nay
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {coursesData.length === 0 ? (
+          <div className="text-center py-20 text-[#94A3B8] bg-white rounded-xl border border-[#E2E8F0] shadow-sm">
+            <p className="text-4xl mb-3">📭</p>
+            <p>Chưa có khóa học nào được công bố.</p>
+          </div>
+        ) : (
+          <CoursesClient courses={coursesData} totalCourses={courses.length} />
+        )}
+      </div>
+    </div>
   )
 }

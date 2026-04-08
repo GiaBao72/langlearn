@@ -22,11 +22,11 @@ interface AdminHeaderProps {
 
 const breadcrumbMap: Record<string, string> = {
   admin: 'Dashboard',
-  users: 'Nguoi dung',
-  courses: 'Khoa hoc',
-  exercises: 'Bai tap',
+  users: 'Người dùng',
+  courses: 'Khóa học',
+  exercises: 'Bài tập',
   blog: 'Blog',
-  lessons: 'Bai hoc',
+  lessons: 'Bài học',
   new: 'Them moi',
 }
 

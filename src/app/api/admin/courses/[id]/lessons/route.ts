@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id: courseId } = await params
-  const { title, order, content } = await req.json()
+  const { title, order, content, section } = await req.json()
   if (!title) return NextResponse.json({ error: 'Title required' }, { status: 400 })
 
   // Auto-increment order if not provided
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       courseId,
       order: order ?? (lastLesson ? lastLesson.order + 1 : 1),
       content: content ?? null,
+      section: section ?? null,
       published: false,
     },
   })

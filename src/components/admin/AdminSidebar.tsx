@@ -13,8 +13,9 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  GraduationCap,
   BarChart2,
+  Sparkles,
+  ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,9 +23,10 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/users', label: 'Người dùng', icon: Users },
   { href: '/admin/courses', label: 'Khóa học', icon: BookOpen },
-  { href: '/admin/lessons', label: 'Bài học', icon: GraduationCap },
+  { href: '/admin/exams', label: 'Bài kiểm tra', icon: ClipboardList },
   { href: '/admin/blog', label: 'Blog', icon: FileText },
   { href: '/admin/stats', label: 'Thống kê', icon: BarChart2 },
+  { href: '/admin/ai-generate', label: 'AI Tạo Đề', icon: Sparkles },
 ]
 
 const bottomItems = [
@@ -61,7 +63,7 @@ function SidebarContent({ collapsed, onClose }: { collapsed: boolean; onClose?: 
       {/* Logo + close (mobile) */}
       <div className="flex items-center justify-between h-14 px-4 border-b border-slate-700/50">
         {!collapsed && (
-          <span className="text-white font-bold text-lg tracking-tight truncate">LangLearn</span>
+          <span className="text-white font-bold text-lg tracking-tight truncate">G-Deutsch</span>
         )}
         {collapsed && (
           <span className="text-blue-400 font-bold text-lg mx-auto">L</span>

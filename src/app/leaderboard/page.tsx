@@ -3,8 +3,8 @@ import LeaderboardClient from './LeaderboardClient'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Bảng xếp hạng — LangLearn',
-  description: 'Top học viên LangLearn tuần này và mọi thời đại.',
+  title: 'Bảng xếp hạng — G-Deutsch',
+  description: 'Top học viên G-Deutsch tuần này và mọi thời đại.',
 }
 
 export default function LeaderboardPage() {

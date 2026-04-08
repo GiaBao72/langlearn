@@ -63,15 +63,15 @@ function Heatmap({ days }: { days: HeatmapDay[] }) {
   }
 
   return (
-    <div className="grid grid-cols-10 gap-1">
+    <div className="overflow-x-auto pb-1"><div className="grid gap-1 min-w-[280px]" style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}>
       {days.map((day) => (
         <div
           key={day.date}
           title={`${day.date}: ${day.count} bài`}
-          className={`w-6 h-6 rounded-sm ${getColor(day.count)}`}
+          className={`aspect-square rounded-sm ${getColor(day.count)}`}
         />
       ))}
-    </div>
+    </div></div>
   )
 }
 
@@ -93,9 +93,9 @@ function DashboardSkeleton() {
       </div>
       <div className="border border-[#E2E8F0] rounded-xl p-5 mb-8">
         <div className="h-5 bg-slate-200 rounded w-40 mb-4" />
-        <div className="grid grid-cols-10 gap-1">
+        <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}>
           {Array.from({length: 30}).map((_, i) => (
-            <div key={i} className="w-6 h-6 rounded-sm bg-slate-200" />
+            <div key={i} className="aspect-square rounded-sm bg-slate-200" />
           ))}
         </div>
       </div>
@@ -149,9 +149,9 @@ export default function DashboardClient() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       {/* Welcome banner */}
       {showWelcome && (
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-5 flex items-center justify-between gap-4 mb-6 shadow-md">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 shadow-md">
           <div>
-            <p className="font-bold text-lg">🎉 Chào mừng đến với LangLearn!</p>
+            <p className="font-bold text-lg">🎉 Chào mừng đến với G-Deutsch!</p>
             <p className="text-blue-100 text-sm mt-0.5">Tài khoản của bạn đã sẵn sàng. Bắt đầu học ngay thôi!</p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
@@ -169,14 +169,14 @@ export default function DashboardClient() {
         nextLesson={data.nextLesson}
       />
       {/* Hero row */}
-      <div className="mb-6 sm:mb-8 flex flex-wrap items-center gap-3">
+      <div className="mb-6 sm:mb-8 flex flex-wrap items-start sm:items-center gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#334155]">
             Xin chào! 👋
           </h1>
           <p className="text-[#64748B] text-sm sm:text-base mt-1">Hôm nay học gì nào?</p>
         </div>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
           {data.streak > 0 && (
             <Badge className="flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-600 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-orange-50">
               <Flame className="w-4 h-4" />
@@ -231,7 +231,7 @@ export default function DashboardClient() {
         </CardHeader>
         <CardContent>
           <Heatmap days={data.heatmap} />
-          <div className="flex items-center gap-4 mt-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
             <p className="text-[#64748B] text-xs">Mỗi ô = 1 ngày</p>
             <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
               <span className="w-3 h-3 rounded-sm bg-[#E2E8F0] inline-block" />

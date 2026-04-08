@@ -1,7 +1,11 @@
-export const dynamic = 'force-dynamic'
-
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Lộ trình học — G-Deutsch',
+  description: 'Lộ trình học tiếng Đức từ A1 đến C2 rõ ràng, có mục tiêu cụ thể và thời gian ước tính cho từng cấp độ.',
+}
 
 const levels = [
   {
@@ -63,6 +67,36 @@ const levels = [
     badgeColor: 'bg-purple-100 text-purple-700 border border-purple-200',
     borderColor: 'border-purple-200',
     btnColor: 'bg-purple-500 hover:bg-purple-600 text-white',
+  },
+  {
+    code: 'C1',
+    name: 'Thành thạo',
+    weeks: 20,
+    description: 'Sử dụng ngôn ngữ linh hoạt, hiệu quả cho các mục đích xã hội, học thuật và chuyên nghiệp. Diễn đạt ý tưởng phức tạp một cách rõ ràng.',
+    skills: [
+      'Hiểu văn bản dài, phức tạp và ngầm ý',
+      'Diễn đạt tự nhiên, trôi chảy không cần tìm từ',
+      'Sử dụng ngôn ngữ linh hoạt trong công việc và học thuật',
+      'Viết văn bản có cấu trúc tốt về chủ đề phức tạp',
+    ],
+    badgeColor: 'bg-rose-100 text-rose-700 border border-rose-200',
+    borderColor: 'border-rose-200',
+    btnColor: 'bg-rose-500 hover:bg-rose-600 text-white',
+  },
+  {
+    code: 'C2',
+    name: 'Thành thục',
+    weeks: 24,
+    description: 'Hiểu hầu hết mọi thứ nghe hoặc đọc. Tóm tắt thông tin từ nhiều nguồn nói và viết, tái hiện lập luận và sự kiện một cách mạch lạc.',
+    skills: [
+      'Hiểu hoàn toàn ngôn ngữ nói và viết tự nhiên',
+      'Tóm tắt và phân tích nguồn thông tin đa dạng',
+      'Biểu đạt chính xác với sắc thái tinh tế',
+      'Trình độ tương đương người bản ngữ học thức',
+    ],
+    badgeColor: 'bg-slate-100 text-slate-700 border border-slate-300',
+    borderColor: 'border-slate-300',
+    btnColor: 'bg-slate-600 hover:bg-slate-700 text-white',
   },
 ]
 
@@ -126,10 +160,10 @@ export default function RoadmapPage() {
 
               {/* CTA */}
               <Link
-                href="/courses"
+                href={`/courses?level=${level.code}`}
                 className={`mt-auto inline-block text-center px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${level.btnColor}`}
               >
-                Bắt đầu cấp này →
+                Bắt đầu cấp {level.code} →
               </Link>
             </div>
           ))}
@@ -139,10 +173,10 @@ export default function RoadmapPage() {
         <div className="mt-12 bg-white border border-[#E2E8F0] rounded-2xl p-8 text-center shadow-sm">
           <p className="text-[#64748B] text-base mb-2">Chưa biết level của mình?</p>
           <Link
-            href="/register"
+            href="/courses"
             className="inline-flex items-center gap-2 text-[#2563EB] font-semibold text-lg hover:underline"
           >
-            Làm bài test miễn phí <span aria-hidden="true">→</span>
+            Xem tất cả khóa học <span aria-hidden="true">→</span>
           </Link>
         </div>
       </section>

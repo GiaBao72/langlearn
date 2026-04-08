@@ -16,6 +16,8 @@ enum ExerciseType {
   FLASHCARD
   FILL_BLANK
   MULTIPLE_CHOICE
+  MULTIPLE_CHOICE_PARTIAL
+  MULTIPLE_CHOICE_ALL
   DICTATION
   SORT_WORDS
 }
@@ -29,11 +31,14 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  refreshTokens RefreshToken[]
+  refreshTokens       RefreshToken[]
   progress            UserProgress[]
   passwordResetTokens PasswordResetToken[]
   lessonCompletions   LessonCompletion[]
   enrollments         CourseEnrollment[]
+  examAttempts        ExamAttempt[]
+  loginHistory        LoginHistory[]
+  studySessions       StudySession[]
 
   @@map("users")
 }
@@ -63,6 +68,7 @@ model Course {
 
   lessons     Lesson[]
   enrollments CourseEnrollment[]
+  exams       Exam[]
 
   @@map("courses")
 }
@@ -72,6 +78,7 @@ model Lesson {
   courseId  String
   title     String
   order     Int
+  section  String?
   content   String?
   published Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -80,8 +87,27 @@ model Lesson {
   course      Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
   exercises   Exercise[]
   completions LessonCompletion[]
+  files       LessonFile[]
+  studySessions StudySession[]
 
   @@map("lessons")
+}
+
+model LessonFile {
+  id             String   @id @default(cuid())
+  lessonId       String
+  displayName    String
+  storedName     String
+  mimeType       String
+  sizeBytes      Int
+  downloadPolicy String   @default("logged_in")
+  order          Int      @default(0)
+  section  String?
+  createdAt      DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_files")
 }
 
 model Exercise {
@@ -92,6 +118,7 @@ model Exercise {
   data     Json
   points   Int          @default(10)
   order    Int          @default(0)
+  section  String?
 
   lesson   Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   progress UserProgress[]
@@ -154,6 +181,60 @@ model LessonCompletion {
   @@map("lesson_completions")
 }
 
+model Exam {
+  id           String   @id @default(cuid())
+  courseId     String
+  title        String
+  description  String?
+  durationMins Int?
+  passingPct   Int?
+  maxAttempts  Int?
+  shuffleQ     Boolean  @default(false)
+  published    Boolean  @default(false)
+  order        Int      @default(0)
+  section  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions ExamQuestion[]
+  attempts  ExamAttempt[]
+
+  @@map("exams")
+}
+
+model ExamQuestion {
+  id       String       @id @default(cuid())
+  examId   String
+  type     ExerciseType
+  question String
+  data     Json
+  points   Int          @default(1)
+  order    Int          @default(0)
+  section  String?
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@map("exam_questions")
+}
+
+model ExamAttempt {
+  id          String    @id @default(cuid())
+  examId      String
+  userId      String
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  score       Int       @default(0)
+  maxScore    Int       @default(0)
+  passed      Boolean?
+  answers     Json      @default("[]")
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("exam_attempts")
+}
+
 model CourseEnrollment {
   id         String   @id @default(cuid())
   userId     String   @map("user_id")
@@ -165,4 +246,33 @@ model CourseEnrollment {
 
   @@unique([userId, courseId])
   @@map("course_enrollments")
+}
+
+model LoginHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  loginAt   DateTime @default(now())
+  ipAddress String?
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loginAt])
+  @@map("login_history")
+}
+
+model StudySession {
+  id           String    @id @default(cuid())
+  userId       String
+  lessonId     String?
+  startedAt    DateTime  @default(now())
+  lastPingAt   DateTime  @default(now())
+  endedAt      DateTime?
+  durationSecs Int       @default(0)
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  @@index([userId, startedAt])
+  @@map("study_sessions")
 }

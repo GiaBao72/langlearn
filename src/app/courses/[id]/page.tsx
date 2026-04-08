@@ -22,12 +22,12 @@ const LEVEL_ICON: Record<string, string> = {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
   const course = await prisma.course.findUnique({ where: { id }, select: { title: true, description: true, level: true } })
-  if (!course) return { title: 'Không tìm thấy — LangLearn' }
+  if (!course) return { title: 'Không tìm thấy — G-Deutsch' }
   return {
-    title: `${course.title} (${course.level}) — LangLearn`,
+    title: `${course.title} (${course.level}) — G-Deutsch`,
     description: course.description || `Khóa học ${course.title} cấp ${course.level} với phương pháp Spaced Repetition`,
     openGraph: {
-      title: `${course.title} — LangLearn`,
+      title: `${course.title} — G-Deutsch`,
       description: course.description || `Học ${course.title} hiệu quả với Spaced Repetition`,
       type: 'website',
     },
@@ -47,6 +47,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         orderBy: { order: 'asc' },
         include: { _count: { select: { exercises: true } } },
       },
+
     },
   })
   if (!course) notFound()
@@ -143,7 +144,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <Link href={`/practice/${nextLesson.id}`}
                 className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
                 {completedCount === 0 ? '🚀 Bắt đầu học' : '▶ Tiếp tục học'}
-                <span className="font-normal opacity-80 text-xs truncate max-w-[160px]">{nextLesson.title}</span>
+                <span className="font-normal opacity-80 text-xs truncate max-w-[120px] sm:max-w-[200px]">{nextLesson.title}</span>
               </Link>
             </div>
           )}
@@ -182,85 +183,122 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </div>
         )}
 
-        {/* Lessons list */}
-        <div className="space-y-2.5">
-          <h2 className="text-sm font-semibold text-[#64748B] uppercase tracking-wider mb-3">Danh sách bài học</h2>
+        {/* Lessons list — grouped by section */}
+        {(() => {
+          // Build section groups — sort by min(order) of each section so order matches admin view
+          type LessonWithSection = typeof course.lessons[0] & { section?: string | null }
+          const sectionMap = new Map<string, { minOrder: number; items: typeof course.lessons }>()
+          let nullMinOrder = Infinity
+          const nullItems: typeof course.lessons = []
+          for (const lesson of course.lessons) {
+            const sec = (lesson as LessonWithSection).section ?? null
+            if (sec) {
+              if (!sectionMap.has(sec)) sectionMap.set(sec, { minOrder: lesson.order, items: [] })
+              const g = sectionMap.get(sec)!
+              if (lesson.order < g.minOrder) g.minOrder = lesson.order
+              g.items.push(lesson)
+            } else {
+              if (lesson.order < nullMinOrder) nullMinOrder = lesson.order
+              nullItems.push(lesson)
+            }
+          }
+          // Sort sections by their earliest lesson order
+          const sortedSections = [...sectionMap.entries()].sort((a, b) => a[1].minOrder - b[1].minOrder)
+          const grouped: { section: string | null; items: typeof course.lessons }[] = [
+            ...sortedSections.map(([sec, g]) => ({ section: sec, items: g.items })),
+            ...(nullItems.length > 0 ? [{ section: null as null, items: nullItems }] : []),
+          ]
+          const hasAnySections = sortedSections.length > 0
 
-          {course.lessons.map((lesson, i) => {
-            const completion = completionMap[lesson.id]
-            const done = !!completion
-            const scoreStr = done && completion.maxScore > 0
-              ? `${completion.score}/${completion.maxScore} điểm` : null
-            const scorePct = done && completion.maxScore > 0
-              ? Math.round((completion.score / completion.maxScore) * 100) : null
-            const isNext = isEnrolled && !done && nextLesson?.id === lesson.id
+          let globalIdx = 0
+          return (
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold text-[#64748B] uppercase tracking-wider">Danh sách bài học</h2>
+              {grouped.map(group => (
+                <div key={group.section ?? '__none__'}>
+                  {hasAnySections && group.section && (
+                    <div className="flex items-center gap-3 mb-2 mt-4 first:mt-0">
+                      <div className="h-px flex-1 bg-[#E2E8F0]" />
+                      <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📂</span>{group.section}
+                        <span className="font-normal text-[#94A3B8]">({group.items.length} bài)</span>
+                      </span>
+                      <div className="h-px flex-1 bg-[#E2E8F0]" />
+                    </div>
+                  )}
+                  <div className="space-y-2.5">
+                    {group.items.map((lesson) => {
+                      const i = globalIdx++
+                      const completion = completionMap[lesson.id]
+                      const done = !!completion
+                      const scoreStr = done && completion.maxScore > 0 ? `${completion.score}/${completion.maxScore} điểm` : null
+                      const scorePct = done && completion.maxScore > 0 ? Math.round((completion.score / completion.maxScore) * 100) : null
+                      const isNext = isEnrolled && !done && nextLesson?.id === lesson.id
+                      const locked = !isEnrolled || !user
+                      const href = locked
+                        ? (user ? '#' : `/login?from=${encodeURIComponent(`/courses/${course.id}`)}`)
+                        : `/practice/${lesson.id}`
 
-            // Determine href based on enrollment
-            const locked = !isEnrolled || !user
-            const href = locked
-              ? (user ? '#' : `/login?from=${encodeURIComponent(`/courses/${course.id}`)}`)
-              : `/practice/${lesson.id}`
-
-            return (
-              <Link key={lesson.id} href={href}
-                className={`flex items-center gap-4 p-4 sm:p-5 rounded-xl border transition-all group ${
-                  locked
-                    ? 'border-[#E2E8F0] bg-slate-50 cursor-not-allowed opacity-70'
-                    : done
-                    ? 'border-green-200 bg-green-50 hover:border-green-300'
-                    : isNext
-                    ? 'border-blue-300 bg-blue-50 hover:border-blue-400 shadow-sm'
-                    : 'border-[#E2E8F0] bg-white hover:border-blue-200 hover:shadow-sm'
-                }`}>
-
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                  locked ? 'bg-slate-200 text-slate-400'
-                  : done ? 'bg-green-100 text-green-600'
-                  : isNext ? 'bg-blue-100 text-blue-600'
-                  : 'bg-slate-100 text-[#94A3B8]'
-                }`}>
-                  {locked ? '🔒' : done ? '✓' : isNext ? '▶' : i + 1}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className={`font-medium text-sm sm:text-base truncate transition-colors ${
-                    locked ? 'text-[#94A3B8]'
-                    : done ? 'text-green-800'
-                    : isNext ? 'text-blue-700'
-                    : 'text-[#334155] group-hover:text-[#2563EB]'
-                  }`}>
-                    {lesson.title}
-                    {isNext && <span className="ml-2 text-[10px] font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full align-middle">Tiếp theo</span>}
+                      return (
+                        <Link key={lesson.id} href={href}
+                          className={`flex items-center gap-4 p-4 sm:p-5 rounded-xl border transition-all group ${
+                            locked ? 'border-[#E2E8F0] bg-slate-50 cursor-not-allowed opacity-70'
+                            : done ? 'border-green-200 bg-green-50 hover:border-green-300'
+                            : isNext ? 'border-blue-300 bg-blue-50 hover:border-blue-400 shadow-sm'
+                            : 'border-[#E2E8F0] bg-white hover:border-blue-200 hover:shadow-sm'
+                          }`}>
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
+                            locked ? 'bg-slate-200 text-slate-400'
+                            : done ? 'bg-green-100 text-green-600'
+                            : isNext ? 'bg-blue-100 text-blue-600'
+                            : 'bg-slate-100 text-[#94A3B8]'
+                          }`}>
+                            {locked ? '🔒' : done ? '✓' : isNext ? '▶' : i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`font-medium text-sm sm:text-base truncate transition-colors ${
+                              locked ? 'text-[#94A3B8]'
+                              : done ? 'text-green-800'
+                              : isNext ? 'text-blue-700'
+                              : 'text-[#334155] group-hover:text-[#2563EB]'
+                            }`}>
+                              {lesson.title}
+                              {isNext && <span className="ml-2 text-[10px] font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full align-middle">Tiếp theo</span>}
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-[#94A3B8]">
+                              <span>{lesson._count.exercises} bài tập</span>
+                              {scoreStr && (
+                                <>
+                                  <span>·</span>
+                                  <span className={`font-medium ${(scorePct ?? 0) >= 80 ? 'text-green-600' : (scorePct ?? 0) >= 50 ? 'text-orange-500' : 'text-red-500'}`}>
+                                    {scoreStr} ({scorePct}%)
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`text-sm shrink-0 transition-colors ${
+                            locked ? 'text-[#CBD5E1]'
+                            : done ? 'text-green-400'
+                            : isNext ? 'text-blue-400'
+                            : 'text-[#CBD5E1] group-hover:text-[#2563EB]'
+                          }`}>→</span>
+                        </Link>
+                      )
+                    })}
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-[#94A3B8]">
-                    <span>{lesson._count.exercises} bài tập</span>
-                    {scoreStr && (
-                      <>
-                        <span>·</span>
-                        <span className={`font-medium ${(scorePct ?? 0) >= 80 ? 'text-green-600' : (scorePct ?? 0) >= 50 ? 'text-orange-500' : 'text-red-500'}`}>
-                          {scoreStr} ({scorePct}%)
-                        </span>
-                      </>
-                    )}
-                  </div>
                 </div>
-
-                <span className={`text-sm shrink-0 transition-colors ${
-                  locked ? 'text-[#CBD5E1]'
-                  : done ? 'text-green-400'
-                  : isNext ? 'text-blue-400'
-                  : 'text-[#CBD5E1] group-hover:text-[#2563EB]'
-                }`}>→</span>
-              </Link>
-            )
-          })}
-        </div>
+              ))}
+            </div>
+          )
+        })()}
 
         {totalLessons === 0 && (
           <div className="text-center py-16 text-[#64748B] bg-white border border-[#E2E8F0] rounded-xl">
             Khóa học chưa có bài học nào.
           </div>
         )}
+
 
         <div className="mt-12 pt-8 border-t border-[#E2E8F0]">
           <Link href="/courses" className="inline-flex items-center gap-1 text-sm text-[#64748B] hover:text-[#2563EB] transition-colors">

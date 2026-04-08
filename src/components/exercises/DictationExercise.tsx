@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 
 interface DictationData {
   audio: string
+  audio_text?: string
   answer: string
+  hint?: string
 }
 
 interface Props {
@@ -40,7 +42,9 @@ function WordComparison({ userAnswer, correctAnswer }: { userAnswer: string; cor
 
 export default function DictationExercise({ question, data, value, onChange, submitted, correct }: Props) {
   const d = data as unknown as DictationData
-  const audioText = d.audio || d.answer || question
+  const audioText = (d as any).audio_text || d.audio || d.answer || question
+  const hint = (d as any).hint as string | undefined
+  const [showHint, setShowHint] = useState(false)
   const [speechAvailable, setSpeechAvailable] = useState(true)
   const [playing, setPlaying] = useState(false)
 
@@ -101,7 +105,6 @@ export default function DictationExercise({ question, data, value, onChange, sub
         disabled={submitted}
         placeholder="Gõ những gì bạn nghe được..."
         rows={3}
-        autoFocus
         className={`w-full text-center text-lg bg-white border-2 rounded-xl px-6 py-4 focus:outline-none transition-all shadow-sm resize-none ${
           submitted
             ? correct
@@ -110,6 +113,20 @@ export default function DictationExercise({ question, data, value, onChange, sub
             : 'border-[#E2E8F0] focus:border-[#2563EB] text-[#334155]'
         }`}
       />
+
+      {hint && !submitted && (
+        <div className="flex flex-col items-center mt-3 gap-1">
+          <button
+            onClick={() => setShowHint(h => !h)}
+            className="text-xs text-[#2563EB] hover:underline flex items-center gap-1"
+          >
+            💡 {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}
+          </button>
+          {showHint && (
+            <p className="text-center text-[#64748B] text-xs mt-1">{hint}</p>
+          )}
+        </div>
+      )}
 
       {submitted && (
         <div className={`mt-4 p-4 rounded-xl border ${correct ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
@@ -121,6 +138,21 @@ export default function DictationExercise({ question, data, value, onChange, sub
               <p className="text-[#334155] text-sm font-semibold text-center mb-2">{d.answer}</p>
               <WordComparison userAnswer={value} correctAnswer={d.answer} />
             </>
+          )}
+          {/* Nút phát lại sau khi submit */}
+          {speechAvailable && (
+            <div className="flex justify-center mt-3">
+              <button
+                onClick={playAudio}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  playing
+                    ? 'bg-blue-100 border-blue-300 text-blue-600'
+                    : 'bg-white border-[#E2E8F0] text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB]'
+                }`}
+              >
+                🔊 {playing ? 'Đang phát...' : 'Phát lại'}
+              </button>
+            </div>
           )}
         </div>
       )}

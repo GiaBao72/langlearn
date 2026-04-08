@@ -14,9 +14,10 @@ interface Props {
   onChange: (val: string) => void
   submitted: boolean
   correct: boolean
+  exerciseId?: string
 }
 
-export default function SortWordsExercise({ question, data, value, onChange, submitted, correct }: Props) {
+export default function SortWordsExercise({ question, data, value, onChange, submitted, correct, exerciseId }: Props) {
   const d = data as unknown as SortWordsData
 
   const shuffleWords = (words: string[]) => {
@@ -29,11 +30,13 @@ export default function SortWordsExercise({ question, data, value, onChange, sub
   const [bank, setBank] = useState<string[]>(() => shuffleWords(d.words))
   const [selected, setSelected] = useState<string[]>([])
 
-  // Reset khi chuyển bài mới
+  // Reset khi chuyển bài mới — dùng exerciseId hoặc câu trả lời làm key để tránh trường hợp
+  // 2 câu khác nhau nhưng cùng tập từ (d.words.join không phân biệt được)
   useEffect(() => {
     setBank(shuffleWords(d.words))
     setSelected([])
-  }, [d.words.join('|')])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exerciseId ?? d.answer])
 
   function pickFromBank(word: string, idx: number) {
     if (submitted) return
@@ -99,7 +102,11 @@ export default function SortWordsExercise({ question, data, value, onChange, sub
             key={`${word}-${i}`}
             onClick={() => pickFromBank(word, i)}
             disabled={submitted}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 border-[#E2E8F0] bg-white text-[#334155] hover:border-[#2563EB] hover:bg-blue-50 transition-all shadow-sm"
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium border-2 border-[#E2E8F0] bg-white text-[#334155] transition-all shadow-sm ${
+              submitted
+                ? 'opacity-40 cursor-not-allowed'
+                : 'hover:border-[#2563EB] hover:bg-blue-50'
+            }`}
           >
             {word}
           </button>

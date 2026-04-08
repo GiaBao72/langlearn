@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 interface Props {
   streak: number
@@ -13,8 +14,12 @@ export default function StreakBanner({ streak, studiedToday, nextLesson }: Props
 
   return (
     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-4 mb-6">
-      <div className="text-3xl flex-shrink-0">
-        {streak > 0 ? '🔥' : '💪'}
+      <div className="w-12 h-12 flex-shrink-0">
+        <DotLottieReact
+          src="https://lottie.host/0f16fc6a-868f-44d1-90fb-4c7198bdd103/0AE46SleI0.lottie"
+          loop
+          autoplay
+        />
       </div>
       <div className="flex-1 min-w-0">
         {streak > 0 ? (

@@ -1,21 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Menu, X, Download } from 'lucide-react'
+import { Menu, X, Download, BookOpen, Map, FileText, Trophy, ShoppingBag, LayoutDashboard, User, Settings, LogOut, LogIn, UserPlus, ClipboardList } from 'lucide-react'
 
 interface NavbarClientProps {
   user: { name: string; email: string; role: string } | null
 }
 
 const navLinks = [
-  { href: '/courses', label: 'Khóa học' },
-  { href: '/roadmap', label: 'Lộ trình' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/leaderboard', label: '🏆 Xếp hạng' },
-  { href: '/store', label: 'Sách' },
+  { href: '/courses', label: 'Khóa học', icon: BookOpen },
+  { href: '/exams', label: 'Kiểm tra', icon: ClipboardList },
+  { href: '/roadmap', label: 'Lộ trình', icon: Map },
+  { href: '/blog', label: 'Blog', icon: FileText },
+  { href: '/leaderboard', label: 'Xếp hạng', icon: Trophy },
+  { href: '/store', label: 'Sách', icon: ShoppingBag },
 ]
 
 function useDarkMode() {
@@ -36,35 +38,19 @@ function useDarkMode() {
   return { dark, toggle }
 }
 
-function detectPlatform() {
-  if (typeof navigator === 'undefined') return 'other'
-  const ua = navigator.userAgent
-  if (/iPad|iPhone|iPod/.test(ua)) return 'ios'
-  if (/Android/.test(ua)) return 'android'
-  return 'desktop'
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DeferredPrompt = any
 
 function useInstallPrompt() {
   const [prompt, setPrompt] = useState<DeferredPrompt>(null)
   const [installed, setInstalled] = useState(false)
-
   useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setInstalled(true)
-      return
-    }
-    const handler = (e: Event) => {
-      e.preventDefault()
-      setPrompt(e)
-    }
+    if (window.matchMedia('(display-mode: standalone)').matches) { setInstalled(true); return }
+    const handler = (e: Event) => { e.preventDefault(); setPrompt(e) }
     window.addEventListener('beforeinstallprompt', handler)
     window.addEventListener('appinstalled', () => { setInstalled(true); setPrompt(null) })
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
-
   async function install() {
     if (!prompt) return false
     prompt.prompt()
@@ -72,45 +58,44 @@ function useInstallPrompt() {
     if (outcome === 'accepted') { setInstalled(true); setPrompt(null) }
     return outcome === 'accepted'
   }
-
-  return { canNativeInstall: !!prompt && !installed, install, installed }
+  return { canNativeInstall: !!prompt && !installed, install }
 }
-
-
 
 export default function NavbarClient({ user }: NavbarClientProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { dark, toggle } = useDarkMode()
-  const { canNativeInstall, install, installed } = useInstallPrompt()
+  const { canNativeInstall, install } = useInstallPrompt()
+  const pathname = usePathname()
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [menuOpen])
+
+  useEffect(() => { setMenuOpen(false) }, [pathname])
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
     window.location.href = '/'
   }
 
-  async function handleInstallClick() {
-    await install()
-  }
-
-  const showInstallBtn = canNativeInstall
+  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href))
 
   return (
-    <>
-
+    <div ref={menuRef}>
       {/* Desktop right side */}
       <div className="hidden md:flex items-center gap-3">
-
-        {showInstallBtn && (
-          <button
-            onClick={handleInstallClick}
-            title='Cài đặt ứng dụng'
-            className="flex items-center gap-1.5 text-sm text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded-full hover:bg-[#2563EB] hover:text-white transition-colors font-medium"
-          >
-            <Download size={14} />
-            Tải về
+        {canNativeInstall && (
+          <button onClick={install} title="Cài đặt ứng dụng"
+            className="flex items-center gap-1.5 text-sm text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded-full hover:bg-[#2563EB] hover:text-white transition-colors font-medium">
+            <Download size={14} /> Tải về
           </button>
         )}
-
         <button onClick={toggle} aria-label="Toggle dark mode"
           className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
           {dark ? '☀️' : '🌙'}
@@ -154,73 +139,103 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="absolute top-14 left-0 right-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] shadow-lg z-50 md:hidden">
-          <div className="max-w-6xl mx-auto px-4 py-3 space-y-1">
-            {navLinks.map(link => (
-              <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
-                className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">
-                {link.label}
-              </Link>
-            ))}
+        <div className="absolute top-14 left-0 right-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] shadow-xl z-50 md:hidden">
+          <div className="max-w-6xl mx-auto px-3 py-4">
 
-            <div className="border-t border-[var(--color-border)] my-2" />
+            {/* Nav links - grid 2 cột */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {navLinks.map(link => {
+                const active = isActive(link.href)
+                const Icon = link.icon
+                return (
+                  <Link key={link.href} href={link.href}
+                    className={`flex items-center gap-2.5 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                      active
+                        ? 'bg-[#2563EB] text-white shadow-sm'
+                        : 'bg-[var(--color-border)] text-[var(--color-text-main)] hover:bg-blue-50 hover:text-[#2563EB] dark:hover:bg-blue-900/20'
+                    }`}>
+                    <Icon size={16} className="shrink-0" />
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </div>
 
-            {showInstallBtn && (
-              <button
-                onClick={() => { setMenuOpen(false); handleInstallClick() }}
-                className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[#2563EB] font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2"
-              >
-                <Download size={16} />
-                Tải ứng dụng về máy
-              </button>
-            )}
+            <div className="border-t border-[var(--color-border)] mb-4" />
 
-            <button onClick={toggle}
-              className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors flex items-center gap-2">
-              {dark ? '☀️ Chế độ sáng' : '🌙 Chế độ tối'}
-            </button>
-
-            <div className="border-t border-[var(--color-border)] my-2" />
-
+            {/* User section */}
             {user ? (
-              <>
-                <div className="flex items-center gap-3 px-3 py-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-[#2563EB] text-white text-xs font-bold">
+              <div className="space-y-2">
+                {/* User info card */}
+                <div className="flex items-center gap-3 px-3 py-3 bg-[var(--color-border)] rounded-xl">
+                  <Avatar className="w-10 h-10 shrink-0">
+                    <AvatarFallback className="bg-[#2563EB] text-white text-sm font-bold">
                       {user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <div className="text-sm font-medium text-[var(--color-text-main)]">{user.name}</div>
-                    <div className="text-xs text-[var(--color-text-muted)]">{user.email}</div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-[var(--color-text-main)] truncate">{user.name}</div>
+                    <div className="text-xs text-[var(--color-text-muted)] truncate">{user.email}</div>
                   </div>
                 </div>
-                <Link href="/dashboard" onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">Dashboard</Link>
-                <Link href="/profile" onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">Tài khoản</Link>
-                {user.role === 'ADMIN' && (
-                  <Link href="/admin" onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-main)] transition-colors">⚙️ Quản trị</Link>
-                )}
-                <button onClick={() => { setMenuOpen(false); handleLogout() }}
-                  className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                  Đăng xuất
-                </button>
-              </>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Link href="/dashboard"
+                    className={`flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                      isActive('/dashboard') ? 'bg-[#2563EB] text-white' : 'bg-[var(--color-border)] text-[var(--color-text-main)] hover:bg-blue-50 hover:text-[#2563EB] dark:hover:bg-blue-900/20'
+                    }`}>
+                    <LayoutDashboard size={15} className="shrink-0" /> Dashboard
+                  </Link>
+                  <Link href="/profile"
+                    className={`flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                      isActive('/profile') ? 'bg-[#2563EB] text-white' : 'bg-[var(--color-border)] text-[var(--color-text-main)] hover:bg-blue-50 hover:text-[#2563EB] dark:hover:bg-blue-900/20'
+                    }`}>
+                    <User size={15} className="shrink-0" /> Tài khoản
+                  </Link>
+                  {user.role === 'ADMIN' && (
+                    <Link href="/admin"
+                      className={`flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                        isActive('/admin') ? 'bg-[#2563EB] text-white' : 'bg-[var(--color-border)] text-[var(--color-text-main)] hover:bg-blue-50 hover:text-[#2563EB] dark:hover:bg-blue-900/20'
+                      }`}>
+                      <Settings size={15} className="shrink-0" /> Quản trị
+                    </Link>
+                  )}
+                  <button onClick={() => { setMenuOpen(false); handleLogout() }}
+                    className="flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-all">
+                    <LogOut size={15} className="shrink-0" /> Đăng xuất
+                  </button>
+                </div>
+              </div>
             ) : (
-              <>
-                <Link href="/login" onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] transition-colors">Đăng nhập</Link>
-                <Link href="/register" onClick={() => setMenuOpen(false)}
-                  className="block mx-3 my-1 px-4 py-2.5 rounded-full text-sm text-center bg-[#2563EB] text-white hover:bg-blue-700 transition-colors font-medium">
-                  Đăng ký miễn phí
+              <div className="grid grid-cols-2 gap-2">
+                <Link href="/login"
+                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium bg-[var(--color-border)] text-[var(--color-text-main)] hover:bg-blue-50 hover:text-[#2563EB] transition-all">
+                  <LogIn size={15} /> Đăng nhập
                 </Link>
-              </>
+                <Link href="/register"
+                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium bg-[#2563EB] text-white hover:bg-blue-700 transition-all shadow-sm">
+                  <UserPlus size={15} /> Đăng ký
+                </Link>
+              </div>
             )}
+
+            {/* Bottom utils */}
+            <div className="border-t border-[var(--color-border)] mt-4 pt-3 flex items-center justify-between">
+              {canNativeInstall ? (
+                <button onClick={() => { setMenuOpen(false); install() }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[#2563EB] font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                  <Download size={15} /> Tải ứng dụng
+                </button>
+              ) : <span />}
+              <button onClick={toggle}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-border)] transition-colors">
+                {dark ? '☀️ Sáng' : '🌙 Tối'}
+              </button>
+            </div>
+
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

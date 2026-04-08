@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import PracticeClient from './PracticeClient'
+
+export const dynamic = 'force-dynamic'
 
 export default async function PracticeIndexPage() {
   const user = await getCurrentUser()
@@ -20,118 +23,78 @@ export default async function PracticeIndexPage() {
     orderBy: { createdAt: 'asc' },
   })
 
-  const completedIds = await prisma.userProgress.findMany({
-    where: { userId: user.userId },
-    select: { exerciseId: true },
-  })
-  const completedSet = new Set(completedIds.map(p => p.exerciseId))
+  // Filter courses with lessons that have exercises
+  const coursesWithLessons = courses.filter(c =>
+    c.lessons.some(l => l.exercises.length > 0)
+  )
 
-  // Score per lesson
-  const progressWithScore = await prisma.userProgress.findMany({
+  const progressList = await prisma.userProgress.findMany({
     where: { userId: user.userId },
     select: { exerciseId: true, score: true, exercise: { select: { lessonId: true } } },
   })
+  const completedSet = new Set(progressList.map(p => p.exerciseId))
   const scorePerLesson: Record<string, number> = {}
-  for (const p of progressWithScore) {
+  const donePerLesson: Record<string, number> = {}
+  for (const p of progressList) {
     const lid = p.exercise.lessonId
     scorePerLesson[lid] = (scorePerLesson[lid] ?? 0) + p.score
+    donePerLesson[lid] = (donePerLesson[lid] ?? 0) + 1
   }
 
-  // Tìm bài tiếp theo chưa hoàn thành
-  let nextLesson: { id: string; title: string } | null = null
-  outer: for (const course of courses) {
+  // Find next incomplete lesson
+  let nextLessonId: string | undefined
+  let nextLessonTitle: string | undefined
+  outer: for (const course of coursesWithLessons) {
     for (const lesson of course.lessons) {
       if (lesson.exercises.length === 0) continue
       const done = lesson.exercises.filter(e => completedSet.has(e.id)).length
-      if (done < lesson.exercises.length) { nextLesson = { id: lesson.id, title: lesson.title }; break outer }
+      if (done < lesson.exercises.length) {
+        nextLessonId = lesson.id
+        nextLessonTitle = lesson.title
+        break outer
+      }
     }
   }
+
+  const clientCourses = coursesWithLessons.map(course => ({
+    id: course.id,
+    title: course.title,
+    language: course.language,
+    level: course.level,
+    lessons: course.lessons
+      .filter(l => l.exercises.length > 0)
+      .map((lesson, idx) => ({
+        id: lesson.id,
+        title: lesson.title,
+        order: lesson.order,
+        exerciseCount: lesson.exercises.length,
+        done: donePerLesson[lesson.id] ?? 0,
+        score: scorePerLesson[lesson.id] ?? 0,
+      })),
+  }))
 
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className="mb-10">
-          <Link href="/dashboard" className="text-[#64748B] text-sm hover:text-[#334155] transition-colors mb-4 inline-block">← Dashboard</Link>
-          <h1 className="text-3xl font-bold text-[#334155] mb-2">Khu vực luyện tập</h1>
-          <p className="text-[#64748B]">Chọn bài học và bắt đầu</p>
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="mb-8">
+          <Link href="/dashboard" className="text-[#64748B] text-sm hover:text-[#334155] transition-colors mb-3 inline-block">← Dashboard</Link>
+          <h1 className="text-3xl font-bold text-[#334155] mb-1">Khu vực luyện tập</h1>
+          <p className="text-[#64748B] text-sm">Chọn khóa học và bắt đầu luyện tập</p>
         </div>
 
-        {/* Gợi ý bài tiếp theo */}
-        {nextLesson && (
-          <Link href={`/practice/${nextLesson.id}`}
-            className="flex items-center gap-4 bg-[#2563EB] text-white rounded-2xl px-5 py-4 mb-8 hover:bg-blue-700 transition-colors shadow-md group">
-            <span className="text-2xl">▶️</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-blue-200 mb-0.5">Tiếp tục từ chỗ bạn dừng</p>
-              <p className="font-semibold truncate">{nextLesson.title}</p>
-            </div>
-            <span className="text-blue-200 group-hover:text-white transition-colors text-lg">→</span>
-          </Link>
-        )}
-
-        {courses.length === 0 ? (
+        {clientCourses.length === 0 ? (
           <div className="text-center py-20 text-[#64748B] bg-white rounded-xl border border-[#E2E8F0] shadow-sm">
             <p className="text-lg mb-2">Chưa có bài học nào.</p>
             <p className="text-sm">Admin sẽ thêm sớm!</p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {courses.map(course => (
-              <div key={course.id}>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs font-semibold bg-blue-100 text-[#2563EB] px-3 py-1 rounded-full">
-                    {course.language} · {course.level}
-                  </span>
-                  <h2 className="text-lg font-semibold text-[#334155]">{course.title}</h2>
-                </div>
-
-                <div className="space-y-2">
-                  {course.lessons.filter(l => l.exercises.length > 0).map((lesson, idx) => {
-                    const total = lesson.exercises.length
-                    const done = lesson.exercises.filter(e => completedSet.has(e.id)).length
-                    const pct = total > 0 ? Math.round((done / total) * 100) : 0
-                    const finished = pct === 100
-
-                    return (
-                      <Link
-                        key={lesson.id}
-                        href={`/practice/${lesson.id}`}
-                        className="flex items-center gap-4 bg-white border border-[#E2E8F0] rounded-xl px-5 py-4 hover:border-blue-300 hover:shadow-md transition-all group shadow-sm"
-                      >
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
-                          finished ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-[#64748B] group-hover:bg-blue-100 group-hover:text-[#2563EB]'
-                        }`}>
-                          {finished ? '✓' : idx + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-[#334155] truncate">{lesson.title}</p>
-                          <p className="text-xs text-[#64748B] mt-0.5">{total} câu hỏi</p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <div className="w-20 bg-slate-100 rounded-full h-1.5">
-                            <div
-                              className={`h-1.5 rounded-full transition-all ${finished ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-[#64748B] w-8 text-right">{pct}%</span>
-                          {scorePerLesson[lesson.id] > 0 && (
-                            <span className="text-xs font-semibold text-[#2563EB]">{scorePerLesson[lesson.id]}đ</span>
-                          )}
-                          <span className="text-[#64748B] group-hover:text-blue-500 transition-colors text-lg">→</span>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                  {course.lessons.filter(l => l.exercises.length > 0).length === 0 && (
-                    <p className="text-[#64748B] text-sm pl-2">Chưa có bài tập trong khóa học này.</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <PracticeClient
+            courses={clientCourses}
+            nextLessonId={nextLessonId}
+            nextLessonTitle={nextLessonTitle}
+          />
         )}
       </div>
     </div>

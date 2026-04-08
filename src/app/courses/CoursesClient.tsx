@@ -2,279 +2,279 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { BookOpen, Trophy, ChevronRight, GraduationCap, Layers } from 'lucide-react'
 
-const LEVEL_ORDER: Record<string, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 }
-const LEVEL_COLOR: Record<string, { bg: string; text: string; ring: string }> = {
-  A1: { bg: 'bg-emerald-50', text: 'text-emerald-700', ring: 'ring-emerald-200' },
-  A2: { bg: 'bg-teal-50',    text: 'text-teal-700',    ring: 'ring-teal-200' },
-  B1: { bg: 'bg-blue-50',    text: 'text-blue-700',    ring: 'ring-blue-200' },
-  B2: { bg: 'bg-violet-50',  text: 'text-violet-700',  ring: 'ring-violet-200' },
-  C1: { bg: 'bg-orange-50',  text: 'text-orange-700',  ring: 'ring-orange-200' },
-  C2: { bg: 'bg-red-50',     text: 'text-red-700',     ring: 'ring-red-200' },
+const LEVEL_COLOR: Record<string, { badge: string }> = {
+  A1: { badge: 'bg-emerald-100 text-emerald-700' },
+  A2: { badge: 'bg-teal-100 text-teal-700' },
+  B1: { badge: 'bg-blue-100 text-blue-700' },
+  B2: { badge: 'bg-violet-100 text-violet-700' },
+  C1: { badge: 'bg-orange-100 text-orange-700' },
+  C2: { badge: 'bg-red-100 text-red-700' },
 }
 const LEVEL_ICON: Record<string, string> = {
   A1: '🌱', A2: '🌿', B1: '📘', B2: '📗', C1: '🔥', C2: '🏆',
 }
 
+type Lesson = {
+  id: string
+  title: string
+  order: number
+  section: string | null
+  exerciseCount: number
+  completed: boolean
+}
+
 type Course = {
   id: string
   title: string
-  description: string | null
+  description?: string | null
   language: string
   level: string
-  exerciseCount: number
-  lessonCount: number
-  completedLessons?: number
-  enrolled: boolean
+  lessons: Lesson[]
+  enrolledStatus: 'enrolled' | 'not-enrolled' | 'admin'
+}
+
+function groupBySection(lessons: Lesson[]): { section: string | null; items: Lesson[] }[] {
+  const groups: { section: string | null; items: Lesson[] }[] = []
+  let current: { section: string | null; items: Lesson[] } | null = null
+  for (const lesson of lessons) {
+    const sec = lesson.section ?? null
+    if (!current || current.section !== sec) {
+      current = { section: sec, items: [] }
+      groups.push(current)
+    }
+    current.items.push(lesson)
+  }
+  return groups
 }
 
 export default function CoursesClient({
   courses,
-  userId,
-  isAdmin,
+  totalCourses,
 }: {
   courses: Course[]
-  userId?: string | null
-  isAdmin?: boolean
+  totalCourses: number
 }) {
-  const languages = [...new Set(courses.map(c => c.language))]
-  const levels = [...new Set(courses.map(c => c.level))].sort(
-    (a, b) => (LEVEL_ORDER[a] ?? 99) - (LEVEL_ORDER[b] ?? 99)
-  )
+  const [activeCourseId, setActiveCourseId] = useState<string>(courses[0]?.id ?? '')
+  const activeCourse = courses.find(c => c.id === activeCourseId) ?? courses[0]
+  const lessons = activeCourse?.lessons ?? []
+  const groups = groupBySection(lessons)
+  const hasAnySections = groups.some(g => g.section !== null)
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedLang, setSelectedLang] = useState('')
-  const [selectedLevel, setSelectedLevel] = useState('')
-  const [enrollFilter, setEnrollFilter] = useState<'all' | 'enrolled' | 'not-enrolled'>('all')
-
-  const filtered = courses
-    .filter(c => {
-      const matchSearch =
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (c.description ?? '').toLowerCase().includes(searchQuery.toLowerCase())
-      const matchLang = selectedLang ? c.language === selectedLang : true
-      const matchLevel = selectedLevel ? c.level === selectedLevel : true
-      const matchEnroll =
-        enrollFilter === 'all' ? true :
-        enrollFilter === 'enrolled' ? c.enrolled :
-        !c.enrolled
-      return matchSearch && matchLang && matchLevel && matchEnroll
-    })
-    .sort((a, b) => (LEVEL_ORDER[a.level] ?? 99) - (LEVEL_ORDER[b.level] ?? 99))
-
-  const inProgress = userId
-    ? courses.filter(c => c.enrolled && (c.completedLessons ?? 0) > 0 && (c.completedLessons ?? 0) < c.lessonCount)
-    : []
-  const hasFilters = !!(searchQuery || selectedLang || selectedLevel || enrollFilter !== 'all')
-
-  function resetFilters() {
-    setSearchQuery('')
-    setSelectedLang('')
-    setSelectedLevel('')
-    setEnrollFilter('all')
+  function getCourseProgress(course: Course) {
+    const done = course.lessons.filter(l => l.completed).length
+    return { done, total: course.lessons.length }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
 
-        {/* Header */}
-        <div className="mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#334155]">Khóa học</h1>
-          <p className="text-[#64748B] text-sm sm:text-base">
-            Chọn ngôn ngữ, chọn cấp độ — bắt đầu ngay hôm nay.
-          </p>
-        </div>
-
-        {/* "Tiếp tục học" banner */}
-        {inProgress.length > 0 && (
-          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-            <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-3">Đang học</p>
-            <div className="flex flex-wrap gap-3">
-              {inProgress.map(c => {
-                const pct = c.lessonCount > 0 ? Math.round(((c.completedLessons ?? 0) / c.lessonCount) * 100) : 0
-                return (
-                  <Link key={c.id} href={`/courses/${c.id}`}
-                    className="flex items-center gap-3 bg-white border border-blue-200 rounded-xl px-4 py-3 hover:border-blue-400 transition-all group min-w-0 max-w-xs">
-                    <span className="text-lg">{LEVEL_ICON[c.level] ?? '📚'}</span>
-                    <div className="min-w-0">
-                      <div className="font-semibold text-sm text-[#334155] truncate group-hover:text-[#2563EB] transition-colors">{c.title}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="w-20 h-1.5 bg-blue-100 rounded-full">
-                          <div className="h-full bg-[#2563EB] rounded-full" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="text-[10px] text-blue-500">{pct}%</span>
-                      </div>
-                    </div>
-                    <span className="text-blue-400 group-hover:text-blue-600 ml-auto">→</span>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Search + Filters */}
-        <div className="mb-6 space-y-3">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="🔍 Tìm khóa học..."
-            className="w-full sm:w-80 px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-sm text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
-          />
-
-          <div className="flex flex-wrap gap-2 items-center">
-            {/* Language filter */}
-            {languages.length > 1 && (
-              <>
-                <button onClick={() => setSelectedLang('')}
-                  className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center transition-colors ${
-                    selectedLang === '' ? 'bg-[#2563EB] border-[#2563EB] text-white' : 'border-[#E2E8F0] text-[#334155] hover:border-blue-300'}`}>
-                  Tất cả
-                </button>
-                {languages.map(lang => (
-                  <button key={lang} onClick={() => setSelectedLang(lang === selectedLang ? '' : lang)}
-                    className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center transition-colors ${
-                      selectedLang === lang ? 'bg-[#2563EB] border-[#2563EB] text-white' : 'border-[#E2E8F0] text-[#334155] hover:border-blue-300'}`}>
-                    {lang}
-                  </button>
-                ))}
-                {levels.length > 1 && <div className="w-px h-7 bg-slate-200 mx-0.5" />}
-              </>
-            )}
-
-            {/* Level filter */}
-            {levels.length > 1 && (
-              <>
-                <button onClick={() => setSelectedLevel('')}
-                  className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center transition-colors ${
-                    selectedLevel === '' ? 'bg-slate-700 border-slate-700 text-white' : 'border-[#E2E8F0] text-[#334155] hover:border-slate-400'}`}>
-                  Mọi cấp
-                </button>
-                {levels.map(level => {
-                  const lc = LEVEL_COLOR[level]
-                  return (
-                    <button key={level} onClick={() => setSelectedLevel(level === selectedLevel ? '' : level)}
-                      className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center gap-1 transition-colors font-medium ${
-                        selectedLevel === level
-                          ? `${lc?.bg ?? 'bg-slate-100'} ${lc?.text ?? 'text-slate-700'} ring-1 ${lc?.ring ?? 'ring-slate-300'} border-transparent`
-                          : 'border-[#E2E8F0] text-[#334155] hover:border-slate-300'}`}>
-                      <span>{LEVEL_ICON[level] ?? ''}</span>
-                      {level}
-                    </button>
-                  )
-                })}
-              </>
-            )}
-
-            {/* Enrollment filter (only for logged-in non-admin) */}
-            {userId && !isAdmin && (
-              <>
-                <div className="w-px h-7 bg-slate-200 mx-0.5" />
-                {(['all', 'enrolled', 'not-enrolled'] as const).map(f => (
-                  <button key={f} onClick={() => setEnrollFilter(f)}
-                    className={`px-3 py-1.5 rounded-full border text-sm h-9 flex items-center transition-colors ${
-                      enrollFilter === f ? 'bg-teal-600 border-teal-600 text-white' : 'border-[#E2E8F0] text-[#334155] hover:border-teal-300'}`}>
-                    {f === 'all' ? 'Tất cả' : f === 'enrolled' ? '✓ Đã đăng ký' : '🔒 Chưa đăng ký'}
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Results */}
-        {filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-4xl mb-3">🔍</div>
-            <p className="text-[#64748B] mb-4">Không tìm thấy khóa học nào phù hợp.</p>
-            {hasFilters && (
-              <button onClick={resetFilters}
-                className="text-sm text-[#2563EB] hover:underline border border-blue-200 px-4 py-2 rounded-lg">
-                ↩ Xóa bộ lọc
+      {/* ── Mobile: horizontal tabs ── */}
+      <div className="md:hidden border-b border-[#E2E8F0] bg-[#F8FAFC]">
+        <div className="flex overflow-x-auto gap-1 p-2 scrollbar-none">
+          {courses.map(course => {
+            const { done, total } = getCourseProgress(course)
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0
+            const active = course.id === activeCourseId
+            const icon = LEVEL_ICON[course.level] ?? '📚'
+            return (
+              <button
+                key={course.id}
+                onClick={() => setActiveCourseId(course.id)}
+                className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-all min-w-[80px] max-w-[100px] ${
+                  active
+                    ? 'bg-[#2563EB] text-white shadow-sm'
+                    : 'bg-white text-[#334155] border border-[#E2E8F0]'
+                }`}
+              >
+                <span className="text-base">{icon}</span>
+                <span className={`font-semibold text-[11px] ${active ? 'text-blue-200' : 'text-[#64748B]'}`}>{course.level}</span>
+                {total > 0 && pct > 0 && (
+                  <div className="w-full h-1 rounded-full bg-blue-200/40 overflow-hidden mt-0.5">
+                    <div
+                      className={`h-full rounded-full ${pct === 100 ? 'bg-yellow-300' : (active ? 'bg-white' : 'bg-[#2563EB]')}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                )}
               </button>
-            )}
-          </div>
-        ) : (
-          <>
-            <p className="text-xs text-[#94A3B8] mb-4">{filtered.length} khóa học</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-              {filtered.map(c => {
-                const lc = LEVEL_COLOR[c.level]
-                const icon = LEVEL_ICON[c.level] ?? '📚'
-                const pct = c.lessonCount > 0 && (c.completedLessons ?? 0) > 0
-                  ? Math.round(((c.completedLessons ?? 0) / c.lessonCount) * 100) : 0
-                const done = pct === 100 && c.enrolled
-
-                return (
-                  <motion.div key={c.id} whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400 }}>
-                    <Link href={`/courses/${c.id}`}
-                      className={`flex flex-col bg-white border rounded-2xl p-5 sm:p-6 transition-all group h-full shadow-sm ${
-                        c.enrolled
-                          ? 'border-[#E2E8F0] hover:border-blue-300 hover:shadow-md'
-                          : 'border-dashed border-slate-300 hover:border-slate-400 opacity-80'
-                      }`}>
-
-                      {/* Top: language + level badge + enrollment */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs text-[#94A3B8] uppercase tracking-widest">{c.language}</span>
-                        <div className="flex items-center gap-1.5">
-                          {userId && !isAdmin && (
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                              c.enrolled ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                              {c.enrolled ? '✓ Đã đăng ký' : '🔒 Chưa đăng ký'}
-                            </span>
-                          )}
-                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${lc?.bg ?? 'bg-slate-100'} ${lc?.text ?? 'text-slate-600'}`}>
-                            {icon} {c.level}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Title */}
-                      <h2 className={`font-semibold text-base sm:text-lg mb-2 transition-colors leading-snug ${
-                        c.enrolled ? 'text-[#334155] group-hover:text-[#2563EB]' : 'text-[#94A3B8]'}`}>
-                        {c.title}
-                      </h2>
-
-                      {/* Description */}
-                      {c.description && (
-                        <p className="text-[#64748B] text-sm line-clamp-2 mb-4 flex-1">{c.description}</p>
-                      )}
-
-                      {/* Stats */}
-                      <div className="flex items-center gap-3 text-xs text-[#94A3B8] mt-auto pt-3 border-t border-[#F1F5F9]">
-                        <span>📖 {c.lessonCount} bài</span>
-                        <span>✏️ {c.exerciseCount} bài tập</span>
-                        {done && <span className="ml-auto text-green-600 font-semibold">✓ Hoàn thành</span>}
-                      </div>
-
-                      {/* Progress bar */}
-                      {userId && c.enrolled && pct > 0 && !done && (
-                        <div className="mt-3">
-                          <div className="flex justify-between text-[10px] text-[#94A3B8] mb-1">
-                            <span>{c.completedLessons}/{c.lessonCount} bài</span>
-                            <span>{pct}%</span>
-                          </div>
-                          <div className="h-1.5 bg-slate-100 rounded-full">
-                            <div className="h-full bg-[#2563EB] rounded-full" style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
-                      )}
-                    </Link>
-                  </motion.div>
-                )
-              })}
-            </div>
-          </>
-        )}
+            )
+          })}
+        </div>
       </div>
 
-      <footer className="border-t border-[#E2E8F0] py-6 text-center text-[#64748B] text-sm px-4">
-        © 2026 LangLearn
-      </footer>
+      {/* ── Desktop: sidebar + panel ── */}
+      <div className="flex min-h-[600px]">
+
+        {/* Left sidebar — desktop only */}
+        <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-[#E2E8F0] bg-[#F8FAFC]">
+          <div className="p-4 border-b border-[#E2E8F0]">
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Khóa học</p>
+            <p className="text-xs text-[#94A3B8] mt-0.5">{totalCourses} khóa học</p>
+          </div>
+          <nav className="p-2 space-y-1 overflow-y-auto flex-1">
+            {courses.map(course => {
+              const { done, total } = getCourseProgress(course)
+              const pct = total > 0 ? Math.round((done / total) * 100) : 0
+              const active = course.id === activeCourseId
+              const lc = LEVEL_COLOR[course.level]
+              const icon = LEVEL_ICON[course.level] ?? '📚'
+              return (
+                <button
+                  key={course.id}
+                  onClick={() => setActiveCourseId(course.id)}
+                  className={`w-full text-left px-3 py-3 rounded-xl transition-all ${
+                    active
+                      ? 'bg-[#2563EB] text-white shadow-sm'
+                      : 'hover:bg-white hover:shadow-sm text-[#334155]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <BookOpen size={14} className={active ? 'text-blue-200' : 'text-[#94A3B8]'} />
+                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
+                      active ? 'bg-blue-500 text-blue-100' : (lc?.badge ?? 'bg-slate-200 text-slate-600')
+                    }`}>
+                      {icon} {course.level}
+                    </span>
+                  </div>
+                  <p className={`text-sm font-medium leading-snug mb-2 ${active ? 'text-white' : 'text-[#334155]'}`}>
+                    {course.title}
+                  </p>
+                  {total > 0 && (
+                    <div>
+                      <div className={`flex items-center gap-1.5 mb-1 text-xs ${active ? 'text-blue-200' : 'text-[#94A3B8]'}`}>
+                        {done > 0 && pct === 100 && (
+                          <Trophy size={11} className={active ? 'text-yellow-300' : 'text-amber-500'} />
+                        )}
+                        <span>{done > 0 ? `${done}/${total} bài` : `${total} bài`}</span>
+                      </div>
+                      {done > 0 && (
+                        <div className="h-1 rounded-full bg-blue-200/40 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${pct === 100 ? 'bg-yellow-300' : (active ? 'bg-white' : 'bg-[#2563EB]')}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </nav>
+        </aside>
+
+        {/* Right panel */}
+        <main className="flex-1 min-w-0 flex flex-col">
+          {/* Header */}
+          <div className="px-4 md:px-6 py-4 border-b border-[#E2E8F0] bg-white">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-bold text-[#334155] text-base md:text-lg leading-snug">{activeCourse?.title}</h2>
+                <p className="text-xs text-[#64748B]">
+                  {activeCourse?.language} · {activeCourse?.level} · {lessons.length} bài học
+                </p>
+              </div>
+              {activeCourse && activeCourse.enrolledStatus !== 'not-enrolled' && (
+                <Link
+                  href={`/courses/${activeCourse.id}`}
+                  className="text-xs font-semibold bg-[#2563EB] text-white px-3 md:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shrink-0"
+                >
+                  Vào học →
+                </Link>
+              )}
+              {activeCourse?.enrolledStatus === 'not-enrolled' && (
+                <Link
+                  href={`/courses/${activeCourse.id}`}
+                  className="text-xs font-semibold border border-[#2563EB] text-[#2563EB] px-3 md:px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors shrink-0"
+                >
+                  Xem chi tiết
+                </Link>
+              )}
+            </div>
+            {activeCourse?.description && (
+              <p className="text-xs text-[#64748B] mt-1.5 line-clamp-2">{activeCourse.description}</p>
+            )}
+          </div>
+
+          {/* Lesson list */}
+          <div className="flex-1 overflow-y-auto p-3 md:p-4 bg-[#F8FAFC]">
+            {lessons.length === 0 ? (
+              <div className="text-center py-16 text-[#94A3B8]">
+                <GraduationCap size={36} className="mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Chưa có bài học trong khóa học này.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {groups.map((group, gIdx) => {
+                  const offset = groups.slice(0, gIdx).reduce((s, g) => s + g.items.length, 0)
+                  return (
+                    <div key={gIdx}>
+                      {hasAnySections && group.section && (
+                        <div className="flex items-center gap-2 mb-2 px-1">
+                          <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
+                            {group.section}
+                          </span>
+                          <div className="flex-1 h-px bg-[#E2E8F0]" />
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        {group.items.map((lesson, idx) => {
+                          const globalIdx = offset + idx
+                          const locked = activeCourse?.enrolledStatus === 'not-enrolled'
+                          const href = locked
+                            ? `/courses/${activeCourse?.id}`
+                            : `/practice/${lesson.id}`
+                          return (
+                            <Link
+                              key={lesson.id}
+                              href={href}
+                              className={`flex items-center gap-3 bg-white border rounded-xl px-3 md:px-4 py-3 transition-all group ${
+                                lesson.completed
+                                  ? 'border-green-200 hover:border-green-400'
+                                  : locked
+                                  ? 'border-dashed border-slate-300 opacity-60'
+                                  : 'border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-sm'
+                              }`}
+                            >
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                                lesson.completed
+                                  ? 'bg-green-100 text-green-700'
+                                  : locked
+                                  ? 'bg-slate-100 text-slate-400'
+                                  : 'bg-blue-50 text-[#2563EB]'
+                              }`}>
+                                {lesson.completed ? '✓' : globalIdx + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-medium text-sm leading-snug ${
+                                  lesson.completed
+                                    ? 'text-green-700'
+                                    : locked
+                                    ? 'text-[#94A3B8]'
+                                    : 'text-[#334155] group-hover:text-[#2563EB]'
+                                } transition-colors`}>
+                                  {locked && '🔒 '}{lesson.title}
+                                </p>
+                                <div className="flex items-center gap-3 text-xs text-[#94A3B8] mt-0.5">
+                                  <span className="flex items-center gap-1"><Layers size={11} />{lesson.exerciseCount} bài tập</span>
+                                  {lesson.completed && <span className="text-green-600 font-medium">Đã hoàn thành</span>}
+                                </div>
+                              </div>
+                              <ChevronRight size={15} className="shrink-0 text-[#CBD5E1] group-hover:text-blue-400 transition-colors" />
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

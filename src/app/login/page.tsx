@@ -13,30 +13,27 @@ function LoginForm() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // TC34: Read ?from= param to redirect back after login
   const searchParams = useSearchParams()
-  const from = searchParams.get('from') || '/dashboard'
+  const rawFrom = searchParams.get('from') || '/dashboard'
+  // Fix: chỉ cho redirect về path nội bộ, chặn open redirect
+  const from = rawFrom.startsWith('/') ? rawFrom : '/dashboard'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-
-    // TC35: Prevent double-click — bail out immediately if already loading
     if (loading) return
-
     setError('')
     setLoading(true)
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       })
       const data = await res.json()
       if (!res.ok) {
         setError(data.error || 'Đăng nhập thất bại')
         return
       }
-      // TC34: Redirect to original destination after successful login
       window.location.replace(from)
     } catch {
       setError('Lỗi kết nối, thử lại sau')
@@ -49,7 +46,7 @@ function LoginForm() {
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4 sm:px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-6 sm:mb-8">
-          <Link href="/" className="text-2xl font-bold tracking-tight text-[#334155]">LangLearn</Link>
+          <Link href="/" className="text-2xl font-bold tracking-tight text-[#334155]">G-Deutsch</Link>
           <p className="text-[#64748B] text-sm mt-2">Tiếp tục hành trình học của bạn</p>
         </div>
 
@@ -64,7 +61,7 @@ function LoginForm() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
               <div>
                 <label className="block text-sm text-[#334155] mb-1.5 font-medium">Email</label>
                 <Input
@@ -72,6 +69,7 @@ function LoginForm() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                   placeholder="ban@email.com"
                   className="bg-[#F8FAFC] border-[#E2E8F0] text-[#334155] placeholder:text-[#94a3b8] focus:border-blue-400 h-12"
                 />
@@ -86,6 +84,7 @@ function LoginForm() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   className="bg-[#F8FAFC] border-[#E2E8F0] text-[#334155] placeholder:text-[#94a3b8] focus:border-blue-400 h-12"
                 />

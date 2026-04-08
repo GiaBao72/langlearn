@@ -18,19 +18,52 @@ export default async function UsersPage() {
         select: { score: true, completedAt: true },
         orderBy: { completedAt: 'desc' },
       },
+      enrollments: {
+        select: {
+          courseId: true, enrolledAt: true,
+          course: { select: { title: true } },
+        },
+        orderBy: { enrolledAt: 'desc' },
+      },
+      examAttempts: {
+        select: { score: true, maxScore: true, passed: true, startedAt: true, exam: { select: { title: true } } },
+        orderBy: { startedAt: 'desc' },
+      },
     },
   })
 
-  const usersWithStats = users.map(u => ({
-    id: u.id,
-    email: u.email,
-    name: u.name,
-    role: u.role,
-    createdAt: u.createdAt,
-    completedCount: u.progress.length,
-    totalScore: u.progress.reduce((s, p) => s + p.score, 0),
-    lastActive: u.progress[0]?.completedAt ?? null,
-  }))
+  const usersWithStats = users.map(u => {
+    const attempts = u.examAttempts
+    const avgExamScore = attempts.length > 0
+      ? Math.round(attempts.reduce((s, a) => s + (a.maxScore > 0 ? a.score / a.maxScore * 100 : 0), 0) / attempts.length)
+      : null
+
+    return {
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      createdAt: u.createdAt,
+      completedCount: u.progress.length,
+      totalScore: u.progress.reduce((s, p) => s + p.score, 0),
+      lastActive: u.progress[0]?.completedAt ?? u.examAttempts[0]?.startedAt ?? null,
+      enrollmentCount: u.enrollments.length,
+      examAttemptCount: u.examAttempts.length,
+      avgExamScore,
+      enrollments: u.enrollments.map(e => ({
+        courseId: e.courseId,
+        courseTitle: e.course.title,
+        enrolledAt: e.enrolledAt,
+      })),
+      recentAttempts: u.examAttempts.slice(0, 5).map(a => ({
+        score: a.score,
+        maxScore: a.maxScore,
+        passed: a.passed,
+        startedAt: a.startedAt,
+        examTitle: a.exam.title,
+      })),
+    }
+  })
 
   return <UsersClient users={usersWithStats} currentUserId={me?.userId ?? ''} />
 }

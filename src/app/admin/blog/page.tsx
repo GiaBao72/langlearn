@@ -1,14 +1,9 @@
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import BlogListClient from '@/components/BlogListClient'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminBlogPage() {
-  const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') redirect('/login')
-
   const posts = await prisma.blogPost.findMany({
     orderBy: { createdAt: 'desc' },
     select: {

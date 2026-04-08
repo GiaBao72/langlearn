@@ -30,3 +30,18 @@ export async function POST(req: NextRequest) {
   })
   return NextResponse.json({ exercise }, { status: 201 })
 }
+
+// DELETE /api/admin/exercises — bulk delete
+// Body: { ids: string[] }
+export async function DELETE(req: NextRequest) {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'ADMIN')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+
+  const { ids } = await req.json() as { ids: string[] }
+  if (!Array.isArray(ids) || ids.length === 0)
+    return NextResponse.json({ error: 'ids phải là mảng không rỗng' }, { status: 400 })
+
+  const { count } = await prisma.exercise.deleteMany({ where: { id: { in: ids } } })
+  return NextResponse.json({ deleted: count })
+}

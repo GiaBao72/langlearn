@@ -2,22 +2,12 @@
 
 import { useState } from 'react'
 
-const faqs = [
-  {
-    q: 'Sách phù hợp với trình độ nào?',
-    a: 'Sách được thiết kế cho người mới bắt đầu hoàn toàn (A1) đến trung cấp (B1). Nếu bạn chưa học tiếng Đức bao giờ, đây là điểm khởi đầu lý tưởng.',
-  },
-  {
-    q: 'File audio ở đâu và cách tải?',
-    a: 'Sau khi đặt mua thành công, bạn sẽ nhận link tải audio qua Messenger/Zalo trong vòng 24 giờ. File MP3 chất lượng cao, dùng được trên mọi thiết bị.',
-  },
-  {
-    q: 'Tôi có thể đặt nhiều cuốn để được giảm giá không?',
-    a: 'Có! Đặt từ 2 cuốn trở lên nhận giảm thêm 10%, từ 3 cuốn giảm 15%. Liên hệ Messenger để đặt combo.',
-  },
-]
+interface Faq {
+  q: string
+  a: string
+}
 
-export default function FaqAccordion() {
+export default function FaqAccordion({ faqs }: { faqs: Faq[] }) {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   return (

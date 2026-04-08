@@ -51,6 +51,7 @@ export default function CreateUserClient() {
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                   placeholder="user@example.com"
+                  autoComplete="off"
                   className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#2563EB]"
                   autoFocus
                 />
@@ -69,6 +70,7 @@ export default function CreateUserClient() {
                 <label className="text-xs font-medium text-[#64748B] mb-1 block">Mật khẩu * (tối thiểu 6 ký tự)</label>
                 <input
                   type="password"
+                  autoComplete="new-password"
                   value={form.password}
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && submit()}

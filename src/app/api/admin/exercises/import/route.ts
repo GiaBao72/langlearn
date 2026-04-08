@@ -4,14 +4,16 @@ import { prisma } from '@/lib/prisma'
 import { Prisma, ExerciseType } from '@prisma/client'
 import * as XLSX from 'xlsx'
 
-const VALID_TYPES = ['FILL_BLANK', 'MULTIPLE_CHOICE', 'FLASHCARD', 'SORT_WORDS', 'DICTATION'] as const
+const VALID_TYPES = ['FILL_BLANK', 'MULTIPLE_CHOICE', 'MULTIPLE_CHOICE_PARTIAL', 'MULTIPLE_CHOICE_ALL', 'FLASHCARD', 'SORT_WORDS', 'DICTATION'] as const
 
 const DEFAULT_POINTS: Record<string, number> = {
-  FILL_BLANK: 10,
-  MULTIPLE_CHOICE: 8,
-  FLASHCARD: 5,
-  SORT_WORDS: 12,
-  DICTATION: 15,
+  FILL_BLANK: 1,
+  MULTIPLE_CHOICE: 1,
+  MULTIPLE_CHOICE_PARTIAL: 1,
+  MULTIPLE_CHOICE_ALL: 1,
+  FLASHCARD: 1,
+  SORT_WORDS: 1,
+  DICTATION: 1,
 }
 
 export async function POST(req: NextRequest) {
@@ -54,9 +56,21 @@ export async function POST(req: NextRequest) {
 
       if (type === 'FILL_BLANK') {
         const sentence = r['sentence']?.toString().trim()
-        const answer = r['answer']?.toString().trim()
-        if (!sentence || !answer) { errors.push(`Sheet ${sheetName} dòng ${rowNum}: thiếu sentence hoặc answer`); continue }
-        data = { sentence, answer, hint: r['hint']?.toString().trim() || '' }
+        const answersRaw = r['answers']?.toString().trim()
+        const answerRaw  = r['answer']?.toString().trim()
+        if (!sentence || (!answersRaw && !answerRaw)) {
+          errors.push(`Sheet ${sheetName} dòng ${rowNum}: thiếu sentence hoặc answer`); continue
+        }
+        // Ưu tiên "answers" (pipe-separated), fallback về "answer"
+        const answersArr = answersRaw
+          ? answersRaw.split('|').map((a: string) => a.trim()).filter(Boolean)
+          : [answerRaw!]
+        data = {
+          sentence,
+          answers: answersArr,           // mảng tất cả đáp án đúng
+          answer: answersArr[0],         // backward compat
+          hint: r['hint']?.toString().trim() || '',
+        }
       }
       else if (type === 'MULTIPLE_CHOICE') {
         const optStr = r['options']?.toString().trim()
@@ -64,7 +78,9 @@ export async function POST(req: NextRequest) {
         if (!optStr || !answer) { errors.push(`Sheet ${sheetName} dòng ${rowNum}: thiếu options hoặc answer`); continue }
         const options = optStr.split('|').map((o: string) => o.trim()).filter(Boolean)
         if (options.length < 2) { errors.push(`Sheet ${sheetName} dòng ${rowNum}: cần ít nhất 2 options`); continue }
-        data = { options, answer, explanation: r['explanation']?.toString().trim() || '' }
+        const notesRaw = r['notes']?.toString().trim()
+        const notes = notesRaw ? notesRaw.split('|').map((n: string) => n.trim()) : undefined
+        data = { options, answer, explanation: r['explanation']?.toString().trim() || '', ...(notes ? { notes } : {}) }
       }
       else if (type === 'FLASHCARD') {
         const front = r['front']?.toString().trim()
@@ -78,6 +94,18 @@ export async function POST(req: NextRequest) {
         if (!wordsStr || !answer) { errors.push(`Sheet ${sheetName} dòng ${rowNum}: thiếu words hoặc answer`); continue }
         const words = wordsStr.split('|').map((w: string) => w.trim()).filter(Boolean)
         data = { words, answer }
+      }
+      else if (type === 'MULTIPLE_CHOICE_PARTIAL' || type === 'MULTIPLE_CHOICE_ALL') {
+        const optStr = r['options']?.toString().trim()
+        const answersStr = r['answers']?.toString().trim()
+        if (!optStr || !answersStr) { errors.push(`Sheet ${sheetName} dòng ${rowNum}: thiếu options hoặc answers`); continue }
+        const options = optStr.split('|').map((o: string) => o.trim()).filter(Boolean)
+        const answers = answersStr.split('|').map((a: string) => a.trim()).filter(Boolean)
+        if (options.length < 2) { errors.push(`Sheet ${sheetName} dòng ${rowNum}: cần ít nhất 2 options`); continue }
+        if (answers.length < 1) { errors.push(`Sheet ${sheetName} dòng ${rowNum}: cần ít nhất 1 đáp án đúng (answers)`); continue }
+        const notesRaw2 = r['notes']?.toString().trim()
+        const notes2 = notesRaw2 ? notesRaw2.split('|').map((n: string) => n.trim()) : undefined
+        data = { options, answers, explanation: r['explanation']?.toString().trim() || '', ...(notes2 ? { notes: notes2 } : {}) }
       }
       else if (type === 'DICTATION') {
         const audio_text = r['audio_text']?.toString().trim()

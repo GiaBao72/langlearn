@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
+
 interface MultipleChoiceData {
   options: string[]
   answer: string
   explanation?: string
+  notes?: string[]   // ghi chú per-option, index tương ứng options gốc
 }
 
 interface Props {
@@ -17,8 +20,28 @@ interface Props {
 
 const LABELS = ['A', 'B', 'C', 'D', 'E', 'F']
 
+function shuffleArray<T>(arr: T[], seed?: number): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export default function MultipleChoiceExercise({ question, data, value, onChange, submitted, correct: _correct }: Props) {
   const d = data as unknown as MultipleChoiceData
+
+  // Shuffle options + map notes theo cùng thứ tự
+  const [shuffled] = useState<{ opt: string; note: string }[]>(() => {
+    const pairs = d.options.map((opt, i) => ({ opt, note: d.notes?.[i] ?? '' }))
+    const a = [...pairs]
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+  })
 
   function getStyle(opt: string) {
     if (!submitted) {
@@ -26,14 +49,15 @@ export default function MultipleChoiceExercise({ question, data, value, onChange
         ? 'border-[#2563EB] bg-blue-50 text-[#2563EB]'
         : 'border-[#E2E8F0] bg-white text-[#334155] hover:border-blue-300 hover:bg-blue-50'
     }
-    // After submitted
-    if (opt === d.answer) {
-      return 'border-[#10B981] bg-green-50 text-[#10B981]'
-    }
-    if (opt === value && opt !== d.answer) {
-      return 'border-[#EF4444] bg-red-50 text-[#EF4444]'
-    }
+    if (opt === d.answer) return 'border-[#10B981] bg-green-50 text-[#10B981]'
+    if (opt === value && opt !== d.answer) return 'border-[#EF4444] bg-red-50 text-[#EF4444]'
     return 'border-[#E2E8F0] bg-slate-50 text-[#64748B] opacity-60'
+  }
+
+  function getNoteStyle(opt: string) {
+    if (opt === d.answer) return 'text-green-700 bg-green-50 border-green-200'
+    if (opt === value && opt !== d.answer) return 'text-red-700 bg-red-50 border-red-200'
+    return 'text-[#64748B] bg-slate-50 border-slate-200'
   }
 
   return (
@@ -43,20 +67,28 @@ export default function MultipleChoiceExercise({ question, data, value, onChange
       </p>
 
       <div className="space-y-3">
-        {d.options.map((opt, i) => (
-          <button
-            key={opt}
-            onClick={() => !submitted && onChange(opt)}
-            disabled={submitted}
-            className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all font-medium shadow-sm flex items-center gap-3 ${getStyle(opt)}`}
-          >
-            <span className="w-7 h-7 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold flex-shrink-0">
-              {LABELS[i]}
-            </span>
-            <span>{opt}</span>
-            {submitted && opt === d.answer && <span className="ml-auto">✓</span>}
-            {submitted && opt === value && opt !== d.answer && <span className="ml-auto">✗</span>}
-          </button>
+        {shuffled.map(({ opt, note }, i) => (
+          <div key={opt}>
+            <button
+              onClick={() => !submitted && onChange(opt)}
+              disabled={submitted}
+              className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all font-medium shadow-sm flex items-center gap-3 ${getStyle(opt)}`}
+            >
+              <span className="w-7 h-7 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold flex-shrink-0">
+                {LABELS[i]}
+              </span>
+              <span className="flex-1">{opt}</span>
+              {submitted && opt === d.answer && <span className="ml-auto">✓</span>}
+              {submitted && opt === value && opt !== d.answer && <span className="ml-auto">✗</span>}
+            </button>
+
+            {/* Note: hiển thị khi submitted HOẶC khi đang chọn option này */}
+            {note && (submitted ? (opt === value || opt === d.answer) : value === opt) && (
+              <div className={`mt-1 mx-1 px-4 py-2 rounded-lg border text-xs leading-relaxed ${getNoteStyle(opt)}`}>
+                💬 {note}
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
@@ -68,9 +100,7 @@ export default function MultipleChoiceExercise({ question, data, value, onChange
       )}
 
       {!submitted && (
-        <p className="text-center text-[#64748B] text-xs mt-5">
-          Chọn một đáp án
-        </p>
+        <p className="text-center text-[#64748B] text-xs mt-5">Chọn một đáp án</p>
       )}
     </div>
   )

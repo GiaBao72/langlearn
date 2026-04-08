@@ -63,6 +63,15 @@ export async function POST(req: NextRequest) {
     // Login thành công → xóa rate limit
     clearRateLimit(ip)
 
+    // Ghi login history
+    await prisma.loginHistory.create({
+      data: {
+        userId: user.id,
+        ipAddress: ip,
+        userAgent: req.headers.get('user-agent')?.slice(0, 500) || null,
+      },
+    }).catch(() => {}) // silent fail, không block login
+
     const payload = { userId: user.id, email: user.email, role: user.role }
     const accessToken = await signAccessToken(payload)
     const refreshToken = await signRefreshToken(payload)
@@ -84,14 +93,14 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false,
       sameSite: 'lax',
-      maxAge: 15 * 60,
+      maxAge: 365 * 24 * 60 * 60,
       path: '/',
     })
     response.cookies.set('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false,
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 365 * 24 * 60 * 60,
       path: '/',
     })
 

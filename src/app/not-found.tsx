@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: '404 — Trang không tìm thấy | LangLearn' }
+export const metadata: Metadata = { title: '404 — Trang không tìm thấy | G-Deutsch' }
 
 export default function NotFound() {
   return (

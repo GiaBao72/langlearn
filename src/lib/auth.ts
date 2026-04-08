@@ -14,14 +14,14 @@ export interface JWTPayload {
 export async function signAccessToken(payload: JWTPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('15m')
+    .setExpirationTime('365d')
     .sign(ACCESS_SECRET)
 }
 
 export async function signRefreshToken(payload: JWTPayload): Promise<string> {
   return new SignJWT({ ...payload, jti: crypto.randomUUID() })
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('7d')
+    .setExpirationTime('365d')
     .sign(REFRESH_SECRET)
 }
 

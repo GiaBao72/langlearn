@@ -5,11 +5,13 @@ import { prisma } from '@/lib/prisma'
 type ExerciseData = {
   options?: string[]
   answer?: string
+  answers?: string[]   // MULTIPLE_CHOICE_PARTIAL / MULTIPLE_CHOICE_ALL
   pairs?: Array<{ term: string; definition: string }>
   words?: string[]
   sentence?: string
   blanks?: string[]
   audio?: string
+  audio_text?: string
 }
 
 function scoreAnswer(
@@ -23,32 +25,65 @@ function scoreAnswer(
       return { correct, score: correct ? 1 : 0, correctAnswer: data.answer }
     }
 
+    case 'MULTIPLE_CHOICE_PARTIAL': {
+      // Score = max(0, correctSelected - wrongSelected) / totalCorrect
+      const correctAnswers: string[] = Array.isArray(data.answers) ? data.answers as unknown as string[] : []
+      let selected: string[] = []
+      try { selected = Array.isArray(userAnswer) ? userAnswer as string[] : JSON.parse(String(userAnswer)) } catch { selected = [] }
+      const correctSelected = selected.filter(s => correctAnswers.includes(s)).length
+      const wrongSelected = selected.filter(s => !correctAnswers.includes(s)).length
+      const net = Math.max(0, correctSelected - wrongSelected)
+      const score = correctAnswers.length > 0 ? net / correctAnswers.length : 0
+      return {
+        correct: score === 1,
+        score: Math.round(score * 10) / 10,
+        correctAnswer: correctAnswers,
+      }
+    }
+
+    case 'MULTIPLE_CHOICE_ALL': {
+      // All or nothing: phải chọn đúng và đủ
+      const correctAnswers: string[] = Array.isArray(data.answers) ? data.answers as unknown as string[] : []
+      let selected: string[] = []
+      try { selected = Array.isArray(userAnswer) ? userAnswer as string[] : JSON.parse(String(userAnswer)) } catch { selected = [] }
+      const allCorrect = selected.length === correctAnswers.length &&
+        correctAnswers.every(a => selected.includes(a)) &&
+        selected.every(a => correctAnswers.includes(a))
+      return { correct: allCorrect, score: allCorrect ? 1 : 0, correctAnswer: correctAnswers }
+    }
+
     case 'FILL_BLANK': {
-      const expected = (data.answer ?? '').toLowerCase().trim()
-      const given = String(userAnswer ?? '').toLowerCase().trim()
-      const correct = given === expected
-      return { correct, score: correct ? 1 : 0, correctAnswer: data.answer }
+      const normalize = (s: string) => s.toLowerCase().trim().replace(/[.!?,;:]/g, '')
+      const given = normalize(String(userAnswer ?? ''))
+      const allAnswers: string[] = Array.isArray(data.answers) && data.answers.length > 0
+        ? data.answers
+        : data.answer ? [data.answer] : []
+      const correct = allAnswers.some(a => normalize(a) === given)
+      const primary = allAnswers[0] ?? data.answer ?? ''
+      return { correct, score: correct ? 1 : 0, correctAnswer: correct ? null : primary }
     }
 
     case 'FLASHCARD': {
-      // Self-reported: user marks themselves correct/incorrect
-      const correct = userAnswer === true || userAnswer === 'correct'
+      // Self-reported: ExerciseRunner gửi 'known' hoặc 'unknown'
+      const correct = userAnswer === true || userAnswer === 'correct' || userAnswer === 'known'
       return { correct, score: correct ? 1 : 0, correctAnswer: data.answer }
     }
 
     case 'SORT_WORDS': {
       // data.answer is the correct full sentence; data.words are the shuffled pieces
-      const expected = String(data.answer ?? '').toLowerCase().trim().replace(/[.!?,]/g, '')
+      const normalize = (s: string) => s.toLowerCase().trim().replace(/[.!?,;:]/g, '')
+      const expected = normalize(String(data.answer ?? ''))
       const given = Array.isArray(userAnswer)
-        ? (userAnswer as string[]).join(' ').toLowerCase().trim().replace(/[.!?,]/g, '')
-        : String(userAnswer).toLowerCase().trim().replace(/[.!?,]/g, '')
+        ? normalize((userAnswer as string[]).join(' '))
+        : normalize(String(userAnswer))
       const correct = given === expected
       return { correct, score: correct ? 1 : 0, correctAnswer: data.answer }
     }
 
     case 'DICTATION': {
-      const expected = (data.sentence ?? data.answer ?? '').toLowerCase().trim()
-      const given = String(userAnswer ?? '').toLowerCase().trim()
+      const normalize = (s: string) => s.toLowerCase().trim().replace(/[.!?,;:]/g, '')
+      const expected = normalize(data.audio_text ?? data.sentence ?? data.answer ?? '')
+      const given = normalize(String(userAnswer ?? ''))
       // Partial scoring: word-level match
       const expectedWords = expected.split(/\s+/)
       const givenWords = given.split(/\s+/)
@@ -57,7 +92,7 @@ function scoreAnswer(
       return {
         correct: score === 1,
         score: Math.round(score * 10) / 10,
-        correctAnswer: data.sentence ?? data.answer,
+        correctAnswer: data.audio_text ?? data.sentence ?? data.answer,
       }
     }
 
@@ -129,7 +164,7 @@ export async function POST(
     if (allDone) {
       const totalMax = allExercises.reduce((s, e) => s + e.points, 0)
       const totalEarned = allExercises.reduce((s, e) => s + (progressMap.get(e.id) ?? 0), 0)
-      await (prisma as any).lesson_completions.upsert({
+      await prisma.lessonCompletion.upsert({
         where: { userId_lessonId: { userId: user.userId, lessonId } },
         create: { userId: user.userId, lessonId, score: totalEarned, maxScore: totalMax },
         update: { score: totalEarned, maxScore: totalMax, completedAt: new Date() },

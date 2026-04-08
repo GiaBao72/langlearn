@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import CoursesClient from '@/components/CoursesClient'
+import AdminCoursesClient from './AdminCoursesClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,15 +9,20 @@ export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
     orderBy: { level: 'asc' },
     include: {
-      _count: { select: { lessons: true } },
       lessons: {
-        select: { _count: { select: { exercises: true } } },
+        orderBy: { order: 'asc' },
+        include: { _count: { select: { exercises: true } } },
       },
+      exams: {
+        orderBy: { order: 'asc' },
+        include: { _count: { select: { questions: true, attempts: true } } },
+      },
+      _count: { select: { lessons: true } },
     },
   })
 
-  const sorted = [...courses].sort((a, b) =>
-    (LEVEL_ORDER[a.level] ?? 99) - (LEVEL_ORDER[b.level] ?? 99)
+  const sorted = [...courses].sort(
+    (a, b) => (LEVEL_ORDER[a.level] ?? 99) - (LEVEL_ORDER[b.level] ?? 99)
   )
 
   const data = sorted.map(c => ({
@@ -30,7 +35,26 @@ export default async function AdminCoursesPage() {
     createdAt: c.createdAt.toISOString(),
     lessonCount: c._count.lessons,
     exerciseCount: c.lessons.reduce((s, l) => s + l._count.exercises, 0),
+    examCount: c.exams.length,
+    lessons: c.lessons.map(l => ({
+      id: l.id,
+      title: l.title,
+      order: l.order,
+      section: l.section ?? null,
+      published: l.published,
+      exerciseCount: l._count.exercises,
+    })),
+    exams: c.exams.map(e => ({
+      id: e.id,
+      title: e.title,
+      published: e.published,
+      order: e.order,
+      durationMins: e.durationMins,
+      passingPct: e.passingPct,
+      questionCount: e._count.questions,
+      attemptCount: e._count.attempts,
+    })),
   }))
 
-  return <CoursesClient courses={data} />
+  return <AdminCoursesClient courses={data} />
 }

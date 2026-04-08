@@ -66,14 +66,14 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false,
       sameSite: 'lax',
-      maxAge: 15 * 60,
+      maxAge: 365 * 24 * 60 * 60,
       path: '/',
     })
     response.cookies.set('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NEXTAUTH_URL?.startsWith("https") ?? false,
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 365 * 24 * 60 * 60,
       path: '/',
     })
 

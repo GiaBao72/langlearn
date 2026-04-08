@@ -2,21 +2,18 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 type Step = 'email' | 'reset' | 'done'
 
 export default function ForgotPasswordPage() {
-  const router = useRouter()
   const [step, setStep] = useState<Step>('email')
   const [email, setEmail] = useState('')
-  const [token, setToken] = useState('')
   const [tokenInput, setTokenInput] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [devToken, setDevToken] = useState('') // hiện token khi chưa có email
+  const [devToken, setDevToken] = useState('')
 
   async function requestReset() {
     if (!email) return setError('Vui lòng nhập email')
@@ -24,12 +21,13 @@ export default function ForgotPasswordPage() {
     const res = await fetch('/api/auth/forgot-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email: email.trim() }),
     })
     const data = await res.json()
     setLoading(false)
     if (!res.ok) return setError(data.error || 'Có lỗi xảy ra')
-    if (data.token) setDevToken(data.token) // dev mode: hiện token
+    // Chỉ hiện devToken trong development (server không gửi trong prod)
+    if (data.token && process.env.NODE_ENV !== 'production') setDevToken(data.token)
     setStep('reset')
   }
 
@@ -55,7 +53,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-[#2563EB]">LangLearn</Link>
+          <Link href="/" className="text-2xl font-bold text-[#2563EB]">G-Deutsch</Link>
           <h1 className="text-xl font-bold text-[#334155] mt-4">
             {step === 'done' ? '✅ Đặt lại thành công!' : 'Quên mật khẩu'}
           </h1>
@@ -69,7 +67,7 @@ export default function ForgotPasswordPage() {
                 <label className="text-xs font-medium text-[#64748B] mb-1 block">Email</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && requestReset()}
-                  placeholder="email@example.com" autoFocus
+                  placeholder="email@example.com" autoFocus autoComplete="email"
                   className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#2563EB]" />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -98,6 +96,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <label className="text-xs font-medium text-[#64748B] mb-1 block">Mật khẩu mới</label>
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                  autoComplete="new-password"
                   placeholder="Tối thiểu 6 ký tự"
                   className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#2563EB]" />
               </div>
@@ -105,6 +104,7 @@ export default function ForgotPasswordPage() {
                 <label className="text-xs font-medium text-[#64748B] mb-1 block">Xác nhận mật khẩu</label>
                 <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && doReset()}
+                  autoComplete="new-password"
                   placeholder="Nhập lại mật khẩu mới"
                   className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#2563EB]" />
               </div>

@@ -35,7 +35,7 @@ export async function PATCH(
   const body = await req.json()
 
   // Whitelist allowed fields — prevent courseId injection etc.
-  const allowed = ['title', 'content', 'order', 'published'] as const
+  const allowed = ['title', 'content', 'order', 'published', 'section'] as const
   const data: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) data[key] = body[key]
