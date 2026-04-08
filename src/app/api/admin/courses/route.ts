@@ -29,6 +29,8 @@ export async function GET(_req: NextRequest) {
     level: c.level,
     description: c.description,
     published: c.published,
+    isDemo: c.isDemo,
+    demoLessonLimit: c.demoLessonLimit,
     createdAt: c.createdAt,
     lessonCount: c._count.lessons,
     exerciseCount: c.lessons.reduce((s, l) => s + l._count.exercises, 0),
