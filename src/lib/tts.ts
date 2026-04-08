@@ -1,83 +1,121 @@
 /**
- * Text-to-Speech helper cho tiếng Đức
- * Ưu tiên giọng de-DE thực sự, fallback về giọng tiếng Anh/khác
- * Xử lý các quirk trên Chrome, Safari, mobile browsers
+ * TTS helper — iOS Safari / Chrome / Android safe
+ *
+ * iOS Safari quirks:
+ *  1. speak() MUST be called synchronously inside a user-gesture handler (no setTimeout, no await before it)
+ *  2. voiceschanged never fires on iOS — voices available immediately after first getVoices() call
+ *  3. Setting utt.voice to a non-matching voice causes silence — must pick carefully
+ *  4. speechSynthesis.cancel() right before speak() can cause silence on iOS — add tiny pause trick
+ *  5. Rate < 0.7 may not work on some iOS voices
  */
 
-let cachedGermanVoice: SpeechSynthesisVoice | null | undefined = undefined
+let _voices: SpeechSynthesisVoice[] = []
+let _voicesLoaded = false
 
-export function getGermanVoice(): SpeechSynthesisVoice | null {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return null
-  if (cachedGermanVoice !== undefined) return cachedGermanVoice
-
-  const voices = window.speechSynthesis.getVoices()
-  if (!voices.length) return null // voices not loaded yet
-
-  // Priority list — pick the first matching
-  const prio = [
-    // Best: native German voices
-    (v: SpeechSynthesisVoice) => v.lang.startsWith('de') && !v.localService, // Google/cloud German
-    (v: SpeechSynthesisVoice) => v.lang === 'de-DE',
-    (v: SpeechSynthesisVoice) => v.lang.startsWith('de'),
-    // Fallback: any voice that can handle Latin chars
-    (v: SpeechSynthesisVoice) => v.lang.startsWith('en') && !v.localService, // Google English
-    (v: SpeechSynthesisVoice) => v.lang.startsWith('en'),
-    () => true, // last resort: whatever browser has
-  ]
-
-  for (const match of prio) {
-    const found = voices.find(match)
-    if (found) { cachedGermanVoice = found; return found }
+function ensureVoices(): SpeechSynthesisVoice[] {
+  if (!_voicesLoaded) {
+    _voices = window.speechSynthesis?.getVoices() ?? []
+    if (_voices.length) _voicesLoaded = true
   }
+  return _voices
+}
 
-  cachedGermanVoice = null
-  return null
+function pickVoice(lang: string): SpeechSynthesisVoice | null {
+  const voices = ensureVoices()
+  if (!voices.length) return null
+
+  const langLower = lang.toLowerCase()
+  const primary   = langLower.slice(0, 2) // e.g. 'de'
+
+  // Tiered matching
+  return (
+    voices.find(v => v.lang.toLowerCase() === langLower) ||          // exact: de-DE
+    voices.find(v => v.lang.toLowerCase().startsWith(primary)) ||    // prefix: de-*
+    voices.find(v => v.lang.toLowerCase().startsWith('en')) ||       // fallback English
+    voices[0] ||                                                      // last resort
+    null
+  )
+}
+
+function isIOS(): boolean {
+  return typeof navigator !== 'undefined' &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+    !(window as any).MSStream
 }
 
 export function speak(
   text: string,
-  opts?: { rate?: number; onStart?: () => void; onEnd?: () => void; onError?: () => void }
+  opts?: {
+    lang?: string
+    rate?: number
+    onStart?: () => void
+    onEnd?: () => void
+    onError?: () => void
+  }
 ): boolean {
   if (typeof window === 'undefined' || !window.speechSynthesis) return false
-  window.speechSynthesis.cancel()
 
-  const voice = getGermanVoice()
+  const lang  = opts?.lang ?? 'de-DE'
+  const rate  = opts?.rate ?? 0.85
+  const ios   = isIOS()
+
+  // iOS: DO NOT cancel before speak — causes silence.
+  // Non-iOS: cancel is fine.
+  if (!ios) window.speechSynthesis.cancel()
+
   const utt = new SpeechSynthesisUtterance(text)
-  utt.lang = 'de-DE'
-  utt.rate = opts?.rate ?? 0.85
+  utt.lang  = lang
+  utt.rate  = Math.max(0.7, Math.min(rate, 2.0)) // iOS rate clamp
   utt.pitch = 1.0
+
+  // Only set voice if we found a real match — do NOT set if null (iOS will auto-pick)
+  const voice = pickVoice(lang)
   if (voice) utt.voice = voice
 
-  // Workaround: Chrome desktop sometimes won't play unless voice is set async
-  // We fire with a short timeout to ensure voices are loaded
-  let started = false
-  const startTimer = setTimeout(() => {
-    // If onstart didn't fire in 300ms, assume it started (mobile Chrome quirk)
-    if (!started) { started = true; opts?.onStart?.() }
-  }, 300)
-
-  utt.onstart = () => {
-    started = true
-    clearTimeout(startTimer)
-    opts?.onStart?.()
-  }
-  utt.onend = () => {
-    clearTimeout(startTimer)
-    opts?.onEnd?.()
-  }
+  utt.onstart = () => opts?.onStart?.()
+  utt.onend   = () => opts?.onEnd?.()
   utt.onerror = (e) => {
-    clearTimeout(startTimer)
-    if (e.error !== 'interrupted') opts?.onError?.()
+    // 'interrupted' is normal when cancel() is called before new speak
+    if (e.error !== 'interrupted' && e.error !== 'canceled') opts?.onError?.()
   }
 
+  // iOS: speak() must be called SYNCHRONOUSLY inside user gesture
+  // — no setTimeout, no await. Call directly.
   window.speechSynthesis.speak(utt)
+
+  // iOS Safari bug: sometimes speech pauses after ~15s due to a known WebKit bug.
+  // Workaround: resume every 10s.
+  if (ios) {
+    const resumeTimer = setInterval(() => {
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume()
+    }, 10000)
+    utt.onend = () => {
+      clearInterval(resumeTimer)
+      opts?.onEnd?.()
+    }
+    utt.onerror = (e) => {
+      clearInterval(resumeTimer)
+      if (e.error !== 'interrupted' && e.error !== 'canceled') opts?.onError?.()
+    }
+  }
+
   return true
 }
 
-/** Call once at app boot to pre-load voices (some browsers lazy-load) */
+/** 
+ * Call this inside a useEffect to pre-warm voice list.
+ * On iOS, voices are available synchronously — no event needed.
+ */
 export function preloadVoices(): void {
   if (typeof window === 'undefined' || !window.speechSynthesis) return
-  const load = () => { cachedGermanVoice = undefined; getGermanVoice() }
-  if (window.speechSynthesis.getVoices().length) { load(); return }
-  window.speechSynthesis.addEventListener('voiceschanged', load, { once: true })
+
+  // Try immediately (works on iOS)
+  const v = window.speechSynthesis.getVoices()
+  if (v.length) { _voices = v; _voicesLoaded = true; return }
+
+  // Chrome desktop fires voiceschanged asynchronously
+  window.speechSynthesis.addEventListener('voiceschanged', () => {
+    _voices = window.speechSynthesis.getVoices()
+    _voicesLoaded = _voices.length > 0
+  }, { once: true })
 }
