@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { generateDictationAudioBatch } from '@/lib/vbee'
 import { Prisma, ExerciseType } from '@prisma/client'
 import * as XLSX from 'xlsx'
 
@@ -128,6 +129,19 @@ export async function POST(req: NextRequest) {
   await prisma.exercise.createMany({
     data: exercises.map(e => ({ ...e, lessonId, order: order++ }))
   })
+
+  // Auto-generate Vbee audio for DICTATION exercises
+  const dictationTexts = exercises
+    .filter(e => e.type === 'DICTATION')
+    .map(e => (e.data as { audio_text?: string }).audio_text)
+    .filter((t): t is string => Boolean(t))
+
+  if (dictationTexts.length > 0) {
+    // Fire-and-forget in background — don't block the response
+    generateDictationAudioBatch(dictationTexts).catch(err =>
+      console.error('[import] Vbee batch error:', err)
+    )
+  }
 
   return NextResponse.json({ imported: exercises.length, errors })
 }
