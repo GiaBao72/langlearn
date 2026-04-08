@@ -39,10 +39,12 @@ export default function PracticeClient({ courses, nextLessonId, nextLessonTitle 
     return total > 0 ? Math.round((done / total) * 100) : 0
   }
 
+  const [showSidebar, setShowSidebar] = useState(true)
+
   return (
-    <div className="flex gap-0 min-h-[600px] bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+    <div className="flex gap-0 min-h-[600px] bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden relative">
       {/* Left panel — course tabs */}
-      <aside className="w-64 shrink-0 border-r border-[#E2E8F0] bg-[#F8FAFC]">
+      <aside className={`${showSidebar ? 'flex' : 'hidden md:flex'} flex-col w-full md:w-64 shrink-0 border-r border-[#E2E8F0] bg-[#F8FAFC] absolute md:relative inset-0 z-10 md:z-auto overflow-y-auto`}>
         <div className="p-4 border-b border-[#E2E8F0]">
           <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Khóa học</p>
         </div>
@@ -53,7 +55,7 @@ export default function PracticeClient({ courses, nextLessonId, nextLessonTitle 
             return (
               <button
                 key={course.id}
-                onClick={() => setActiveCourseId(course.id)}
+                onClick={() => { setActiveCourseId(course.id); setShowSidebar(false) }}
                 className={`w-full text-left px-3 py-3 rounded-xl transition-all group ${
                   active
                     ? 'bg-[#2563EB] text-white shadow-sm'
@@ -88,11 +90,16 @@ export default function PracticeClient({ courses, nextLessonId, nextLessonTitle 
       </aside>
 
       {/* Right panel — lessons */}
-      <main className="flex-1 min-w-0 flex flex-col">
+      <main className={`${showSidebar ? 'hidden md:flex' : 'flex'} flex-1 min-w-0 flex-col`}>
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4 bg-white">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-[#E2E8F0] flex items-center gap-3 bg-white">
+          <button onClick={() => setShowSidebar(true)} className="md:hidden flex items-center gap-1 text-xs text-[#64748B] hover:text-[#2563EB] shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Khóa học
+          </button>
+          <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
           <div>
-            <h2 className="font-bold text-[#334155] text-lg">{activeCourse?.title}</h2>
+            <h2 className="font-bold text-[#334155] text-base sm:text-lg">{activeCourse?.title}</h2>
             <p className="text-xs text-[#64748B]">
               {activeCourse?.language} · {activeCourse?.level} · {lessons.length} bài
             </p>
@@ -108,10 +115,11 @@ export default function PracticeClient({ courses, nextLessonId, nextLessonTitle 
               Tiếp tục
             </Link>
           )}
+          </div>
         </div>
 
         {/* Lesson list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2">
           {lessons.length === 0 ? (
             <div className="text-center py-16 text-[#94A3B8]">
               <p className="text-3xl mb-2">📭</p>

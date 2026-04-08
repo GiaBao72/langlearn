@@ -20,6 +20,14 @@ export default async function ExamStartPage({ params }: { params: Promise<{ id: 
   })
   if (!exam) notFound()
 
+  // Check enrollment (ADMIN bypasses)
+  if (user.role !== 'ADMIN') {
+    const enrollment = await prisma.courseEnrollment.findUnique({
+      where: { userId_courseId: { userId: user.userId, courseId: exam.course.id } },
+    })
+    if (!enrollment) redirect(`/courses/${exam.course.id}`)
+  }
+
   // Check maxAttempts
   if (exam.maxAttempts) {
     const used = await prisma.examAttempt.count({ where: { examId: id, userId: user.userId, submittedAt: { not: null } } })
@@ -44,7 +52,7 @@ export default async function ExamStartPage({ params }: { params: Promise<{ id: 
   const safeQuestions = questions.map(q => {
     const data = q.data as Record<string, unknown>
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { answer, answers, ...rest } = data
+    const { answer, answers, audio_text, correctIndex, ...rest } = data
     return { id: q.id, type: q.type as Parameters<typeof ExamRunner>[0]['questions'][0]['type'], question: q.question, data: rest, points: q.points, order: q.order }
   })
 

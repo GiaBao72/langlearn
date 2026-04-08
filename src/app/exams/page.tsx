@@ -20,6 +20,16 @@ export default async function ExamsListPage() {
     },
   })
 
+  // Enrolled course ids
+  let enrolledCourseIds = new Set<string>()
+  if (user && user.role !== 'ADMIN') {
+    const enrollments = await prisma.courseEnrollment.findMany({
+      where: { userId: user.userId },
+      select: { courseId: true },
+    })
+    enrolledCourseIds = new Set(enrollments.map(e => e.courseId))
+  }
+
   let bestMap: Record<string, { pct: number; passed: boolean | null }> = {}
   if (user) {
     const examIds = courses.flatMap(c => c.exams.map(e => e.id))
@@ -44,6 +54,7 @@ export default async function ExamsListPage() {
     title: course.title,
     language: course.language,
     level: course.level,
+    isEnrolled: user?.role === 'ADMIN' || enrolledCourseIds.has(course.id),
     exams: course.exams.map(exam => ({
       id: exam.id,
       title: exam.title,

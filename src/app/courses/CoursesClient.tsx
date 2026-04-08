@@ -52,11 +52,16 @@ function groupBySection(lessons: Lesson[]): { section: string | null; items: Les
 export default function CoursesClient({
   courses,
   totalCourses,
+  filterLevel,
 }: {
   courses: Course[]
   totalCourses: number
+  filterLevel?: string
 }) {
-  const [activeCourseId, setActiveCourseId] = useState<string>(courses[0]?.id ?? '')
+  const defaultCourse = filterLevel
+    ? (courses.find(c => c.level === filterLevel) ?? courses[0])
+    : courses[0]
+  const [activeCourseId, setActiveCourseId] = useState<string>(defaultCourse?.id ?? '')
   const activeCourse = courses.find(c => c.id === activeCourseId) ?? courses[0]
   const lessons = activeCourse?.lessons ?? []
   const groups = groupBySection(lessons)

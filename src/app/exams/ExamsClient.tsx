@@ -20,6 +20,7 @@ interface Course {
   title: string
   language: string
   level: string
+  isEnrolled: boolean
   exams: Exam[]
 }
 
@@ -94,6 +95,9 @@ export default function ExamsClient({ courses, isLoggedIn, totalExams }: Props) 
                   {course.title}
                 </p>
                 <div className="flex items-center gap-1.5">
+                  {!course.isEnrolled && isLoggedIn && (
+                    <span className="text-xs text-amber-600">🔒</span>
+                  )}
                   {passed > 0 && (
                     <span className={`flex items-center gap-1 text-xs ${active ? 'text-green-300' : 'text-emerald-600'}`}>
                       <Trophy size={11} />
@@ -143,7 +147,12 @@ export default function ExamsClient({ courses, isLoggedIn, totalExams }: Props) 
                   )}
                   <div className="space-y-3">
                     {group.items.map(exam => {
-                      const href = isLoggedIn ? `/exams/${exam.id}` : `/login?from=/exams/${exam.id}`
+                      const courseEnrolled = activeCourse?.isEnrolled ?? true
+                      const href = !isLoggedIn
+                        ? `/login?from=/exams/${exam.id}`
+                        : !courseEnrolled
+                        ? `/courses/${activeCourse?.id}`
+                        : `/exams/${exam.id}`
                       return (
                         <Link
                           key={exam.id}
@@ -194,6 +203,9 @@ export default function ExamsClient({ courses, isLoggedIn, totalExams }: Props) 
                               )}
                               {!isLoggedIn && (
                                 <span className="text-[#2563EB] font-medium">🔒 Đăng nhập để thi</span>
+                              )}
+                              {isLoggedIn && !(activeCourse?.isEnrolled ?? true) && (
+                                <span className="text-amber-600 font-medium">🔒 Yêu cầu đăng ký khóa học</span>
                               )}
                             </div>
                           </div>

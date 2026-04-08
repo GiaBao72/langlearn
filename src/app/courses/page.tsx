@@ -11,8 +11,9 @@ export const metadata: Metadata = {
   description: 'Khám phá các khóa học ngoại ngữ từ A1 đến C2. Học tiếng Đức và nhiều ngôn ngữ khác với phương pháp Spaced Repetition.',
 }
 
-export default async function CoursesPage() {
+export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const user = await getCurrentUser()
+  const { level: filterLevel } = await searchParams
   const isAdmin = user?.role === 'ADMIN'
 
   const courses = await prisma.course.findMany({
@@ -89,7 +90,7 @@ export default async function CoursesPage() {
             <p>Chưa có khóa học nào được công bố.</p>
           </div>
         ) : (
-          <CoursesClient courses={coursesData} totalCourses={courses.length} />
+          <CoursesClient courses={coursesData} totalCourses={courses.length} filterLevel={filterLevel} />
         )}
       </div>
     </div>
