@@ -13,7 +13,12 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  outputFileTracing: false,
+  experimental: {
+    outputFileTracingRoot: process.cwd(),
+    outputFileTracingExcludes: {
+      '*': ['node_modules/**/*'],
+    },
+  },
   async headers() {
     return [
       {
