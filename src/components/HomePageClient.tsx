@@ -181,14 +181,11 @@ export default function HomePageClient() {
               </>
             ) : (
               <>
-                <Link href="/register" className="bg-[#2563EB] text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base text-center">
-                  Bắt đầu miễn phí
+                <Link href="/register" className="bg-[#2563EB] text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base text-center shadow-md">
+                  Bắt đầu miễn phí →
                 </Link>
-                <Link href="/demo" className="border-2 border-amber-400 text-amber-600 bg-amber-50 px-6 py-3 rounded-full font-semibold hover:bg-amber-100 transition-colors text-sm sm:text-base text-center flex items-center gap-2 justify-center">
-                  🎓 Học thử ngay
-                </Link>
-                <Link href="/courses" className="border border-[#E2E8F0] text-[#334155] px-6 py-3 rounded-full font-semibold hover:border-[#2563EB] hover:text-[#2563EB] transition-colors text-sm sm:text-base text-center bg-white">
-                  Xem khóa học
+                <Link href="/demo" className="border-2 border-[#2563EB]/30 text-[#2563EB] bg-white px-6 py-3 rounded-full font-semibold hover:border-[#2563EB] hover:bg-blue-50 transition-colors text-sm sm:text-base text-center flex items-center gap-2 justify-center">
+                  🎓 Học thử — không cần đăng ký
                 </Link>
               </>
             )}

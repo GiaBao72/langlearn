@@ -122,7 +122,10 @@ export async function GET() {
       total: l.exercises.length,
     }))
 
+  const displayName = user.email.split('@')[0]
+
   return NextResponse.json({
+    displayName,
     totalScore,
     completedCount,
     streak,

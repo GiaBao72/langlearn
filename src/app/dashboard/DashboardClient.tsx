@@ -16,6 +16,7 @@ interface HeatmapDay {
 }
 
 interface DashboardData {
+  displayName: string
   totalScore: number
   completedCount: number
   streak: number
@@ -172,7 +173,7 @@ export default function DashboardClient() {
       <div className="mb-6 sm:mb-8 flex flex-wrap items-start sm:items-center gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#334155]">
-            Xin chào! 👋
+            Xin chào, {data.displayName}! 👋
           </h1>
           <p className="text-[#64748B] text-sm sm:text-base mt-1">Hôm nay học gì nào?</p>
         </div>

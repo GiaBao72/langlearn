@@ -11,8 +11,20 @@ export default async function PracticeIndexPage() {
   const user = await getCurrentUser()
   if (!user) redirect('/login')
 
+  // Lấy danh sách khóa đã enroll
+  const enrollments = user.role === 'ADMIN'
+    ? null
+    : await prisma.courseEnrollment.findMany({
+        where: { userId: user.userId },
+        select: { courseId: true },
+      })
+  const enrolledIds = enrollments ? new Set(enrollments.map(e => e.courseId)) : null
+
   const courses = await prisma.course.findMany({
-    where: { published: true },
+    where: {
+      published: true,
+      ...(enrolledIds ? { id: { in: [...enrolledIds] } } : {}),
+    },
     include: {
       lessons: {
         where: { published: true },
@@ -73,6 +85,8 @@ export default async function PracticeIndexPage() {
       })),
   }))
 
+  const displayName = user.email.split('@')[0]
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -80,14 +94,18 @@ export default async function PracticeIndexPage() {
       <div className="max-w-5xl mx-auto px-4 py-10">
         <div className="mb-8">
           <Link href="/dashboard" className="text-[#64748B] text-sm hover:text-[#334155] transition-colors mb-3 inline-block">← Dashboard</Link>
-          <h1 className="text-3xl font-bold text-[#334155] mb-1">Khu vực luyện tập</h1>
+          <h1 className="text-3xl font-bold text-[#334155] mb-1">Xin chào, {displayName}! 👋</h1>
           <p className="text-[#64748B] text-sm">Chọn khóa học và bắt đầu luyện tập</p>
         </div>
 
         {clientCourses.length === 0 ? (
           <div className="text-center py-20 text-[#64748B] bg-white rounded-xl border border-[#E2E8F0] shadow-sm">
-            <p className="text-lg mb-2">Chưa có bài học nào.</p>
-            <p className="text-sm">Admin sẽ thêm sớm!</p>
+            <p className="text-4xl mb-4">📚</p>
+            <p className="text-lg font-semibold text-[#334155] mb-2">Bạn chưa đăng ký khóa học nào</p>
+            <p className="text-sm mb-6">Hãy khám phá các khóa học và bắt đầu học ngay!</p>
+            <a href="/courses" className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors">
+              Xem khóa học →
+            </a>
           </div>
         ) : (
           <PracticeClient

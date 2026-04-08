@@ -15,8 +15,7 @@ const navLinks = [
   { href: '/courses', label: 'Khóa học', icon: BookOpen },
   { href: '/exams', label: 'Kiểm tra', icon: ClipboardList },
   { href: '/roadmap', label: 'Lộ trình', icon: Map },
-  { href: '/blog', label: 'Blog', icon: FileText },
-  { href: '/leaderboard', label: 'Xếp hạng', icon: Trophy },
+  { href: '/leaderboard', label: '🏆 Xếp hạng', icon: Trophy },
   { href: '/store', label: 'Sách', icon: ShoppingBag },
 ]
 
