@@ -570,7 +570,7 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
           )}
           {exercise.type === 'DICTATION' && (
             <DictationExercise
-              question={exercise.question} data={exercise.data}
+              question={exercise.question} data={exercise.data as {audio_text?: string; sentence?: string; answer: string; hint?: string}}
               value={userAnswer} onChange={setUserAnswer}
               submitted={submitted} correct={correct}
             />
