@@ -65,6 +65,7 @@ model Course {
   published   Boolean  @default(false)
   isDemo            Boolean  @default(false)
   demoLessonLimit   Int      @default(1)
+  freeForAll        Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

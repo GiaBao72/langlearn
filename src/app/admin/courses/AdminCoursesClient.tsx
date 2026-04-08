@@ -28,7 +28,7 @@ import { CSS } from '@dnd-kit/utilities'
 interface Course {
   id: string; title: string; language: string; level: string
   description: string | null; published: boolean; createdAt: string
-  lessonCount: number; exerciseCount: number; examCount: number
+  lessonCount: number; exerciseCount: number; examCount: number; freeForAll?: boolean
 }
 interface Lesson {
   id: string; title: string; order: number; section: string | null

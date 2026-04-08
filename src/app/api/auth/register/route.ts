@@ -48,6 +48,18 @@ export async function POST(req: NextRequest) {
       data: { email, passwordHash, name },
     })
 
+    // Auto-enroll all freeForAll courses
+    const freeCourses = await prisma.course.findMany({
+      where: { freeForAll: true, published: true },
+      select: { id: true },
+    })
+    if (freeCourses.length > 0) {
+      await prisma.courseEnrollment.createMany({
+        data: freeCourses.map(c => ({ userId: user.id, courseId: c.id })),
+        skipDuplicates: true,
+      })
+    }
+
     const payload = { userId: user.id, email: user.email, role: user.role }
     const accessToken = await signAccessToken(payload)
     const refreshToken = await signRefreshToken(payload)

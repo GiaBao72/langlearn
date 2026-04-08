@@ -40,6 +40,7 @@ interface Course {
   published: boolean
   isDemo: boolean
   demoLessonLimit: number
+  freeForAll: boolean
   lessons: Lesson[]
 }
 
@@ -214,7 +215,7 @@ export default function CourseEditClient({ course }: { course: Course }) {
   const initialForm = {
     title: course.title, language: course.language, level: course.level,
     description: course.description || '', published: course.published,
-    isDemo: course.isDemo, demoLessonLimit: course.demoLessonLimit,
+    isDemo: course.isDemo, demoLessonLimit: course.demoLessonLimit, freeForAll: course.freeForAll,
   }
   const [form, setForm] = useState(initialForm)
   const [lessons, setLessons] = useState<Lesson[]>([...course.lessons].sort((a, b) => a.order - b.order))
@@ -419,6 +420,13 @@ export default function CourseEditClient({ course }: { course: Course }) {
                   <p className="text-xs text-[#94A3B8] mt-1">Guest có thể học {form.demoLessonLimit} bài đầu tiên mà không cần đăng ký.</p>
                 </div>
               )}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={form.freeForAll} onChange={e => updateForm({ freeForAll: e.target.checked })} className="w-4 h-4 accent-blue-600" />
+                <div>
+                  <span className="text-sm text-[#334155]">🆓 Miễn phí cho tất cả</span>
+                  <p className="text-xs text-[#94A3B8] mt-0.5">User mới đăng ký sẽ tự động được enroll khóa này.</p>
+                </div>
+              </label>
             </div>
             {sections.length > 0 && (
               <div>

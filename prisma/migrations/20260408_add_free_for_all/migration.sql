@@ -1,0 +1,1 @@
+ALTER TABLE "courses" ADD COLUMN "freeForAll" BOOLEAN NOT NULL DEFAULT false;

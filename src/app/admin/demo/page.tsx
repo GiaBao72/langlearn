@@ -27,6 +27,7 @@ interface Course {
   published: boolean
   isDemo: boolean
   demoLessonLimit: number
+  freeForAll: boolean
   lessonCount: number
   exerciseCount: number
 }
@@ -243,7 +244,7 @@ export default function AdminDemoPage() {
     fetch('/api/admin/courses')
       .then(r => r.json())
       .then((data: (Course & { isDemo?: boolean; demoLessonLimit?: number })[]) => {
-        setCourses(data.map(c => ({ ...c, isDemo: c.isDemo ?? false, demoLessonLimit: c.demoLessonLimit ?? 1 })))
+        setCourses(data.map(c => ({ ...c, isDemo: c.isDemo ?? false, demoLessonLimit: c.demoLessonLimit ?? 1, freeForAll: c.freeForAll ?? false })))
         setLoading(false)
       })
   }, [])

@@ -31,6 +31,7 @@ export async function GET(_req: NextRequest) {
     published: c.published,
     isDemo: c.isDemo,
     demoLessonLimit: c.demoLessonLimit,
+    freeForAll: c.freeForAll,
     createdAt: c.createdAt,
     lessonCount: c._count.lessons,
     exerciseCount: c.lessons.reduce((s, l) => s + l._count.exercises, 0),

@@ -31,7 +31,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await params
   const body = await req.json()
-  const allowed = ['title', 'language', 'level', 'description', 'published', 'imageUrl', 'isDemo', 'demoLessonLimit']
+  const allowed = ['title', 'language', 'level', 'description', 'published', 'imageUrl', 'isDemo', 'demoLessonLimit', 'freeForAll']
   const data: Record<string, unknown> = {}
   for (const key of allowed) { if (key in body) data[key] = body[key] }
   if (!Object.keys(data).length) return NextResponse.json({ error: 'No valid fields' }, { status: 400 })
