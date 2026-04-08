@@ -182,7 +182,7 @@ export default function HomePageClient() {
             ) : (
               <>
                 <Link href="/courses" className="bg-[#2563EB] text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base text-center shadow-md flex items-center gap-2 justify-center">
-                  📚 Xem khóa học — 3 bài đầu miễn phí
+                  📚 Khám phá khóa học →
                 </Link>
               </>
             )}
