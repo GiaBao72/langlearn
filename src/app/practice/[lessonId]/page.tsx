@@ -30,43 +30,60 @@ export default async function PracticePage({ params, searchParams }: {
 
   if (!lesson || !lesson.published) notFound()
 
-  // Guest → cần đăng nhập
+  // Kiểm tra xem lesson có thuộc top 3 bài của khóa không
+  const allLessons = await prisma.lesson.findMany({
+    where: { courseId: lesson.course.id, published: true },
+    orderBy: { order: 'asc' },
+    select: { id: true },
+  })
+  const lessonIndex = allLessons.findIndex(l => l.id === lessonId)
+  const isFreeLesson = lessonIndex >= 0 && lessonIndex < 3
+
+  // Guest — chỉ được vào 3 bài đầu
   if (!user) {
-    const from = encodeURIComponent(`/practice/${lessonId}`)
+    if (!isFreeLesson) {
+      return (
+        <div className="min-h-screen bg-[#F8FAFC]">
+          <Navbar />
+          <div className="max-w-md mx-auto px-4 py-16 text-center">
+            <div className="text-5xl mb-4">🔒</div>
+            <h2 className="text-xl font-bold text-[#334155] mb-2">Bài học này yêu cầu tài khoản</h2>
+            <p className="text-[#64748B] text-sm mb-6">Đăng ký miễn phí để mở khóa toàn bộ khóa học và lưu tiến độ!</p>
+            <Link href={`/register?from=/practice/${lessonId}`}
+              className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
+              Đăng ký miễn phí
+            </Link>
+            <p className="text-[#64748B] text-xs mt-4">
+              Đã có tài khoản?{' '}
+              <Link href={`/login?from=/practice/${lessonId}`} className="text-[#2563EB] hover:underline">Đăng nhập</Link>
+            </p>
+          </div>
+        </div>
+      )
+    }
+    // Free lesson: tiếp tục render với isGuest=true
+  }
+
+  // Check enrollment (logged-in user)
+  let isEnrolled = user?.role === 'ADMIN'
+  if (user && !isEnrolled) {
+    const enrollment = await prisma.courseEnrollment.findUnique({
+      where: { userId_courseId: { userId: user.userId, courseId: lesson.course.id } },
+    })
+    isEnrolled = !!enrollment
+  }
+
+  // Logged-in nhưng chưa enroll, và không phải free lesson
+  if (user && !isEnrolled && !isFreeLesson) {
     return (
       <div className="min-h-screen bg-[#F8FAFC]">
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-16 text-center">
-          <div className="text-5xl mb-4">🔒</div>
-          <h2 className="text-xl font-bold text-[#334155] mb-2">Bạn cần đăng nhập</h2>
-          <p className="text-[#64748B] text-sm mb-6">Hãy đăng nhập để bắt đầu luyện tập.</p>
-          <Link href={`/login?from=/practice/${lessonId}`}
-            className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
-            Đăng nhập
-          </Link>
-          <p className="text-[#64748B] text-xs mt-4">
-            Chưa có tài khoản?{' '}
-            <Link href={`/register?from=/practice/${lessonId}`} className="text-[#2563EB] hover:underline">Đăng ký miễn phí</Link>
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Check enrollment — user phải được enroll vào khóa này
-  const enrollment = await prisma.courseEnrollment.findUnique({
-    where: { userId_courseId: { userId: user.userId, courseId: lesson.course.id } },
-  })
-  if (!enrollment && user.role !== 'ADMIN') {
-    return (
-      <div className='min-h-screen bg-[#F8FAFC]'>
-        <Navbar />
-        <div className='max-w-md mx-auto px-4 py-16 text-center'>
-          <div className='text-5xl mb-4'>🚫</div>
-          <h2 className='text-xl font-bold text-[#334155] mb-2'>Bạn chưa đăng ký khóa này</h2>
-          <p className='text-[#64748B] text-sm mb-6'>Hãy đăng ký khóa học để truy cập bài tập.</p>
+          <div className="text-5xl mb-4">🚫</div>
+          <h2 className="text-xl font-bold text-[#334155] mb-2">Bạn chưa đăng ký khóa này</h2>
+          <p className="text-[#64748B] text-sm mb-6">Hãy đăng ký khóa học để truy cập bài tập.</p>
           <Link href={`/courses/${lesson.course.id}`}
-            className='inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm'>
+            className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
             Xem khóa học
           </Link>
         </div>
@@ -74,11 +91,15 @@ export default async function PracticePage({ params, searchParams }: {
     )
   }
 
+  const isGuest = !user
+
   // Load all files for logged-in users (including view_only)
-  const allFiles = await prisma.lessonFile.findMany({
-    where: { lessonId },
-    orderBy: { order: 'asc' },
-  })
+  const allFiles = isGuest
+    ? lesson.files
+    : await prisma.lessonFile.findMany({
+        where: { lessonId },
+        orderBy: { order: 'asc' },
+      })
 
   const hasContent = !!(lesson.content?.trim()) || allFiles.length > 0
   const hasExercises = lesson.exercises.length > 0
@@ -87,7 +108,20 @@ export default async function PracticePage({ params, searchParams }: {
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
       <div className="max-w-2xl md:max-w-5xl mx-auto px-4 py-8">
-        <StudyTracker lessonId={lessonId} />
+        {!isGuest && <StudyTracker lessonId={lessonId} />}
+        {isGuest && (
+          <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
+            <span className="text-xl">🆓</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-800">Bài học miễn phí — không cần đăng nhập</p>
+              <p className="text-xs text-amber-600 mt-0.5">
+                Tiến độ sẽ không được lưu.{' '}
+                <Link href={`/register?from=/practice/${lessonId}`} className="underline font-medium">Đăng ký miễn phí</Link>
+                {' '}để theo dõi kết quả!
+              </p>
+            </div>
+          </div>
+        )}
         <div className="mb-6">
           <Link href={`/courses/${lesson.course.id}`} className="inline-flex items-center gap-1 text-sm text-[#64748B] hover:text-[#2563EB] transition-colors mb-3">
             ← Quay lại khóa học
@@ -127,6 +161,7 @@ export default async function PracticePage({ params, searchParams }: {
             }))}
             lessonId={lessonId}
             courseId={lesson.course.id}
+            isGuest={isGuest}
           />
         )}
 

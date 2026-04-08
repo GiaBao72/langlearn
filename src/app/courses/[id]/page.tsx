@@ -47,7 +47,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         orderBy: { order: 'asc' },
         include: { _count: { select: { exercises: true } } },
       },
-
     },
   })
   if (!course) notFound()
@@ -164,7 +163,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <span className="text-2xl">🔒</span>
             <div>
               <p className="font-semibold text-amber-800 mb-1">Bạn chưa đăng ký khóa học này</p>
-              <p className="text-sm text-amber-700">Liên hệ quản trị viên để được cấp quyền truy cập.</p>
+              <p className="text-sm text-amber-700">Liên hệ quản trị viên để được cấp quyền truy cập. 3 bài đầu có thể học thử miễn phí.</p>
             </div>
           </div>
         )}
@@ -174,8 +173,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3 mb-5">
             <span className="text-2xl">🔓</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-blue-700">Đăng nhập để bắt đầu học</p>
-              <p className="text-xs text-blue-500 mt-0.5">Miễn phí · Theo dõi tiến độ · Lưu kết quả</p>
+              <p className="text-sm font-semibold text-blue-700">3 bài đầu miễn phí — không cần đăng nhập</p>
+              <p className="text-xs text-blue-500 mt-0.5">Đăng ký để mở toàn bộ khóa học · Theo dõi tiến độ · Lưu kết quả</p>
             </div>
             <Link href="/register" className="bg-[#2563EB] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition-colors shrink-0">
               Đăng ký ngay
@@ -185,7 +184,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
         {/* Lessons list — grouped by section */}
         {(() => {
-          // Build section groups — sort by min(order) of each section so order matches admin view
           type LessonWithSection = typeof course.lessons[0] & { section?: string | null }
           const sectionMap = new Map<string, { minOrder: number; items: typeof course.lessons }>()
           let nullMinOrder = Infinity
@@ -202,7 +200,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               nullItems.push(lesson)
             }
           }
-          // Sort sections by their earliest lesson order
           const sortedSections = [...sectionMap.entries()].sort((a, b) => a[1].minOrder - b[1].minOrder)
           const grouped: { section: string | null; items: typeof course.lessons }[] = [
             ...sortedSections.map(([sec, g]) => ({ section: sec, items: g.items })),
@@ -234,7 +231,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       const scoreStr = done && completion.maxScore > 0 ? `${completion.score}/${completion.maxScore} điểm` : null
                       const scorePct = done && completion.maxScore > 0 ? Math.round((completion.score / completion.maxScore) * 100) : null
                       const isNext = isEnrolled && !done && nextLesson?.id === lesson.id
-                      const locked = !isEnrolled || !user
+                      // 3 bài đầu: ai cũng học được (kể cả guest)
+                      const freeLesson = i < 3
+                      const locked = !freeLesson && (!isEnrolled || !user)
                       const href = locked
                         ? (user ? '#' : `/login?from=${encodeURIComponent(`/courses/${course.id}`)}`)
                         : `/practice/${lesson.id}`
@@ -242,28 +241,44 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       return (
                         <Link key={lesson.id} href={href}
                           className={`flex items-center gap-4 p-4 sm:p-5 rounded-xl border transition-all group ${
-                            locked ? 'border-[#E2E8F0] bg-slate-50 cursor-not-allowed opacity-70'
-                            : done ? 'border-green-200 bg-green-50 hover:border-green-300'
-                            : isNext ? 'border-blue-300 bg-blue-50 hover:border-blue-400 shadow-sm'
-                            : 'border-[#E2E8F0] bg-white hover:border-blue-200 hover:shadow-sm'
+                            locked
+                              ? 'border-[#E2E8F0] bg-slate-50 cursor-not-allowed opacity-70'
+                              : freeLesson && !isEnrolled && !done
+                                ? 'border-amber-200 bg-amber-50 hover:border-amber-300 hover:shadow-sm'
+                                : done
+                                  ? 'border-green-200 bg-green-50 hover:border-green-300'
+                                  : isNext
+                                    ? 'border-blue-300 bg-blue-50 hover:border-blue-400 shadow-sm'
+                                    : 'border-[#E2E8F0] bg-white hover:border-blue-200 hover:shadow-sm'
                           }`}>
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                            locked ? 'bg-slate-200 text-slate-400'
-                            : done ? 'bg-green-100 text-green-600'
-                            : isNext ? 'bg-blue-100 text-blue-600'
-                            : 'bg-slate-100 text-[#94A3B8]'
+                            locked
+                              ? 'bg-slate-200 text-slate-400'
+                              : freeLesson && !isEnrolled && !done
+                                ? 'bg-amber-100 text-amber-600'
+                                : done
+                                  ? 'bg-green-100 text-green-600'
+                                  : isNext
+                                    ? 'bg-blue-100 text-blue-600'
+                                    : 'bg-slate-100 text-[#94A3B8]'
                           }`}>
-                            {locked ? '🔒' : done ? '✓' : isNext ? '▶' : i + 1}
+                            {locked ? '🔒' : done ? '✓' : isNext ? '▶' : freeLesson && !isEnrolled ? '🆓' : i + 1}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className={`font-medium text-sm sm:text-base truncate transition-colors ${
-                              locked ? 'text-[#94A3B8]'
-                              : done ? 'text-green-800'
-                              : isNext ? 'text-blue-700'
-                              : 'text-[#334155] group-hover:text-[#2563EB]'
+                              locked
+                                ? 'text-[#94A3B8]'
+                                : freeLesson && !isEnrolled && !done
+                                  ? 'text-amber-700'
+                                  : done
+                                    ? 'text-green-800'
+                                    : isNext
+                                      ? 'text-blue-700'
+                                      : 'text-[#334155] group-hover:text-[#2563EB]'
                             }`}>
                               {lesson.title}
                               {isNext && <span className="ml-2 text-[10px] font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full align-middle">Tiếp theo</span>}
+                              {freeLesson && !isEnrolled && !done && <span className="ml-2 text-[10px] font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full align-middle">🆓 Miễn phí</span>}
                             </div>
                             <div className="flex items-center gap-3 mt-1 text-xs text-[#94A3B8]">
                               <span>{lesson._count.exercises} bài tập</span>
@@ -278,10 +293,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                             </div>
                           </div>
                           <span className={`text-sm shrink-0 transition-colors ${
-                            locked ? 'text-[#CBD5E1]'
-                            : done ? 'text-green-400'
-                            : isNext ? 'text-blue-400'
-                            : 'text-[#CBD5E1] group-hover:text-[#2563EB]'
+                            locked
+                              ? 'text-[#CBD5E1]'
+                              : freeLesson && !isEnrolled && !done
+                                ? 'text-amber-400 group-hover:text-amber-600'
+                                : done
+                                  ? 'text-green-400'
+                                  : isNext
+                                    ? 'text-blue-400'
+                                    : 'text-[#CBD5E1] group-hover:text-[#2563EB]'
                           }`}>→</span>
                         </Link>
                       )
@@ -298,7 +318,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             Khóa học chưa có bài học nào.
           </div>
         )}
-
 
         <div className="mt-12 pt-8 border-t border-[#E2E8F0]">
           <Link href="/courses" className="inline-flex items-center gap-1 text-sm text-[#64748B] hover:text-[#2563EB] transition-colors">

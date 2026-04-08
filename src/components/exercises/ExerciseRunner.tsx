@@ -26,6 +26,7 @@ interface Props {
   exercises: Exercise[]
   lessonId: string
   courseId?: string
+  isGuest?: boolean
 }
 
 function checkCorrectness(exercise: Exercise, answer: string): boolean {
@@ -109,7 +110,7 @@ function shuffleExercises(exercises: Exercise[]): Exercise[] {
   return result
 }
 
-export default function ExerciseRunner({ exercises: rawExercises, lessonId, courseId }: Props) {
+export default function ExerciseRunner({ exercises: rawExercises, lessonId, courseId, isGuest }: Props) {
   const router = useRouter()
   const [queue] = useState<Exercise[]>(() => shuffleExercises(rawExercises))
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -274,6 +275,7 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
   }
 
   function saveProgress(exerciseId: string, answer: string) {
+    if (isGuest) return
     fetch(`/api/exercises/${exerciseId}/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
