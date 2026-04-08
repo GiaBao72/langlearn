@@ -131,8 +131,33 @@ function AccessModal({ user, onClose }: { user: User; onClose: () => void }) {
   const [courses, setCourses] = useState<AccessCourse[]>([])
   const [exams, setExams]     = useState<AccessExam[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving]   = useState<string | null>(null)
-  const [search, setSearch]   = useState('')
+  const [saving, setSaving]       = useState<string | null>(null)
+  const [search, setSearch]       = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [batchSaving, setBatchSaving] = useState(false)
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const n = new Set(prev)
+      n.has(id) ? n.delete(id) : n.add(id)
+      return n
+    })
+  }
+
+  async function batchEnroll() {
+    if (selectedIds.size === 0) return
+    setBatchSaving(true)
+    await fetch(`/api/admin/users/${user.id}/access`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'course', targetIds: Array.from(selectedIds) }),
+    })
+    setBatchSaving(false)
+    setCourses(prev => prev.map(c =>
+      selectedIds.has(c.id) ? { ...c, enrolled: true, enrolledAt: new Date().toISOString() } : c
+    ))
+    setSelectedIds(new Set())
+  }
 
   async function loadData() {
     setLoading(true)
@@ -228,9 +253,41 @@ function AccessModal({ user, onClose }: { user: User; onClose: () => void }) {
             <div className="text-center py-10 text-[#94A3B8]">Đang tải...</div>
           ) : tab === 'courses' ? (
             <div className="space-y-2">
+              {/* Batch action bar */}
+              {selectedIds.size > 0 && (
+                <div className="flex items-center justify-between bg-[#2563EB] text-white px-4 py-2.5 rounded-xl">
+                  <span className="text-sm font-medium">Đã chọn {selectedIds.size} khóa</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={batchEnroll} disabled={batchSaving}
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-white text-[#2563EB] font-semibold hover:bg-blue-50 transition-colors disabled:opacity-60">
+                      {batchSaving ? <RefreshCw size={12} className="animate-spin" /> : <Unlock size={12} />}
+                      Mở khóa {selectedIds.size} khóa
+                    </button>
+                    <button onClick={() => setSelectedIds(new Set())} className="text-white/70 hover:text-white text-xs px-2 py-1.5">Bỏ chọn</button>
+                  </div>
+                </div>
+              )}
+
               {filteredCourses.length === 0 && <p className="text-sm text-[#94A3B8] text-center py-8">Không có khóa học nào</p>}
               {filteredCourses.map(c => (
-                <div key={c.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${c.enrolled ? 'border-green-200 bg-green-50' : 'border-[#E2E8F0] bg-white hover:border-blue-200'}`}>
+                <div key={c.id}
+                  onClick={() => { if (!c.enrolled) toggleSelect(c.id) }}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
+                    c.enrolled ? 'border-green-200 bg-green-50' :
+                    selectedIds.has(c.id) ? 'border-[#2563EB] bg-blue-50 cursor-pointer' :
+                    'border-[#E2E8F0] bg-white hover:border-blue-200 cursor-pointer'
+                  }`}>
+                  {/* Checkbox cho khóa chưa enroll */}
+                  {!c.enrolled ? (
+                    <div onClick={e => { e.stopPropagation(); toggleSelect(c.id) }}
+                      className={`w-4 h-4 rounded border-2 shrink-0 flex items-center justify-center transition-colors ${
+                        selectedIds.has(c.id) ? 'border-[#2563EB] bg-[#2563EB]' : 'border-[#CBD5E1]'
+                      }`}>
+                      {selectedIds.has(c.id) && <svg viewBox="0 0 10 10" className="w-2.5 h-2.5 fill-none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>}
+                    </div>
+                  ) : (
+                    <div className="w-4 h-4 shrink-0" />
+                  )}
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${LEVEL_COLORS[c.level] ?? 'bg-slate-100 text-slate-600'}`}>{c.level}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[#334155] truncate">{c.title}</p>
@@ -239,14 +296,14 @@ function AccessModal({ user, onClose }: { user: User; onClose: () => void }) {
                     )}
                   </div>
                   <button
-                    onClick={() => toggleCourse(c.id, c.enrolled)}
+                    onClick={e => { e.stopPropagation(); toggleCourse(c.id, c.enrolled) }}
                     disabled={saving === c.id}
                     className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors disabled:opacity-50 shrink-0 ${
                       c.enrolled
                         ? 'border-red-200 text-red-500 hover:bg-red-50 bg-white'
                         : 'border-[#2563EB] text-[#2563EB] hover:bg-blue-50 bg-white'
                     }`}>
-                    {saving === c.id ? <RefreshCw size={12} className="animate-spin" /> : c.enrolled ? <><Lock size={12} /> Thu hồi</> : <><Unlock size={12} /> Mở khóa</>}
+                    {saving === c.id ? <RefreshCw size={12} className="animate-spin" /> : c.enrolled ? <><Lock size={12} /> Thu hồi</> : <><Unlock size={12} /> Mở</>}
                   </button>
                 </div>
               ))}

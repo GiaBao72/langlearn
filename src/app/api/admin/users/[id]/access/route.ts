@@ -52,15 +52,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const me = await getCurrentUser()
   if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id: userId } = await params
-  const { type, targetId } = await req.json() as { type: 'course' | 'exam'; targetId: string }
+  const body = await req.json() as { type: 'course' | 'exam'; targetId?: string; targetIds?: string[] }
+  const { type, targetId } = body
 
   if (type === 'course') {
-    await prisma.courseEnrollment.upsert({
-      where: { userId_courseId: { userId, courseId: targetId } },
-      create: { userId, courseId: targetId, enrolledAt: new Date() },
-      update: {},
+    // Hỗ trợ cả single (targetId) và batch (targetIds)
+    const ids: string[] = body.targetIds ?? (targetId ? [targetId] : [])
+    if (ids.length === 0) return NextResponse.json({ error: 'No targetId(s)' }, { status: 400 })
+    await prisma.courseEnrollment.createMany({
+      data: ids.map(courseId => ({ userId, courseId, enrolledAt: new Date() })),
+      skipDuplicates: true,
     })
-    return NextResponse.json({ ok: true, action: 'enrolled' })
+    return NextResponse.json({ ok: true, action: 'enrolled', count: ids.length })
   }
 
   if (type === 'exam') {
