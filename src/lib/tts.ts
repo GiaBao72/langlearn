@@ -27,12 +27,34 @@ function pickVoice(lang: string): SpeechSynthesisVoice | null {
   const langLower = lang.toLowerCase()
   const primary   = langLower.slice(0, 2) // e.g. 'de'
 
-  // Tiered matching
+  // Human-sounding voice names (iOS enhanced/premium voices for German)
+  // iOS: "Anna" (de-DE enhanced), "Markus", "Yannick", "Petra", "Lena"
+  // Android/Chrome: Google Deutsch
+  const humanNames = ['anna', 'markus', 'yannick', 'petra', 'lena', 'thomas', 'google']
+
+  const deVoices = voices.filter(v => v.lang.toLowerCase().startsWith(primary))
+
+  if (deVoices.length) {
+    // 1st priority: enhanced/premium German (contains 'enhanced' or 'premium' in name)
+    const enhanced = deVoices.find(v =>
+      v.name.toLowerCase().includes('enhanced') || v.name.toLowerCase().includes('premium')
+    )
+    if (enhanced) return enhanced
+
+    // 2nd priority: known human-sounding voice names
+    const human = deVoices.find(v =>
+      humanNames.some(n => v.name.toLowerCase().includes(n))
+    )
+    if (human) return human
+
+    // 3rd: any German voice
+    return deVoices[0]
+  }
+
+  // No German voice at all — English fallback
   return (
-    voices.find(v => v.lang.toLowerCase() === langLower) ||          // exact: de-DE
-    voices.find(v => v.lang.toLowerCase().startsWith(primary)) ||    // prefix: de-*
-    voices.find(v => v.lang.toLowerCase().startsWith('en')) ||       // fallback English
-    voices[0] ||                                                      // last resort
+    voices.find(v => v.lang.toLowerCase().startsWith('en')) ||
+    voices[0] ||
     null
   )
 }
