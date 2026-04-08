@@ -35,16 +35,18 @@ type Course = {
   enrolledStatus: 'enrolled' | 'not-enrolled' | 'admin'
 }
 
-function groupBySection(lessons: Lesson[]): { section: string | null; items: Lesson[] }[] {
-  const groups: { section: string | null; items: Lesson[] }[] = []
-  let current: { section: string | null; items: Lesson[] } | null = null
+function groupBySection(lessons: Lesson[]): { section: string | null; items: Lesson[]; startIdx: number }[] {
+  const groups: { section: string | null; items: Lesson[]; startIdx: number }[] = []
+  let current: { section: string | null; items: Lesson[]; startIdx: number } | null = null
+  let globalIdx = 0
   for (const lesson of lessons) {
     const sec = lesson.section ?? null
     if (!current || current.section !== sec) {
-      current = { section: sec, items: [] }
+      current = { section: sec, items: [], startIdx: globalIdx }
       groups.push(current)
     }
     current.items.push(lesson)
+    globalIdx++
   }
   return groups
 }
@@ -66,6 +68,7 @@ export default function CoursesClient({
   const lessons = activeCourse?.lessons ?? []
   const groups = groupBySection(lessons)
   const hasAnySections = groups.some(g => g.section !== null)
+  const isNotEnrolled = activeCourse?.enrolledStatus === 'not-enrolled'
 
   function getCourseProgress(course: Course) {
     const done = course.lessons.filter(l => l.completed).length
@@ -179,22 +182,17 @@ export default function CoursesClient({
                 <h2 className="font-bold text-[#334155] text-base md:text-lg leading-snug">{activeCourse?.title}</h2>
                 <p className="text-xs text-[#64748B]">
                   {activeCourse?.language} · {activeCourse?.level} · {lessons.length} bài học
+                  {isNotEnrolled && (
+                    <span className="ml-2 text-amber-600 font-medium">· 3 bài đầu miễn phí</span>
+                  )}
                 </p>
               </div>
               {activeCourse && activeCourse.enrolledStatus !== 'not-enrolled' && (
                 <Link
-                  href={`/courses/${activeCourse.id}`}
+                  href={`/practice/${lessons.find(l => !l.completed)?.id ?? lessons[0]?.id}`}
                   className="text-xs font-semibold bg-[#2563EB] text-white px-3 md:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shrink-0"
                 >
-                  Vào học →
-                </Link>
-              )}
-              {activeCourse?.enrolledStatus === 'not-enrolled' && (
-                <Link
-                  href={`/courses/${activeCourse.id}`}
-                  className="text-xs font-semibold border border-[#2563EB] text-[#2563EB] px-3 md:px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors shrink-0"
-                >
-                  Xem chi tiết
+                  {lessons.some(l => l.completed) ? 'Tiếp tục →' : 'Bắt đầu →'}
                 </Link>
               )}
             </div>
@@ -212,69 +210,79 @@ export default function CoursesClient({
               </div>
             ) : (
               <div className="space-y-4">
-                {groups.map((group, gIdx) => {
-                  const offset = groups.slice(0, gIdx).reduce((s, g) => s + g.items.length, 0)
-                  return (
-                    <div key={gIdx}>
-                      {hasAnySections && group.section && (
-                        <div className="flex items-center gap-2 mb-2 px-1">
-                          <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
-                            {group.section}
-                          </span>
-                          <div className="flex-1 h-px bg-[#E2E8F0]" />
-                        </div>
-                      )}
-                      <div className="space-y-2">
-                        {group.items.map((lesson, idx) => {
-                          const globalIdx = offset + idx
-                          const locked = activeCourse?.enrolledStatus === 'not-enrolled'
-                          const href = locked
-                            ? `/courses/${activeCourse?.id}`
-                            : `/practice/${lesson.id}`
-                          return (
-                            <Link
-                              key={lesson.id}
-                              href={href}
-                              className={`flex items-center gap-3 bg-white border rounded-xl px-3 md:px-4 py-3 transition-all group ${
-                                lesson.completed
-                                  ? 'border-green-200 hover:border-green-400'
-                                  : locked
-                                  ? 'border-dashed border-slate-300 opacity-60'
-                                  : 'border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-sm'
-                              }`}
-                            >
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                lesson.completed
-                                  ? 'bg-green-100 text-green-700'
-                                  : locked
-                                  ? 'bg-slate-100 text-slate-400'
-                                  : 'bg-blue-50 text-[#2563EB]'
-                              }`}>
-                                {lesson.completed ? '✓' : globalIdx + 1}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className={`font-medium text-sm leading-snug ${
-                                  lesson.completed
-                                    ? 'text-green-700'
-                                    : locked
-                                    ? 'text-[#94A3B8]'
-                                    : 'text-[#334155] group-hover:text-[#2563EB]'
-                                } transition-colors`}>
-                                  {locked && '🔒 '}{lesson.title}
-                                </p>
-                                <div className="flex items-center gap-3 text-xs text-[#94A3B8] mt-0.5">
-                                  <span className="flex items-center gap-1"><Layers size={11} />{lesson.exerciseCount} bài tập</span>
-                                  {lesson.completed && <span className="text-green-600 font-medium">Đã hoàn thành</span>}
-                                </div>
-                              </div>
-                              <ChevronRight size={15} className="shrink-0 text-[#CBD5E1] group-hover:text-blue-400 transition-colors" />
-                            </Link>
-                          )
-                        })}
+                {groups.map((group, gIdx) => (
+                  <div key={gIdx}>
+                    {hasAnySections && group.section && (
+                      <div className="flex items-center gap-2 mb-2 px-1">
+                        <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
+                          {group.section}
+                        </span>
+                        <div className="flex-1 h-px bg-[#E2E8F0]" />
                       </div>
+                    )}
+                    <div className="space-y-2">
+                      {group.items.map((lesson, idx) => {
+                        const globalIdx = group.startIdx + idx
+                        // 3 bài đầu: ai cũng học được
+                        const freeLesson = globalIdx < 3
+                        const locked = isNotEnrolled && !freeLesson
+                        const href = locked ? '#' : `/practice/${lesson.id}`
+
+                        return (
+                          <Link
+                            key={lesson.id}
+                            href={href}
+                            onClick={locked ? (e) => e.preventDefault() : undefined}
+                            className={`flex items-center gap-3 bg-white border rounded-xl px-3 md:px-4 py-3 transition-all group ${
+                              locked
+                                ? 'border-dashed border-slate-300 opacity-60 cursor-not-allowed'
+                                : lesson.completed
+                                  ? 'border-green-200 hover:border-green-400'
+                                  : freeLesson && isNotEnrolled
+                                    ? 'border-amber-200 hover:border-amber-400 hover:shadow-sm'
+                                    : 'border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-sm'
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                              locked
+                                ? 'bg-slate-100 text-slate-400'
+                                : lesson.completed
+                                  ? 'bg-green-100 text-green-700'
+                                  : freeLesson && isNotEnrolled
+                                    ? 'bg-amber-100 text-amber-600'
+                                    : 'bg-blue-50 text-[#2563EB]'
+                            }`}>
+                              {locked ? '🔒' : lesson.completed ? '✓' : freeLesson && isNotEnrolled ? '🆓' : globalIdx + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`font-medium text-sm leading-snug transition-colors ${
+                                locked
+                                  ? 'text-[#94A3B8]'
+                                  : lesson.completed
+                                    ? 'text-green-700'
+                                    : freeLesson && isNotEnrolled
+                                      ? 'text-amber-700 group-hover:text-amber-900'
+                                      : 'text-[#334155] group-hover:text-[#2563EB]'
+                              }`}>
+                                {lesson.title}
+                                {freeLesson && isNotEnrolled && !lesson.completed && (
+                                  <span className="ml-2 text-[10px] font-semibold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-full align-middle">Miễn phí</span>
+                                )}
+                              </p>
+                              <div className="flex items-center gap-3 text-xs text-[#94A3B8] mt-0.5">
+                                <span className="flex items-center gap-1"><Layers size={11} />{lesson.exerciseCount} bài tập</span>
+                                {lesson.completed && <span className="text-green-600 font-medium">Đã hoàn thành</span>}
+                              </div>
+                            </div>
+                            <ChevronRight size={15} className={`shrink-0 transition-colors ${
+                              locked ? 'text-[#E2E8F0]' : 'text-[#CBD5E1] group-hover:text-blue-400'
+                            }`} />
+                          </Link>
+                        )
+                      })}
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
