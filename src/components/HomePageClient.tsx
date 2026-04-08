@@ -184,6 +184,9 @@ export default function HomePageClient() {
                 <Link href="/register" className="bg-[#2563EB] text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base text-center">
                   Bắt đầu miễn phí →
                 </Link>
+                <Link href="/demo" className="border-2 border-amber-400 text-amber-600 bg-amber-50 px-6 py-3 rounded-full font-semibold hover:bg-amber-100 transition-colors text-sm sm:text-base text-center flex items-center gap-2 justify-center">
+                  🎓 Học thử ngay
+                </Link>
                 <Link href="/courses" className="border border-[#E2E8F0] text-[#334155] px-6 py-3 rounded-full font-semibold hover:border-[#2563EB] hover:text-[#2563EB] transition-colors text-sm sm:text-base text-center bg-white">
                   Xem khóa học
                 </Link>
@@ -362,12 +365,22 @@ export default function HomePageClient() {
         <p className="cta-bottom__sub text-blue-200 mb-6 sm:mb-8 text-sm sm:text-base">
           {isLoggedIn ? 'Streak của bạn đang chờ. Đừng để bị đứt!' : 'Chỉ cần 5 phút. Không cần thẻ tín dụng.'}
         </p>
-        <Link
-          href={isLoggedIn ? '/dashboard' : '/register'}
-          className="cta-bottom__btn inline-block bg-white text-[#2563EB] px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-colors text-sm sm:text-base"
-        >
-          {isLoggedIn ? 'Vào dashboard →' : 'Tạo tài khoản miễn phí →'}
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            href={isLoggedIn ? '/dashboard' : '/register'}
+            className="cta-bottom__btn inline-block bg-white text-[#2563EB] px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-colors text-sm sm:text-base"
+          >
+            {isLoggedIn ? 'Vào dashboard →' : 'Tạo tài khoản miễn phí →'}
+          </Link>
+          {!isLoggedIn && (
+            <Link
+              href="/demo"
+              className="inline-block border-2 border-white/60 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-colors text-sm sm:text-base"
+            >
+              🎓 Học thử — không cần đăng ký
+            </Link>
+          )}
+        </div>
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────── */}
