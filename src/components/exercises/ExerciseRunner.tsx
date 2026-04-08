@@ -257,7 +257,9 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
       // Partial sai hoàn toàn thì không hiện popup, nhưng cũng không tăng correctCount
     }
     const data = exercise.data as Record<string, unknown>
-    const correctAnswer = String(data.answer ?? (Array.isArray((data as Record<string, unknown>).answers) ? ((data as Record<string, unknown>).answers as string[]).join(', ') : ''))
+    const correctAnswer = exercise.type === 'DICTATION'
+      ? String(data.audio_text ?? data.answer ?? '')
+      : String(data.answer ?? (Array.isArray((data as Record<string, unknown>).answers) ? ((data as Record<string, unknown>).answers as string[]).join(', ') : ''))
     setSessionResults(prev => [...prev, {
       type: exercise.type,
       question: exercise.question,
@@ -603,6 +605,10 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
                       const d = exercise.data as Record<string, unknown>
                       if (Array.isArray(d.answers) && (d.answers as string[]).length > 0) {
                         return (d.answers as string[]).join(' / ')
+                      }
+                      // DICTATION: show audio_text (full sentence) not just answer
+                      if (exercise.type === 'DICTATION') {
+                        return String(d.audio_text ?? d.answer ?? '')
                       }
                       return String(d.answer ?? '')
                     })()}

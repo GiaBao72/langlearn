@@ -119,12 +119,28 @@ export async function POST(
 
   const exercise = await prisma.exercise.findUnique({
     where: { id },
-    include: { lesson: { select: { published: true } } },
+    include: { lesson: { select: { published: true, courseId: true } } },
   })
 
   if (!exercise) return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
   if (!exercise.lesson.published && user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  // Enrollment check — ADMIN bypasses; guest (no courseId) blocked
+  if (user.role !== 'ADMIN') {
+    const courseId = exercise.lesson.courseId
+    if (courseId) {
+      const course = await prisma.course.findUnique({ where: { id: courseId }, select: { freeForAll: true } })
+      if (!course?.freeForAll) {
+        const enrolled = await prisma.courseEnrollment.findUnique({
+          where: { userId_courseId: { userId: user.userId, courseId } },
+        })
+        if (!enrolled) {
+          return NextResponse.json({ error: 'Not enrolled in this course' }, { status: 403 })
+        }
+      }
+    }
   }
 
   const data = exercise.data as ExerciseData
