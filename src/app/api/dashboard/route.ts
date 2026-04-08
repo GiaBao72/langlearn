@@ -64,6 +64,13 @@ export async function GET() {
   const completedExerciseIds = new Set(progress.map(p => p.exerciseId))
   const LEVEL_ORDER: Record<string, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 }
 
+  // Lấy danh sách courseId mà user đã enroll
+  const enrollments = await prisma.courseEnrollment.findMany({
+    where: { userId: user.userId },
+    select: { courseId: true },
+  })
+  const enrolledCourseIds = new Set(enrollments.map(e => e.courseId))
+
   const allLessons = await prisma.lesson.findMany({
     where: { published: true, course: { published: true } },
     select: {
@@ -76,7 +83,12 @@ export async function GET() {
     orderBy: [{ order: 'asc' }],
   })
 
-  allLessons.sort((a, b) => {
+  // Chỉ giữ bài học thuộc khóa user đã enroll (hoặc admin thì xem hết)
+  const filteredLessons = user.role === 'ADMIN'
+    ? allLessons
+    : allLessons.filter(l => enrolledCourseIds.has(l.course.id))
+
+  filteredLessons.sort((a, b) => {
     const la = LEVEL_ORDER[a.course.level] ?? 99
     const lb = LEVEL_ORDER[b.course.level] ?? 99
     if (la !== lb) return la - lb
@@ -84,7 +96,7 @@ export async function GET() {
   })
 
   let nextLesson: { id: string; title: string; courseTitle: string } | null = null
-  for (const lesson of allLessons) {
+  for (const lesson of filteredLessons) {
     const hasIncomplete = lesson.exercises.some(ex => !completedExerciseIds.has(ex.id))
     if (hasIncomplete) {
       nextLesson = { id: lesson.id, title: lesson.title, courseTitle: lesson.course.title }
@@ -93,7 +105,7 @@ export async function GET() {
   }
 
   // inProgress: lessons đã làm ít nhất 1 bài nhưng chưa xong
-  const inProgressLessons = allLessons
+  const inProgressLessons = filteredLessons
     .filter(l => {
       const total = l.exercises.length
       if (total === 0) return false
