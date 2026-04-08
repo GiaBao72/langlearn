@@ -1,4 +1,5 @@
 'use client'
+import { speak, preloadVoices } from '@/lib/tts'
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -308,14 +309,7 @@ export default function ExamRunner({
                     <div className="flex justify-center">
                       <button
                         type="button"
-                        onClick={() => {
-                          if (typeof window === 'undefined' || !window.speechSynthesis) return
-                          window.speechSynthesis.cancel()
-                          const utt = new SpeechSynthesisUtterance(audioText)
-                          utt.lang = 'de-DE'
-                          utt.rate = 0.8
-                          window.speechSynthesis.speak(utt)
-                        }}
+                        onClick={() => speak(audioText, { rate: 0.85 })}
                         className="w-16 h-16 rounded-full bg-[#2563EB] text-white flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg active:scale-95"
                         title="Nghe câu"
                       >

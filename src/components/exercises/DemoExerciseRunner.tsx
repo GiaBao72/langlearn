@@ -313,7 +313,7 @@ export default function DemoExerciseRunner({ exercises, courseId }: Props) {
             {exercise.type === 'FILL_BLANK' && <FillBlankExercise question={exercise.question} data={exercise.data} value={userAnswer} onChange={setUserAnswer} onSubmit={checkAnswer} submitted={submitted} correct={correct} />}
             {exercise.type === 'MULTIPLE_CHOICE' && <MultipleChoiceExercise question={exercise.question} data={exercise.data} value={userAnswer} onChange={setUserAnswer} submitted={submitted} correct={correct} />}
             {(exercise.type === 'MULTIPLE_CHOICE_PARTIAL' || exercise.type === 'MULTIPLE_CHOICE_ALL') && <MultipleChoiceMultiExercise question={exercise.question} data={exercise.data} value={userAnswer} onChange={setUserAnswer} submitted={submitted} correct={correct} scoreMode={exercise.type === 'MULTIPLE_CHOICE_PARTIAL' ? 'partial' : 'all'} />}
-            {exercise.type === 'DICTATION' && <DictationExercise question={exercise.question} data={exercise.data} value={userAnswer} onChange={setUserAnswer} submitted={submitted} correct={correct} />}
+            {exercise.type === 'DICTATION' && <DictationExercise question={exercise.question} data={exercise.data as {audio_text?: string; sentence?: string; answer: string; hint?: string}} value={userAnswer} onChange={setUserAnswer} submitted={submitted} correct={correct} />}
             {exercise.type === 'SORT_WORDS' && <SortWordsExercise question={exercise.question} data={exercise.data} value={userAnswer} onChange={setUserAnswer} submitted={submitted} correct={correct} exerciseId={exercise.id} />}
           </motion.div>
         </AnimatePresence>
