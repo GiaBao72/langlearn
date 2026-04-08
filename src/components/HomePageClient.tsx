@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-// @ts-ignore
-import confetti from 'canvas-confetti'
 
 function useTypewriter(text: string, speed = 80) {
   const [displayed, setDisplayed] = useState('')
@@ -22,14 +20,6 @@ function useTypewriter(text: string, speed = 80) {
   }, [text, speed])
   return { displayed, done }
 }
-
-const ALL_QUESTIONS = [
-  { sentence: 'Ich ___ jeden Tag Deutsch.', answer: 'lerne', hint: 'Động từ "học" chia ngôi thứ nhất số ít' },
-  { sentence: 'Das ist ___ Buch.', answer: 'ein', hint: '"Một" — mạo từ bất định với danh từ trung tính' },
-  { sentence: 'Wie ___ du?', answer: 'heißt', hint: 'Động từ "tên là" chia ngôi thứ hai số ít' },
-  { sentence: 'Ich ___ aus Vietnam.', answer: 'komme', hint: 'Động từ "đến từ" chia ngôi thứ nhất số ít' },
-  { sentence: '___ sprechen Deutsch.', answer: 'Wir', hint: '"Chúng tôi" — đại từ nhân xưng ngôi thứ nhất số nhiều' },
-]
 
 const TESTIMONIALS = [
   {
@@ -74,19 +64,6 @@ const TESTIMONIALS = [
   },
 ]
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
-
-const normalize = (s: string) =>
-  s.trim().toLowerCase()
-    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
-
 function StarRating({ n }: { n: number }) {
   return (
     <div className="flex gap-0.5">
@@ -98,47 +75,12 @@ function StarRating({ n }: { n: number }) {
 }
 
 export default function HomePageClient() {
-  const [questions, setQuestions] = useState(ALL_QUESTIONS)
-  const [current, setCurrent] = useState(0)
-  const [input, setInput] = useState('')
-  const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
-  const [showCTA, setShowCTA] = useState(false)
-  const [correctCount, setCorrectCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const { displayed: typedLine2, done: typingDone } = useTypewriter('Giỏi ngay tiếng Đức', 80)
 
   useEffect(() => {
-    setQuestions(shuffle(ALL_QUESTIONS))
-    // Kiểm tra đăng nhập
     fetch('/api/auth/me').then(r => { if (r.ok) setIsLoggedIn(true) }).catch(() => {})
   }, [])
-
-  useEffect(() => {
-    if (showCTA && correctCount >= 4) {
-      confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } })
-    }
-  }, [showCTA])
-
-  const q = questions[current]
-
-  function checkAnswer() {
-    if (!input.trim()) return
-    const correct = normalize(input) === normalize(q.answer)
-    setResult(correct ? 'correct' : 'wrong')
-    if (correct) {
-      setCorrectCount(c => c + 1)
-      confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: ['#2563EB', '#10B981', '#F59E0B'] })
-    }
-    setTimeout(() => {
-      if (current + 1 >= questions.length) {
-        setShowCTA(true)
-      } else {
-        setCurrent(i => i + 1)
-        setInput('')
-        setResult(null)
-      }
-    }, correct ? 800 : 1400)
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-[#F8FAFC]">
@@ -188,75 +130,6 @@ export default function HomePageClient() {
             )}
           </motion.div>
 
-          {/* Demo widget */}
-          <motion.div
-            className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-6 sm:p-8 max-w-md mx-auto text-left"
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs text-[#64748B] font-medium">🎯 Thử ngay — không cần đăng ký</span>
-              <span className="text-xs text-[#94a3b8]">{Math.min(current + 1, questions.length)}/{questions.length}</span>
-            </div>
-
-            {/* Progress bar */}
-            <div className="w-full bg-[#E2E8F0] rounded-full h-1.5 mb-5">
-              <div
-                className="bg-[#2563EB] h-1.5 rounded-full transition-all duration-500"
-                style={{ width: `${((current) / questions.length) * 100}%` }}
-              />
-            </div>
-
-            {!showCTA && q ? (
-              <>
-                <p className="text-base sm:text-lg font-semibold text-[#334155] mb-1 leading-relaxed">
-                  {q.sentence.split('___').map((part, i, arr) => (
-                    <span key={i}>{part}{i < arr.length - 1 && (
-                      <span className={`inline-block min-w-[60px] border-b-2 mx-1 text-center font-bold ${
-                        result === 'correct' ? 'border-emerald-400 text-emerald-600' :
-                        result === 'wrong' ? 'border-red-400 text-red-500' :
-                        'border-[#2563EB] text-[#2563EB]'
-                      }`}>{input || '\u00A0\u00A0\u00A0\u00A0\u00A0'}</span>
-                    )}</span>
-                  ))}
-                </p>
-                <p className="text-[#64748B] text-xs mb-4">{q.hint}</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && !result && checkAnswer()}
-                    placeholder="Điền từ vào đây..."
-                    disabled={!!result}
-                    className="flex-1 min-w-0 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-3 py-2.5 text-sm text-[#334155] placeholder-[#94a3b8] focus:outline-none focus:border-[#2563EB] transition-colors disabled:opacity-60"
-                  />
-                  <button onClick={checkAnswer} disabled={!!result || !input.trim()}
-                    className="bg-[#2563EB] text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shrink-0 disabled:opacity-50">
-                    Check
-                  </button>
-                </div>
-                {result && (
-                  <p className={`mt-3 text-sm font-medium ${result === 'correct' ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {result === 'correct' ? '🎉 Chính xác!' : `❌ Chưa đúng. Đáp án: ${q.answer}`}
-                  </p>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-2">
-                <p className="text-xl sm:text-2xl mb-1">
-                  {correctCount >= 4 ? '🏆 Xuất sắc!' : correctCount >= 2 ? '🔥 Không tệ!' : '💪 Cứ luyện thêm!'}
-                </p>
-                <p className="text-[#64748B] text-sm mb-1">Bạn đúng {correctCount}/{questions.length} câu</p>
-                <p className="text-[#64748B] text-sm mb-5">
-                  {isLoggedIn ? 'Tiếp tục luyện tập với khóa học thật!' : 'Tạo tài khoản miễn phí để lưu tiến độ!'}
-                </p>
-                <Link href={isLoggedIn ? '/dashboard' : '/register'}
-                  className="inline-block bg-[#2563EB] text-white px-6 py-3 rounded-full font-bold hover:bg-blue-700 transition-colors text-sm">
-                  {isLoggedIn ? 'Vào dashboard →' : 'Bắt đầu ngay →'}
-                </Link>
-              </div>
-            )}
-          </motion.div>
         </div>
       </section>
 

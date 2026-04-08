@@ -29,8 +29,6 @@ export async function GET(_req: NextRequest) {
     level: c.level,
     description: c.description,
     published: c.published,
-    isDemo: c.isDemo,
-    demoLessonLimit: c.demoLessonLimit,
     freeForAll: c.freeForAll,
     createdAt: c.createdAt,
     lessonCount: c._count.lessons,
