@@ -27,6 +27,7 @@ const navItems = [
   { href: '/admin/blog', label: 'Blog', icon: FileText },
   { href: '/admin/stats', label: 'Thống kê', icon: BarChart2 },
   { href: '/admin/ai-generate', label: 'AI Tạo Đề', icon: Sparkles },
+    { href: '/admin/demo-generate', label: 'AI Demo', icon: Sparkles },
 ]
 
 const bottomItems = [
