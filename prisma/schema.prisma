@@ -63,6 +63,8 @@ model Course {
   level       String
   description String?
   published   Boolean  @default(false)
+  isDemo            Boolean  @default(false)
+  demoLessonLimit   Int      @default(1)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

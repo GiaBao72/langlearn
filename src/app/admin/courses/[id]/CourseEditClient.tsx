@@ -38,6 +38,8 @@ interface Course {
   level: string
   description: string | null
   published: boolean
+  isDemo: boolean
+  demoLessonLimit: number
   lessons: Lesson[]
 }
 
@@ -212,6 +214,7 @@ export default function CourseEditClient({ course }: { course: Course }) {
   const initialForm = {
     title: course.title, language: course.language, level: course.level,
     description: course.description || '', published: course.published,
+    isDemo: course.isDemo, demoLessonLimit: course.demoLessonLimit,
   }
   const [form, setForm] = useState(initialForm)
   const [lessons, setLessons] = useState<Lesson[]>([...course.lessons].sort((a, b) => a.order - b.order))
@@ -402,6 +405,21 @@ export default function CourseEditClient({ course }: { course: Course }) {
               <input type="checkbox" checked={form.published} onChange={e => updateForm({ published: e.target.checked })} className="w-4 h-4 accent-blue-600" />
               <span className="text-sm text-[#334155]">Công khai</span>
             </label>
+            <div className="border-t border-[#E2E8F0] pt-4 space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={form.isDemo} onChange={e => updateForm({ isDemo: e.target.checked })} className="w-4 h-4 accent-amber-500" />
+                <span className="text-sm text-[#334155]">🎓 Khóa học thử (Demo)</span>
+              </label>
+              {form.isDemo && (
+                <div>
+                  <label className="block text-sm text-[#64748B] mb-1.5">Số bài thử miễn phí</label>
+                  <input type="number" min={1} max={100} value={form.demoLessonLimit}
+                    onChange={e => updateForm({ demoLessonLimit: parseInt(e.target.value) || 1 })}
+                    className="w-full bg-slate-50 border border-[#E2E8F0] rounded-lg px-4 py-2.5 focus:outline-none focus:border-amber-400 transition-colors text-sm" />
+                  <p className="text-xs text-[#94A3B8] mt-1">Guest có thể học {form.demoLessonLimit} bài đầu tiên mà không cần đăng ký.</p>
+                </div>
+              )}
+            </div>
             {sections.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-[#64748B] mb-2">📂 Chủ đề ({sections.length}) — kéo header để sắp xếp</p>
