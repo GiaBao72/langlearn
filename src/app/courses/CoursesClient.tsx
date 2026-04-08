@@ -183,7 +183,7 @@ export default function CoursesClient({
                 <p className="text-xs text-[#64748B]">
                   {activeCourse?.language} · {activeCourse?.level} · {lessons.length} bài học
                   {isNotEnrolled && (
-                    <span className="ml-2 text-amber-600 font-medium">· 3 bài đầu miễn phí</span>
+                    <span className="ml-2 text-amber-600 font-medium">· 3 bài đầu miễn phí — <a href="/register" className="underline hover:text-amber-800">Đăng ký để học toàn bộ</a></span>
                   )}
                 </p>
               </div>
