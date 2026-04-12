@@ -183,7 +183,12 @@ export default function CoursesClient({
                 <p className="text-xs text-[#64748B]">
                   {activeCourse?.language} · {activeCourse?.level} · {lessons.length} bài học
                   {isNotEnrolled && (
-                    <span className="ml-2 text-amber-600 font-medium">· 3 bài đầu miễn phí — <a href="https://www.facebook.com/GiaBaoBooks" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-800">Liên hệ fanpage để mở toàn bộ</a></span>
+                    <span className="ml-2 text-amber-600 font-medium">· 3 bài đầu miễn phí —{' '}
+                      <a href="https://www.facebook.com/GiaBaoBooks" target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 underline hover:text-amber-800 font-semibold">
+                        🔓 Mở khoá toàn bộ
+                      </a>
+                    </span>
                   )}
                 </p>
               </div>
@@ -288,6 +293,24 @@ export default function CoursesClient({
           </div>
         </main>
       </div>
+
+      {/* Enroll CTA banner */}
+      {isNotEnrolled && (
+        <div className="border-t border-amber-200 bg-amber-50 px-4 md:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-sm text-amber-800 text-center sm:text-left">
+            <span className="font-semibold">🔒 Bài 4 trở đi bị khoá.</span>{' '}
+            Liên hệ để mở toàn bộ khoá học — hoàn toàn miễn phí.
+          </div>
+          <a
+            href="https://www.facebook.com/GiaBaoBooks"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          >
+            Liên hệ mở khoá →
+          </a>
+        </div>
+      )}
     </div>
   )
 }

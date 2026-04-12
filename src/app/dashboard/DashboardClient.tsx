@@ -59,8 +59,18 @@ function useCountUp(target: number, duration = 1000) {
 function Heatmap({ days }: { days: HeatmapDay[] }) {
   function getColor(count: number) {
     if (count === 0) return 'bg-[#E2E8F0]'
-    if (count <= 2) return 'bg-blue-200'
+    if (count === 1) return 'bg-blue-200'
+    if (count <= 3) return 'bg-blue-400'
     return 'bg-[#2563EB]'
+  }
+
+  function formatDate(dateStr: string) {
+    try {
+      const d = new Date(dateStr + 'T00:00:00')
+      return d.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
+    } catch {
+      return dateStr
+    }
   }
 
   return (
@@ -68,8 +78,8 @@ function Heatmap({ days }: { days: HeatmapDay[] }) {
       {days.map((day) => (
         <div
           key={day.date}
-          title={`${day.date}: ${day.count} bài`}
-          className={`aspect-square rounded-sm ${getColor(day.count)}`}
+          title={day.count === 0 ? formatDate(day.date) : `${formatDate(day.date)}: ${day.count} bài`}
+          className={`aspect-square rounded-sm cursor-default transition-opacity hover:opacity-80 ${getColor(day.count)}`}
         />
       ))}
     </div></div>

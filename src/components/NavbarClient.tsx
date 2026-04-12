@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Menu, X, Download, BookOpen, Map, FileText, Trophy, ShoppingBag, LayoutDashboard, User, Settings, LogOut, LogIn, UserPlus, ClipboardList } from 'lucide-react'
+import { Menu, X, Download, BookOpen, Map, FileText, Trophy, ShoppingBag, LayoutDashboard, User, Settings, LogOut, LogIn, UserPlus, ClipboardList, ChevronDown } from 'lucide-react'
 
 interface NavbarClientProps {
   user: { name: string; email: string; role: string } | null
@@ -66,10 +66,12 @@ function useInstallPrompt() {
 
 export default function NavbarClient({ user }: NavbarClientProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [userDropOpen, setUserDropOpen] = useState(false)
   const { dark, toggle } = useDarkMode()
   const { canNativeInstall, install } = useInstallPrompt()
   const pathname = usePathname()
   const menuRef = useRef<HTMLDivElement>(null)
+  const userDropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!menuOpen) return
@@ -79,6 +81,15 @@ export default function NavbarClient({ user }: NavbarClientProps) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [menuOpen])
+
+  useEffect(() => {
+    if (!userDropOpen) return
+    function handleClickOutside(e: MouseEvent) {
+      if (userDropRef.current && !userDropRef.current.contains(e.target as Node)) setUserDropOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [userDropOpen])
 
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
@@ -105,23 +116,49 @@ export default function NavbarClient({ user }: NavbarClientProps) {
         </button>
         {user ? (
           <>
-            {user.role === 'ADMIN' && (
-              <Link href="/admin" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">Admin</Link>
-            )}
-            <Link href="/dashboard" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">Dashboard</Link>
-            <Link href="/profile" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">Tài khoản</Link>
-            <div className="flex items-center gap-2">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback className="bg-[#2563EB] text-white text-xs font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm text-[var(--color-text-main)]">{user.name}</span>
+            {/* User dropdown */}
+            <div className="relative" ref={userDropRef}>
+              <button
+                onClick={() => setUserDropOpen(o => !o)}
+                className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-[var(--color-border)] transition-colors"
+              >
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback className="bg-[#2563EB] text-white text-xs font-bold">
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-[var(--color-text-main)] font-medium">{user.name}</span>
+                <ChevronDown size={14} className={`text-[var(--color-text-muted)] transition-transform ${userDropOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {userDropOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-lg z-50 py-1 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-[var(--color-border)]">
+                    <p className="text-xs font-semibold text-[var(--color-text-main)] truncate">{user.name}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] truncate">{user.email}</p>
+                  </div>
+                  <Link href="/dashboard" onClick={() => setUserDropOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm text-[var(--color-text-main)] hover:bg-[var(--color-border)] transition-colors">
+                    <LayoutDashboard size={14} className="text-[var(--color-text-muted)]" /> Dashboard
+                  </Link>
+                  <Link href="/profile" onClick={() => setUserDropOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm text-[var(--color-text-main)] hover:bg-[var(--color-border)] transition-colors">
+                    <User size={14} className="text-[var(--color-text-muted)]" /> Tài khoản
+                  </Link>
+                  {user.role === 'ADMIN' && (
+                    <Link href="/admin" onClick={() => setUserDropOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2.5 text-sm text-[var(--color-text-main)] hover:bg-[var(--color-border)] transition-colors">
+                      <Settings size={14} className="text-[var(--color-text-muted)]" /> Quản trị
+                    </Link>
+                  )}
+                  <div className="border-t border-[var(--color-border)] mt-1" />
+                  <button onClick={() => { setUserDropOpen(false); handleLogout() }}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                    <LogOut size={14} /> Đăng xuất
+                  </button>
+                </div>
+              )}
             </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout}
-              className="text-sm text-[var(--color-text-muted)] hover:text-red-500 transition-colors">
-              Đăng xuất
-            </Button>
           </>
         ) : (
           <>

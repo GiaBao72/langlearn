@@ -177,8 +177,11 @@ export default function HomePageClient() {
               </>
             ) : (
               <>
-                <Link href="/courses" className="bg-[#2563EB] text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base text-center shadow-md flex items-center gap-2 justify-center">
-                  📚 Khám phá khóa học →
+                <Link href="/register" className="bg-[#2563EB] text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base text-center shadow-md flex items-center gap-2 justify-center">
+                  🚀 Bắt đầu miễn phí →
+                </Link>
+                <Link href="/courses" className="border border-[#E2E8F0] text-[#334155] px-8 py-3 rounded-full font-semibold hover:border-[#2563EB] hover:text-[#2563EB] transition-colors text-sm sm:text-base text-center bg-white flex items-center gap-2 justify-center">
+                  📚 Xem khóa học
                 </Link>
               </>
             )}

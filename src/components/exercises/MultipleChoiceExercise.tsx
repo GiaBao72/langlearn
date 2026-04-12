@@ -51,7 +51,7 @@ export default function MultipleChoiceExercise({ question, data, value, onChange
     }
     if (opt === d.answer) return 'border-[#10B981] bg-green-50 text-[#10B981]'
     if (opt === value && opt !== d.answer) return 'border-[#EF4444] bg-red-50 text-[#EF4444]'
-    return 'border-[#E2E8F0] bg-slate-50 text-[#64748B] opacity-60'
+    return 'border-[#E2E8F0] bg-slate-50 text-[#94A3B8]'
   }
 
   function getNoteStyle(opt: string) {

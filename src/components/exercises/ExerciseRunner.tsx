@@ -149,6 +149,29 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
     }
   }, [finished])
 
+  // Keyboard shortcuts: Enter = submit/next, Space = next (khi đã submitted)
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (finished) return
+      const tag = (e.target as HTMLElement)?.tagName
+      // Bỏ qua nếu đang focus vào input/textarea (vì FillBlank/Dictation cần Enter để submit qua onSubmit prop)
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      const canSub = userAnswer.trim().length > 0 && !submitted
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        if (submitted) nextExercise()
+        else if (canSub) checkAnswer()
+      }
+      if (e.key === ' ' && submitted) {
+        e.preventDefault()
+        nextExercise()
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitted, userAnswer, finished, currentIndex])
+
   const exercise = queue[currentIndex]
   const isFlashcard = exercise?.type === 'FLASHCARD'
   const canSkip = exercise && !skippedIds.current.has(exercise.id) && !submitted
@@ -629,16 +652,18 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring' }}
               onClick={checkAnswer} disabled={!canSubmit}
-              className="px-6 py-3 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">
+              className="px-6 py-3 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
               Kiểm tra
+              <kbd className="hidden sm:inline text-xs bg-blue-500 px-1.5 py-0.5 rounded font-mono opacity-80">Enter</kbd>
             </motion.button>
           ) : (
             <motion.button
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring' }}
               onClick={nextExercise}
-              className="px-6 py-3 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm">
+              className="px-6 py-3 bg-[#2563EB] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2">
               {currentIndex + 1 >= queue.length ? 'Xem kết quả' : 'Tiếp theo →'}
+              <kbd className="hidden sm:inline text-xs bg-blue-500 px-1.5 py-0.5 rounded font-mono opacity-80">Space</kbd>
             </motion.button>
           )}
         </div>
