@@ -81,7 +81,7 @@ export default async function AdminPage() {
     { icon: BookOpen, label: 'Khóa học', value: courseCount, sub: `${pubCourseCount} đã đăng`, href: '/admin/courses', color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { icon: GraduationCap, label: 'Bài học', value: lessonCount, sub: `${exerciseCount.toLocaleString('vi-VN')} bài tập`, href: '/admin/courses', color: 'text-indigo-600', bg: 'bg-indigo-50' },
     { icon: ClipboardList, label: 'Bài kiểm tra', value: examCount, sub: `${attemptCount} lượt thi`, href: '/admin/exams', color: 'text-purple-600', bg: 'bg-purple-50' },
-    { icon: UserCheck, label: 'Lượt đăng ký', value: enrollmentCount, sub: 'tổng enrollment', href: '/admin/users', color: 'text-teal-600', bg: 'bg-teal-50' },
+    { icon: UserCheck, label: 'Lượt đăng ký khóa học', value: enrollmentCount, sub: 'tổng lượt user đăng ký vào khóa', href: '/admin/users', color: 'text-teal-600', bg: 'bg-teal-50' },
     { icon: CheckCircle2, label: 'Bài đã hoàn thành', value: completionCount, sub: 'lesson completions', href: '/admin/stats', color: 'text-green-600', bg: 'bg-green-50' },
     { icon: FileText, label: 'Bài viết blog', value: blogCount, sub: '', href: '/admin/blog', color: 'text-orange-600', bg: 'bg-orange-50' },
     { icon: Dumbbell, label: 'Bài tập', value: exerciseCount, sub: `trên ${lessonCount} bài học`, href: '/admin/exercises', color: 'text-rose-600', bg: 'bg-rose-50' },

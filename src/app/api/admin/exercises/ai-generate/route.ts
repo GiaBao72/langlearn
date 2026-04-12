@@ -193,9 +193,16 @@ function normalizeExercises(
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Allow N8N_SECRET bypass (for automation)
+  const n8nSecret = req.headers.get('x-n8n-secret')
+  const validSecret = process.env.N8N_SECRET
+  const isN8nRequest = validSecret && n8nSecret === validSecret
+
+  if (!isN8nRequest) {
+    const user = await getCurrentUser()
+    if (!user || user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   const body = await req.json()

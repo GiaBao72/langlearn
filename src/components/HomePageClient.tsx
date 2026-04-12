@@ -64,6 +64,60 @@ const TESTIMONIALS = [
   },
 ]
 
+const STATS = [
+  { value: '500+', label: 'Học viên' },
+  { value: '10,000+', label: 'Bài tập hoàn thành' },
+  { value: '6', label: 'Cấp độ A1→C2' },
+  { value: '5', label: 'Dạng bài tập' },
+]
+
+const FAQS = [
+  {
+    q: 'G-Deutsch có miễn phí không?',
+    a: 'Hoàn toàn miễn phí. Bạn chỉ cần tạo tài khoản là học được tất cả nội dung — không có gói trả phí ẩn.',
+  },
+  {
+    q: 'Tôi cần học bao lâu để lên B1?',
+    a: 'Trung bình 6–12 tháng nếu học đều đặn 15–20 phút/ngày. Hệ thống Spaced Repetition giúp bạn nhớ lâu hơn và tối ưu thời gian ôn tập.',
+  },
+  {
+    q: 'Có app điện thoại không?',
+    a: 'Chưa có app riêng nhưng website tương thích hoàn toàn với điện thoại và có thể cài như PWA (Add to Home Screen) để dùng như app thật.',
+  },
+  {
+    q: 'Tôi hoàn toàn mới, bắt đầu từ đâu?',
+    a: 'Bắt đầu từ khóa A1 — không cần biết gì trước. Lộ trình được thiết kế từ con số 0, từng bước rõ ràng.',
+  },
+  {
+    q: 'Khác gì Duolingo hay các app khác?',
+    a: 'G-Deutsch tập trung vào tiếng Đức thuần túy, không có mini-game gây xao nhãng. Bài tập sát thực tế hơn (nghe chép, điền từ, sắp xếp câu) và có lộ trình theo chuẩn Goethe.',
+  },
+]
+
+function FaqAccordion() {
+  const [open, setOpen] = useState<number | null>(null)
+  return (
+    <div className="space-y-2">
+      {FAQS.map((faq, i) => (
+        <div key={i} className="border border-[#E2E8F0] rounded-xl overflow-hidden bg-white">
+          <button
+            className="w-full flex items-center justify-between px-5 py-4 text-left font-semibold text-[#334155] text-sm sm:text-base hover:bg-[#F8FAFC] transition-colors"
+            onClick={() => setOpen(open === i ? null : i)}
+          >
+            <span>{faq.q}</span>
+            <span className={`ml-4 shrink-0 text-[#2563EB] transition-transform ${open === i ? 'rotate-45' : ''}`}>＋</span>
+          </button>
+          {open === i && (
+            <div className="px-5 pb-4 text-[#64748B] text-sm leading-relaxed border-t border-[#E2E8F0] pt-3">
+              {faq.a}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function StarRating({ n }: { n: number }) {
   return (
     <div className="flex gap-0.5">
@@ -130,6 +184,18 @@ export default function HomePageClient() {
             )}
           </motion.div>
 
+        </div>
+      </section>
+
+      {/* ── STATS BAR ────────────────────────────────────── */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          {STATS.map(s => (
+            <div key={s.label}>
+              <div className="text-2xl font-extrabold text-[#2563EB]">{s.value}</div>
+              <div className="text-xs text-[#64748B] mt-0.5">{s.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -222,6 +288,15 @@ export default function HomePageClient() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────── */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="text-center mb-8">
+          <p className="text-xs font-semibold text-[#2563EB] uppercase tracking-widest mb-2">Giải đáp thắc mắc</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#1E293B]">Câu hỏi thường gặp</h2>
+        </div>
+        <FaqAccordion />
       </section>
 
       {/* ── BOTTOM CTA ───────────────────────────────────── */}
