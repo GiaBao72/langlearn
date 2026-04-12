@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 // GET — lấy danh sách khóa học + đề thi để admin mở khóa
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const me = await getCurrentUser()
-  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id: userId } = await params
 
   const [allCourses, allExams, enrollments, examAttempts] = await Promise.all([
@@ -50,9 +50,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 // POST — mở khóa (enroll khóa học hoặc reset đề thi)
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const me = await getCurrentUser()
-  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id: userId } = await params
-  const body = await req.json() as { type: 'course' | 'exam'; targetId?: string; targetIds?: string[] }
+  let body: { type: 'course' | 'exam'; targetId?: string; targetIds?: string[] }
+  try { body = await req.json().catch(() => null) } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
   const { type, targetId } = body
 
   if (type === 'course') {
@@ -78,9 +79,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 // DELETE — thu hồi quyền (unenroll khóa học)
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const me = await getCurrentUser()
-  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id: userId } = await params
-  const { type, targetId } = await req.json() as { type: 'course'; targetId: string }
+  const { type, targetId } = (await req.json().catch(() => null) ?? {}) as any;
 
   if (type === 'course') {
     await prisma.courseEnrollment.deleteMany({ where: { userId, courseId: targetId } })

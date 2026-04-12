@@ -138,10 +138,11 @@ export default function DictationExercise({
     }
   }, [audioText, audioReady, audioSrc, playCount])
 
-  // Auto-focus after playing
+  // Auto-focus after playing — với cleanup để tránh memory leak
   useEffect(() => {
     if (!playing && playCount > 0 && !submitted) {
-      setTimeout(() => inputRef.current?.focus(), 100)
+      const t = setTimeout(() => inputRef.current?.focus(), 100)
+      return () => clearTimeout(t)
     }
   }, [playing, playCount, submitted])
 

@@ -12,9 +12,12 @@ export async function PATCH(
   { params }: { params: Promise<{ fileId: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { fileId } = await params
-  const body = await req.json()
+
+  let body: Record<string, unknown>
+
+  try { body = await req.json().catch(() => null) } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }) }
   const data: Record<string, unknown> = {}
   if ('displayName' in body) data.displayName = body.displayName
   if ('downloadPolicy' in body) data.downloadPolicy = body.downloadPolicy
@@ -29,7 +32,7 @@ export async function DELETE(
   { params }: { params: Promise<{ fileId: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { fileId } = await params
   const record = await prisma.lessonFile.findUnique({ where: { id: fileId } })
   if (!record) return NextResponse.json({ error: 'Not found' }, { status: 404 })

@@ -6,10 +6,13 @@ import bcrypt from 'bcryptjs'
 // PATCH /api/admin/users/[id] — đổi role hoặc reset password
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const me = await getCurrentUser()
-  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
-  const body = await req.json()
+
+  let body: any
+
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
   const data: Record<string, unknown> = {}
 
   if (body.role) {
@@ -19,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (body.name !== undefined) data.name = body.name
   if (body.password) {
     if (body.password.length < 6) return NextResponse.json({ error: "Mật khẩu tối thiểu 6 ký tự" }, { status: 400 })
-    data.passwordHash = await bcrypt.hash(body.password, 10)
+    data.passwordHash = await bcrypt.hash(body.password, 12)
   }
 
   const user = await prisma.user.update({ where: { id }, data, select: { id: true, email: true, name: true, role: true } })
@@ -29,7 +32,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 // DELETE /api/admin/users/[id]
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const me = await getCurrentUser()
-  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
 

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 // GET /api/admin/exams?courseId=xxx
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const courseId = new URL(req.url).searchParams.get('courseId')
   const where = courseId ? { courseId } : {}
   const exams = await prisma.exam.findMany({
@@ -19,8 +19,11 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/exams
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const body = await req.json()
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  let body: any
+
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
   const { courseId, title, description, durationMins, passingPct, maxAttempts, shuffleQ } = body
   if (!courseId || !title) return NextResponse.json({ error: 'courseId and title required' }, { status: 400 })
   const count = await prisma.exam.count({ where: { courseId } })

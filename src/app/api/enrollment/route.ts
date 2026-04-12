@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { courseId } = await req.json()
+  const { courseId } = (await req.json().catch(() => null) ?? {}) as any;
   if (!courseId) return NextResponse.json({ error: 'courseId required' }, { status: 400 })
 
   const course = await prisma.course.findUnique({
@@ -36,7 +36,7 @@ export async function DELETE(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { courseId } = await req.json()
+  const { courseId } = (await req.json().catch(() => null) ?? {}) as any;
   if (!courseId) return NextResponse.json({ error: 'courseId required' }, { status: 400 })
 
   await prisma.courseEnrollment.deleteMany({

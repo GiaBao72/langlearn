@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id: examId } = await params
   const questions = await prisma.examQuestion.findMany({ where: { examId }, orderBy: { order: 'asc' } })
   return NextResponse.json(questions)
@@ -20,9 +20,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id: examId } = await params
-  const body = await req.json()
+
+  let body: any
+
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
   const { type, question, data, points } = body
   if (!type || !question) return NextResponse.json({ error: 'type and question required' }, { status: 400 })
   const count = await prisma.examQuestion.count({ where: { examId } })

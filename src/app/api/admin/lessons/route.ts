@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const lessons = await prisma.lesson.findMany({
     include: { course: { select: { title: true } } },
@@ -15,9 +15,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { courseId, title, content, order, published } = await req.json()
+  const { courseId, title, content, order, published } = (await req.json().catch(() => null) ?? {}) as any;
   if (!courseId || !title) return NextResponse.json({ error: 'courseId và title là bắt buộc' }, { status: 400 })
 
   const lesson = await prisma.lesson.create({

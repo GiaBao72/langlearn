@@ -8,8 +8,8 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 
-const VBEE_APP_ID = '59f3ce87-cddf-4902-b097-ad06ed479b87'
-const VBEE_TOKEN  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzU2NjQ5Mzl9.xSmgzyZBUvnYG712fWq8vqvCqyPnhnrxGB-_GzH5iEg'
+const VBEE_APP_ID = process.env.VBEE_APP_ID ?? ''
+const VBEE_TOKEN  = process.env.VBEE_TOKEN ?? ''
 const VBEE_VOICE  = 'de-DE-Standard-A'
 const VBEE_URL    = 'https://vbee.vn/api/v1/tts'
 const AUDIO_DIR   = path.join(process.cwd(), 'public', 'audio', 'dictation')

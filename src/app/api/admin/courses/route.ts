@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 // GET /api/admin/courses — list with stats
 export async function GET(_req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const courses = await prisma.course.findMany({
     orderBy: { level: 'asc' },
@@ -39,9 +39,9 @@ export async function GET(_req: NextRequest) {
 // POST /api/admin/courses — create course
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { title, language, level, description, published } = await req.json()
+  const { title, language, level, description, published } = (await req.json().catch(() => null) ?? {}) as any;
   if (!title || !language || !level) {
     return NextResponse.json({ error: 'title, language, level are required' }, { status: 400 })
   }
@@ -55,9 +55,9 @@ export async function POST(req: NextRequest) {
 // DELETE /api/admin/courses — bulk delete
 export async function DELETE(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { ids } = await req.json()
+  const { ids } = (await req.json().catch(() => null) ?? {}) as any;
   if (!Array.isArray(ids) || ids.length === 0) {
     return NextResponse.json({ error: 'ids array required' }, { status: 400 })
   }

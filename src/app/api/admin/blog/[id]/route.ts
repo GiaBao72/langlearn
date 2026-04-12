@@ -9,7 +9,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const { id } = await params
-  const body = await req.json()
+
+  let body: any
+
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
 
   // Validate title
   if (body.title !== undefined && !body.title?.trim()) {
@@ -28,8 +31,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const post = await prisma.blogPost.update({
     where: { id },
     data: {
-      ...body,
+      // Allowlist các field được phép update — tránh raw body spread
+      ...(body.title !== undefined && { title: body.title.trim() }),
+      ...(body.slug !== undefined && { slug: body.slug }),
+      ...(body.content !== undefined && { content: body.content }),
+      ...(body.excerpt !== undefined && { excerpt: body.excerpt }),
+      ...(body.coverImage !== undefined && { coverImage: body.coverImage }),
+      ...(body.tags !== undefined && { tags: body.tags }),
       publishedAt: body.published === true ? new Date() : body.published === false ? null : undefined,
+      ...(body.published !== undefined && { published: body.published }),
     },
   })
   return NextResponse.json(post)

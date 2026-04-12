@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { title, content, excerpt, published } = await req.json()
+  const { title, content, excerpt, published } = (await req.json().catch(() => null) ?? {}) as any;
 
   if (!title || !content) {
     return NextResponse.json({ error: 'title and content are required' }, { status: 400 })

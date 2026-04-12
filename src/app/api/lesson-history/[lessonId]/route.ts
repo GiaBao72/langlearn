@@ -15,7 +15,7 @@ export async function GET(
 
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
-    select: { title: true, exercises: { select: { id: true, question: true, type: true, data: true, points: true }, orderBy: { order: 'asc' } } },
+    select: { title: true, exercises: { select: { id: true, question: true, type: true, points: true }, orderBy: { order: 'asc' } } },
   })
   if (!lesson) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
@@ -35,7 +35,7 @@ export async function GET(
       id: e.id,
       question: e.question,
       type: e.type,
-      data: e.data,
+      // data bị ẩn — không trả đáp án về client qua lesson-history
       points: e.points,
       scored: p?.score ?? null,
       completed: !!p,

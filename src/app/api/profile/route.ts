@@ -7,7 +7,11 @@ export async function PATCH(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json()
+
+  let body: any
+
+
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
   const data: Record<string, unknown> = {}
 
   // Update name
@@ -24,7 +28,7 @@ export async function PATCH(req: NextRequest) {
     if (!valid) return NextResponse.json({ error: 'Mật khẩu hiện tại không đúng' }, { status: 400 })
     if (body.newPassword.length < 6) return NextResponse.json({ error: 'Mật khẩu mới tối thiểu 6 ký tự' }, { status: 400 })
 
-    data.passwordHash = await bcrypt.hash(body.newPassword, 10)
+    data.passwordHash = await bcrypt.hash(body.newPassword, 12)
   }
 
   if (Object.keys(data).length === 0) return NextResponse.json({ error: 'Không có gì để cập nhật' }, { status: 400 })

@@ -5,8 +5,11 @@ import { prisma } from '@/lib/prisma'
 // PATCH /api/admin/exams/bulk — bulk update metadata (no title/description/questions)
 export async function PATCH(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const body = await req.json()
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  let body: Record<string, unknown>
+
+  try { body = await req.json() } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }) }
   const { ids, ...patch } = body as { ids: string[]; [k: string]: unknown }
   if (!Array.isArray(ids) || ids.length === 0) return NextResponse.json({ error: 'ids required' }, { status: 400 })
   const allowed = ['published', 'courseId', 'durationMins', 'passingPct', 'maxAttempts', 'shuffleQ', 'order'] as const
@@ -22,7 +25,7 @@ export async function PATCH(req: NextRequest) {
 // DELETE /api/admin/exams/bulk — bulk delete
 export async function DELETE(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { ids } = await req.json() as { ids: string[] }
   if (!Array.isArray(ids) || ids.length === 0) return NextResponse.json({ error: 'ids required' }, { status: 400 })
   await prisma.exam.deleteMany({ where: { id: { in: ids } } })

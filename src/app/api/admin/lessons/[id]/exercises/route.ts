@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id: lessonId } = await params
   const exercises = await prisma.exercise.findMany({
@@ -25,10 +25,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id: lessonId } = await params
-  const { type, question, data, points, order } = await req.json()
+  const { type, question, data, points, order } = (await req.json().catch(() => null) ?? {}) as any;
 
   if (!type || !question || !data) {
     return NextResponse.json({ error: 'type, question, data are required' }, { status: 400 })

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
-  const { email } = await req.json()
+  const { email } = (await req.json().catch(() => null) ?? {}) as any;
   if (!email) return NextResponse.json({ error: 'Email là bắt buộc' }, { status: 400 })
 
   const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } })
@@ -19,6 +19,6 @@ export async function POST(req: NextRequest) {
     data: { token, userId: user.id, email: user.email, expiresAt },
   })
 
-  // TODO: gửi email khi có SMTP — hiện tại trả token thẳng (dev mode)
-  return NextResponse.json({ ok: true, token, message: 'Mã reset được tạo. Dùng mã này để đặt lại mật khẩu.' })
+  // TODO: gửi email khi có SMTP — token không trả về response vì lý do bảo mật
+  return NextResponse.json({ ok: true, message: 'Nếu email tồn tại, mã reset đã được gửi.' })
 }

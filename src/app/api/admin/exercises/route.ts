@@ -3,6 +3,10 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'ADMIN')
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const { searchParams } = new URL(req.url)
   const lessonId = searchParams.get('lessonId')
   const exercises = await prisma.exercise.findMany({
@@ -17,7 +21,7 @@ export async function POST(req: NextRequest) {
   if (!user || user.role !== 'ADMIN')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
-  const { lessonId, type, question, points, data, order } = await req.json()
+  const { lessonId, type, question, points, data, order } = (await req.json().catch(() => null) ?? {}) as any;
   const exercise = await prisma.exercise.create({
     data: {
       lessonId,
@@ -38,7 +42,7 @@ export async function DELETE(req: NextRequest) {
   if (!user || user.role !== 'ADMIN')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
-  const { ids } = await req.json() as { ids: string[] }
+  const { ids } = (await req.json().catch(() => null) ?? {}) as any;
   if (!Array.isArray(ids) || ids.length === 0)
     return NextResponse.json({ error: 'ids phải là mảng không rỗng' }, { status: 400 })
 

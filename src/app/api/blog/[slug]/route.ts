@@ -31,7 +31,7 @@ export async function PATCH(
   }
 
   const { slug } = await params
-  const data = await req.json()
+  const data = await req.json().catch(() => null)
 
   // Auto-set publishedAt when publishing
   if (data.published === true) {

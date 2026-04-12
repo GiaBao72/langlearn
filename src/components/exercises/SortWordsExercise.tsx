@@ -21,10 +21,16 @@ export default function SortWordsExercise({ question, data, value, onChange, sub
   const d = data as unknown as SortWordsData
 
   const shuffleWords = (words: string[]) => {
+    // Fisher-Yates shuffle đúng chuẩn — không bị bias như .sort(random)
     const arr = [...words]
     const seed = words.join('').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
     let s = seed
-    return arr.sort(() => { s = (s * 1103515245 + 12345) & 0x7fffffff; return (s % 3) - 1 })
+    for (let i = arr.length - 1; i > 0; i--) {
+      s = (s * 1103515245 + 12345) & 0x7fffffff
+      const j = s % (i + 1)
+      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+    return arr
   }
 
   const [bank, setBank] = useState<string[]>(() => shuffleWords(d.words))

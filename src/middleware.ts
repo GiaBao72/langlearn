@@ -37,8 +37,8 @@ export async function middleware(request: NextRequest) {
     const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!)
     const { payload } = await jwtVerify(token, secret)
 
-    // Admin guard
-    if (pathname.startsWith('/admin') && payload.role !== 'ADMIN') {
+    // Admin guard — bảo vệ cả /admin pages lẫn /api/admin/* routes
+    if ((pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) && payload.role !== 'ADMIN') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 

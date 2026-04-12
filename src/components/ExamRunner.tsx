@@ -34,14 +34,24 @@ export default function ExamRunner({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startedAt = useRef(Date.now())
   const questionRefs = useRef<(HTMLDivElement | null)[]>([])
+  // Dùng ref để tránh stale closure trong timer callback
+  const answersRef = useRef<Record<string, string | string[]>>({})
+  const submittingRef = useRef(false)
+  const submittedRef = useRef(false)
 
   useEffect(() => {
     if (timeLeft === null) return
     timerRef.current = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startedAt.current) / 1000)
       const remaining = (exam.durationMins! * 60) - elapsed
-      if (remaining <= 0) { setTimeLeft(0); clearInterval(timerRef.current!); handleSubmit() }
-      else setTimeLeft(remaining)
+      if (remaining <= 0) {
+        setTimeLeft(0)
+        clearInterval(timerRef.current!)
+        // Dùng ref — không bị stale closure
+        submitExam(answersRef.current)
+      } else {
+        setTimeLeft(remaining)
+      }
     }, 1000)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -53,12 +63,20 @@ export default function ExamRunner({
   }
 
   function setAnswer(qid: string, val: string | string[]) {
-    setAnswers(a => ({ ...a, [qid]: val }))
+    setAnswers(a => {
+      const next = { ...a, [qid]: val }
+      answersRef.current = next  // Đồng bộ ref để timer dùng được
+      return next
+    })
   }
 
   function toggleMultiAnswer(qid: string, opt: string) {
     const cur = (answers[qid] as string[] | undefined) ?? []
-    setAnswers(a => ({ ...a, [qid]: cur.includes(opt) ? cur.filter(v => v !== opt) : [...cur, opt] }))
+    setAnswers(a => {
+      const next = { ...a, [qid]: cur.includes(opt) ? cur.filter(v => v !== opt) : [...cur, opt] }
+      answersRef.current = next  // Đồng bộ ref
+      return next
+    })
   }
 
   function isAnswered(qid: string) {
@@ -71,21 +89,36 @@ export default function ExamRunner({
     questionRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
-  async function handleSubmit() {
-    if (submitting || submitted) return
+  async function submitExam(currentAnswers: Record<string, string | string[]>) {
+    if (submittingRef.current || submittedRef.current) return
+    submittingRef.current = true
     setSubmitting(true)
-    const payload = questions.map(q => ({ questionId: q.id, answer: answers[q.id] ?? '' }))
-    const res = await fetch(`/api/exams/${exam.id}/submit`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ attemptId, answers: payload }),
-    })
-    if (res.ok) {
-      const data = await res.json()
-      setResult(data); setSubmitted(true)
-      if (timerRef.current) clearInterval(timerRef.current)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+    const payload = questions.map(q => ({ questionId: q.id, answer: currentAnswers[q.id] ?? '' }))
+    try {
+      const res = await fetch(`/api/exams/${exam.id}/submit`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attemptId, answers: payload }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setResult(data)
+        setSubmitted(true)
+        submittedRef.current = true
+        if (timerRef.current) clearInterval(timerRef.current)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        const err = await res.json().catch(() => ({}))
+        alert(err.error ?? 'Có lỗi khi nộp bài, vui lòng thử lại.')
+      }
+    } catch {
+      alert('Mất kết nối mạng. Vui lòng thử nộp lại.')
     }
+    submittingRef.current = false
     setSubmitting(false)
+  }
+
+  async function handleSubmit() {
+    await submitExam(answersRef.current)
   }
 
   const answered = questions.filter(q => isAnswered(q.id)).length

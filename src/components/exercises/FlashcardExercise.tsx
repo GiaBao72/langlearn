@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface FlashcardData {
   front: string
@@ -16,6 +16,11 @@ interface Props {
 export default function FlashcardExercise({ data, onAnswer }: Props) {
   const [flipped, setFlipped] = useState(false)
   const d = data as unknown as FlashcardData
+
+  // Reset trạng thái lật khi chuyển sang bài mới
+  useEffect(() => {
+    setFlipped(false)
+  }, [d.front, d.back])
 
   return (
     <div className="text-center">

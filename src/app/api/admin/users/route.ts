@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 // GET /api/admin/users
 export async function GET() {
   const me = await getCurrentUser()
-  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
@@ -36,16 +36,16 @@ export async function GET() {
 // POST /api/admin/users — tạo user mới
 export async function POST(req: NextRequest) {
   const me = await getCurrentUser()
-  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!me || me.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { email, name, password, role } = await req.json()
+  const { email, name, password, role } = (await req.json().catch(() => null) ?? {}) as any;
   if (!email || !password) return NextResponse.json({ error: 'Email và mật khẩu là bắt buộc' }, { status: 400 })
   if (password.length < 6) return NextResponse.json({ error: 'Mật khẩu tối thiểu 6 ký tự' }, { status: 400 })
 
   const exists = await prisma.user.findUnique({ where: { email } })
   if (exists) return NextResponse.json({ error: 'Email đã tồn tại' }, { status: 409 })
 
-  const passwordHash = await bcrypt.hash(password, 10)
+  const passwordHash = await bcrypt.hash(password, 12)
   const user = await prisma.user.create({
     data: { email, name: name || null, passwordHash, role: role === 'ADMIN' ? 'ADMIN' : 'USER' },
     select: { id: true, email: true, name: true, role: true },

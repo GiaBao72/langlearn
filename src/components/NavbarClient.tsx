@@ -46,9 +46,13 @@ function useInstallPrompt() {
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) { setInstalled(true); return }
     const handler = (e: Event) => { e.preventDefault(); setPrompt(e) }
+    const installedHandler = () => { setInstalled(true); setPrompt(null) }
     window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => { setInstalled(true); setPrompt(null) })
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', installedHandler)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener('appinstalled', installedHandler)
+    }
   }, [])
   async function install() {
     if (!prompt) return false

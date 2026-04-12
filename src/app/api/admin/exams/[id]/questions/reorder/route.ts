@@ -9,9 +9,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id: examId } = await params
-  const { order } = await req.json() as { order: string[] }
+  const { order } = (await req.json().catch(() => null) ?? {}) as any;
   if (!Array.isArray(order)) return NextResponse.json({ error: 'order must be array' }, { status: 400 })
 
   await prisma.$transaction(

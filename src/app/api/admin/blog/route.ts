@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { title, slug: customSlug, excerpt, content, published } = await req.json()
+    const { title, slug: customSlug, excerpt, content, published } = (await req.json().catch(() => null) ?? {}) as any;
     if (!title?.trim() || !content?.trim()) {
       return NextResponse.json({ error: 'Title and content are required' }, { status: 400 })
     }

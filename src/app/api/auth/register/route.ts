@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (!checkRegisterLimit(ip)) {
       return NextResponse.json({ error: 'Quá nhiều yêu cầu đăng ký. Thử lại sau.' }, { status: 429 })
     }
-    const { email, password, name } = await req.json()
+    const { email, password, name } = (await req.json().catch(() => null) ?? {}) as any;
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email và mật khẩu là bắt buộc' }, { status: 400 })

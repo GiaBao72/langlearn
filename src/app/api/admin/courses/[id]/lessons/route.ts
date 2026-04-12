@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id: courseId } = await params
   const lessons = await prisma.lesson.findMany({
@@ -23,9 +23,9 @@ export async function GET(
 // POST /api/admin/courses/[id]/lessons — create lesson
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id: courseId } = await params
-  const { title, order, content, section } = await req.json()
+  const { title, order, content, section } = (await req.json().catch(() => null) ?? {}) as any;
   if (!title) return NextResponse.json({ error: 'Title required' }, { status: 400 })
 
   // Auto-increment order if not provided
