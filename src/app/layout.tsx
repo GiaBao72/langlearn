@@ -109,6 +109,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
+              {/* Lottie web component for Mascot */}
+        <script
+          src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js"
+          type="module"
+          async
+        />
       </head>
       <body className={cn("font-sans antialiased", geist.variable)} suppressHydrationWarning>
         <PageTransition>{children}</PageTransition>

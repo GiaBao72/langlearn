@@ -1,20 +1,24 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 const LOTTIE_URL = 'https://lottie.host/eccea632-a01d-4f0f-a64f-e19fee566301/5xTW7sGdyf.lottie'
 
-// Dùng DotLottieReact (npm package) thay vì dotlottie-wc (web component CDN)
+// Mount dotlottie-wc một lần duy nhất — không re-render khi parent state thay đổi
 function LottieDog() {
-  return (
-    <DotLottieReact
-      src={LOTTIE_URL}
-      loop
-      autoplay
-      style={{ width: 72, height: 72 }}
-    />
-  )
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const lottie = document.createElement('dotlottie-wc')
+    lottie.setAttribute('src', LOTTIE_URL)
+    lottie.setAttribute('autoplay', '')
+    lottie.setAttribute('loop', '')
+    lottie.style.cssText = 'width:72px;height:72px;display:block'
+    el.appendChild(lottie)
+    return () => { el.innerHTML = '' }
+  }, [])
+  return <div ref={ref} style={{ width: 72, height: 72 }} />
 }
 
 const SPEED    = 0.9
@@ -32,12 +36,12 @@ const BUBBLES = [
 
 export default function Mascot() {
   const [x, setX]           = useState(150)
-  const [flip, setFlip]     = useState(true)  // Lottie mặc định nhìn trái → flip=true để nhìn phải
+  const [flip, setFlip]     = useState(true)
   const [bubble, setBubble] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
 
   const xRef   = useRef(x)
-  const dirRef = useRef(1)   // bắt đầu đi phải
+  const dirRef = useRef(1)
   const paused = useRef(false)
   const rafRef = useRef<number>(0)
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -111,7 +115,6 @@ export default function Mascot() {
         pointerEvents: 'none',
       }}
     >
-      {/* Speech bubble — KHÔNG flip */}
       {bubble && (
         <div style={{
           position: 'absolute',
@@ -149,7 +152,6 @@ export default function Mascot() {
         </div>
       )}
 
-      {/* Lottie dog — CHỈ flip con chó, không flip bubble */}
       <div
         onClick={handleClick}
         style={{
@@ -162,7 +164,6 @@ export default function Mascot() {
         <LottieDog />
       </div>
 
-      {/* Close btn */}
       <button
         onClick={(e) => { e.stopPropagation(); setVisible(false) }}
         className="mascot-close"
