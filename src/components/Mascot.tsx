@@ -1,25 +1,22 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 const LOTTIE_URL = 'https://lottie.host/eccea632-a01d-4f0f-a64f-e19fee566301/5xTW7sGdyf.lottie'
 
-// Mount dotlottie-wc một lần duy nhất — không re-render khi parent state thay đổi
+// Dùng DotLottieReact (npm package) thay vì dotlottie-wc (web component CDN)
 function LottieDog() {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const lottie = document.createElement('dotlottie-wc')
-    lottie.setAttribute('src', LOTTIE_URL)
-    lottie.setAttribute('autoplay', '')
-    lottie.setAttribute('loop', '')
-    lottie.style.cssText = 'width:72px;height:72px;display:block'
-    el.appendChild(lottie)
-    return () => { el.innerHTML = '' }
-  }, [])
-  return <div ref={ref} style={{ width: 72, height: 72 }} />
+  return (
+    <DotLottieReact
+      src={LOTTIE_URL}
+      loop
+      autoplay
+      style={{ width: 72, height: 72 }}
+    />
+  )
 }
+
 const SPEED    = 0.9
 const MARGIN   = 20
 const DOG_W    = 72
@@ -71,9 +68,9 @@ export default function Mascot() {
         const dir  = dirRef.current
         const next = cur + SPEED * dir
         if (next >= maxX) {
-          setX(maxX); dirRef.current = -1; setFlip(false); doPause()  // đi trái → không flip (nhìn trái = mặc định lottie)
+          setX(maxX); dirRef.current = -1; setFlip(false); doPause()
         } else if (next <= MARGIN) {
-          setX(MARGIN); dirRef.current = 1; setFlip(true); doPause()  // đi phải → flip (nhìn phải)
+          setX(MARGIN); dirRef.current = 1; setFlip(true); doPause()
         } else {
           setX(next)
         }
@@ -92,7 +89,7 @@ export default function Mascot() {
     e.stopPropagation()
     const newDir = dirRef.current * -1
     dirRef.current = newDir
-    setFlip(newDir === 1)  // đi phải → flip=true, đi trái → flip=false
+    setFlip(newDir === 1)
     if (paused.current) {
       paused.current = false
       if (pauseTimer.current) clearTimeout(pauseTimer.current)
@@ -113,7 +110,8 @@ export default function Mascot() {
         userSelect: 'none',
         pointerEvents: 'none',
       }}
-    >      {/* Speech bubble — KHÔNG flip */}
+    >
+      {/* Speech bubble — KHÔNG flip */}
       {bubble && (
         <div style={{
           position: 'absolute',
