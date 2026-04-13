@@ -81,7 +81,7 @@ function ScorePopup({ points, onDone }: { points: number; onDone: () => void }) 
       animate={{ opacity: 0, y: -60, scale: 1.2 }}
       transition={{ duration: 1, ease: 'easeOut' }}
       className="fixed pointer-events-none z-50 text-2xl font-extrabold text-[#10B981] drop-shadow-lg"
-      style={{ top: '30%', left: '50%', transform: 'translateX(-50%)', maxWidth: '90vw', textAlign: 'center' }}
+      style={{ top: '20%', left: '50%', transform: 'translateX(-50%)', maxWidth: '90vw', textAlign: 'center' }}
     >
       +{points}đ ✨
     </motion.div>

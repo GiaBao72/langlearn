@@ -56,6 +56,8 @@ function useCountUp(target: number, duration = 1000) {
   return count
 }
 
+const DAY_LABELS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+
 function Heatmap({ days }: { days: HeatmapDay[] }) {
   function getColor(count: number) {
     if (count === 0) return 'bg-[#E2E8F0]'
@@ -73,34 +75,36 @@ function Heatmap({ days }: { days: HeatmapDay[] }) {
     }
   }
 
-  // Nhóm theo tuần (mỗi hàng 7 ngày) — tính từ ngày đầu tiên
-  const weeks: HeatmapDay[][] = []
-  for (let i = 0; i < days.length; i += 7) {
-    weeks.push(days.slice(i, i + 7))
-  }
-  const dayLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+  // Pad phía trước để ô đầu tiên rơi đúng cột thứ trong tuần
+  const firstDayOfWeek = days.length > 0
+    ? new Date(days[0].date + 'T00:00:00').getDay()
+    : 0
+  const padded: (HeatmapDay | null)[] = [
+    ...Array(firstDayOfWeek).fill(null),
+    ...days,
+  ]
 
   return (
     <div className="overflow-x-auto pb-1">
-      {/* Day-of-week labels */}
-      <div className="grid gap-1 mb-1 min-w-[240px]" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
-        {dayLabels.map(d => (
+      {/* Header label ngày trong tuần */}
+      <div className="grid gap-1 mb-1" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
+        {DAY_LABELS.map(d => (
           <div key={d} className="text-center text-[10px] text-[#94A3B8] font-medium">{d}</div>
         ))}
       </div>
-      {/* Heatmap grid — mỗi hàng là 1 tuần */}
-      <div className="space-y-1 min-w-[240px]">
-        {weeks.map((week, wi) => (
-          <div key={wi} className="grid gap-1" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
-            {week.map((day) => (
+      {/* Grid ô heatmap */}
+      <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
+        {padded.map((day, i) =>
+          day === null
+            ? <div key={`pad-${i}`} className="aspect-square" />
+            : (
               <div
                 key={day.date}
                 title={day.count === 0 ? formatDate(day.date) : `${formatDate(day.date)}: ${day.count} bài`}
                 className={`aspect-square rounded-sm cursor-default transition-opacity hover:opacity-80 ${getColor(day.count)}`}
               />
-            ))}
-          </div>
-        ))}
+            )
+        )}
       </div>
     </div>
   )
