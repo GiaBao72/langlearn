@@ -46,6 +46,14 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4 sm:px-6">
+      {/* Back to home — góc trên trái */}
+      <Link
+        href="/"
+        className="fixed top-4 left-4 flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#334155] transition-colors z-10"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Trang chủ
+      </Link>
       <div className="w-full max-w-sm">
         <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="text-2xl font-bold tracking-tight text-[#334155]">G-Deutsch</Link>
@@ -117,12 +125,6 @@ function LoginForm() {
         <p className="text-center text-[#64748B] text-sm mt-5 sm:mt-6">
           Chưa có tài khoản?{' '}
           <Link href="/register" className="text-[#2563EB] hover:underline font-medium">Đăng ký miễn phí</Link>
-        </p>
-
-        <p className="text-center mt-4">
-          <Link href="/" className="text-[#64748B] text-xs hover:text-[#334155] transition-colors">
-            ← Về trang chủ
-          </Link>
         </p>
       </div>
     </div>

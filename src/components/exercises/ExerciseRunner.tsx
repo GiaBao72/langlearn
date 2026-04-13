@@ -81,7 +81,7 @@ function ScorePopup({ points, onDone }: { points: number; onDone: () => void }) 
       animate={{ opacity: 0, y: -60, scale: 1.2 }}
       transition={{ duration: 1, ease: 'easeOut' }}
       className="fixed pointer-events-none z-50 text-2xl font-extrabold text-[#10B981] drop-shadow-lg"
-      style={{ top: '40%', left: '50%', transform: 'translateX(-50%)' }}
+      style={{ top: '30%', left: '50%', transform: 'translateX(-50%)', maxWidth: '90vw', textAlign: 'center' }}
     >
       +{points}đ ✨
     </motion.div>
@@ -112,7 +112,7 @@ function shuffleExercises(exercises: Exercise[]): Exercise[] {
 
 export default function ExerciseRunner({ exercises: rawExercises, lessonId, courseId, isGuest }: Props) {
   const router = useRouter()
-  const [queue] = useState<Exercise[]>(() => shuffleExercises(rawExercises))
+  const [queue, setQueue] = useState<Exercise[]>(() => shuffleExercises(rawExercises))
   const [currentIndex, setCurrentIndex] = useState(0)
   const skippedIds = useRef<Set<string>>(new Set())
   const [userAnswer, setUserAnswer] = useState('')
@@ -346,7 +346,8 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => {
-                          setCurrentIndex(0); setUserAnswer(''); setSubmitted(false)
+                setQueue(shuffleExercises(rawExercises))
+                setCurrentIndex(0); setUserAnswer(''); setSubmitted(false)
                 setCorrect(false); setTotalScore(0); setCorrectCount(0)
                 setFinished(false); setSessionResults([]); setSkippedCount(0)
                 skippedIds.current.clear(); flaggedIds.current.clear(); setFlagCount(0)
@@ -493,7 +494,22 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-[#64748B] mb-2">
-          <span>Bài {currentIndex + 1} / {queue.length}</span>
+          <div className="flex items-center gap-3">
+            {/* Nút thoát */}
+            <button
+              onClick={() => {
+                if (window.confirm('Thoát bài học? Tiến độ hiện tại sẽ không được lưu.')) {
+                  if (courseId) window.location.href = `/courses`
+                  else window.location.href = '/practice'
+                }
+              }}
+              className="flex items-center gap-1 text-[#94A3B8] hover:text-red-500 transition-colors"
+              title="Thoát bài học"
+            >
+              ← Thoát
+            </button>
+            <span>Bài {currentIndex + 1} / {queue.length}</span>
+          </div>
           <div className="flex items-center gap-3">
             {skippedCount > 0 && (
               <span className="text-amber-500">⏭ {skippedCount} đã bỏ qua</span>

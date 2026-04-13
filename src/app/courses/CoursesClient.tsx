@@ -79,7 +79,9 @@ export default function CoursesClient({
     <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
 
       {/* ── Mobile: horizontal tabs ── */}
-      <div className="md:hidden border-b border-[#E2E8F0] bg-[#F8FAFC]">
+      <div className="md:hidden border-b border-[#E2E8F0] bg-[#F8FAFC] relative">
+        {/* Fade gradient bên phải để hint scroll */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#F8FAFC] to-transparent z-10" />
         <div className="flex overflow-x-auto gap-1 p-2 scrollbar-none">
           {courses.map(course => {
             const { done, total } = getCourseProgress(course)
@@ -185,8 +187,9 @@ export default function CoursesClient({
                   {isNotEnrolled && (
                     <span className="ml-2 text-amber-600 font-medium">· 3 bài đầu miễn phí —{' '}
                       <a href="https://www.facebook.com/GiaBaoBooks" target="_blank" rel="noopener noreferrer"
+                        title="Nhắn tin Facebook để được kích hoạt miễn phí — chỉ mất 1 phút!"
                         className="inline-flex items-center gap-1 underline hover:text-amber-800 font-semibold">
-                        🔓 Mở khoá toàn bộ
+                        🔓 Mở khoá (nhắn FB)
                       </a>
                     </span>
                   )}
@@ -299,15 +302,16 @@ export default function CoursesClient({
         <div className="border-t border-amber-200 bg-amber-50 px-4 md:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm text-amber-800 text-center sm:text-left">
             <span className="font-semibold">🔒 Bài 4 trở đi bị khoá.</span>{' '}
-            Liên hệ để mở toàn bộ khoá học — hoàn toàn miễn phí.
+            Nhắn tin Facebook để được kích hoạt toàn bộ — hoàn toàn miễn phí.
           </div>
           <a
             href="https://www.facebook.com/GiaBaoBooks"
             target="_blank"
             rel="noopener noreferrer"
+            title="Nhắn tin cho GiaBao Books trên Facebook để được kích hoạt khoá học miễn phí"
             className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
           >
-            Liên hệ mở khoá →
+            💬 Nhắn tin Facebook →
           </a>
         </div>
       )}

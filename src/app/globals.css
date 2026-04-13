@@ -5,7 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Modern Academic Palette */
+  /* Modern Academic Palette — dùng --app-* prefix để không conflict với shadcn */
+  --app-primary: #2563EB;
+  --app-accent: #F5A623;
+  --app-bg: #F8FAFC;
+  --app-surface: #FFFFFF;
+  --app-text-main: #334155;
+  --app-text-muted: #64748B;
+  --app-border: #E2E8F0;
+  --app-success: #10B981;
+  --app-error: #EF4444;
+  --app-warning: #F97316;
+  /* Legacy aliases — backward compat cho code cũ */
   --color-primary: #2563EB;
   --color-accent: #F5A623;
   --color-bg-app: #F8FAFC;
@@ -61,6 +72,13 @@ body {
 }
 
 .dark {
+  --app-primary: #3B82F6;
+  --app-bg: #0F172A;
+  --app-surface: #1E293B;
+  --app-text-main: #E2E8F0;
+  --app-text-muted: #94A3B8;
+  --app-border: #334155;
+  /* Legacy aliases */
   --color-bg-app: #0F172A;
   --color-surface: #1E293B;
   --color-text-main: #E2E8F0;
@@ -80,15 +98,15 @@ body {
 html.dark .bg-white,
 html.dark .bg-white\/80,
 html.dark .bg-white\/90 {
-  background-color: #1E293B !important;
+  background-color: var(--color-surface) !important;
 }
 html.dark .bg-\[\#F8FAFC\],
 html.dark .bg-\[\#f8fafc\] {
-  background-color: #0F172A !important;
+  background-color: var(--color-bg-app) !important;
 }
 html.dark .bg-slate-50,
 html.dark .bg-gray-50 {
-  background-color: #1E293B !important;
+  background-color: var(--color-surface) !important;
 }
 html.dark .bg-slate-100,
 html.dark .bg-gray-100 {
@@ -103,20 +121,19 @@ html.dark .bg-gradient-to-b {
 html.dark .bg-gradient-to-br,
 html.dark .bg-gradient-to-r {
   background-image: none !important;
-  background-color: #0F172A !important;
+  background-color: var(--color-bg-app) !important;
 }
 
 /* Text colors */
 html.dark .text-\[\#334155\],
 html.dark .text-\[\#1E293B\],
 html.dark .text-\[\#1e293b\] {
-  color: #E2E8F0 !important;
+  color: var(--color-text-main) !important;
 }
 html.dark .text-\[\#64748B\],
 html.dark .text-\[\#64748b\],
-html.dark .text-\[\#475569\],
 html.dark .text-\[\#475569\] {
-  color: #94A3B8 !important;
+  color: var(--color-text-muted) !important;
 }
 html.dark .text-slate-700,
 html.dark .text-gray-700 {
@@ -124,7 +141,7 @@ html.dark .text-gray-700 {
 }
 html.dark .text-slate-600,
 html.dark .text-gray-600 {
-  color: #94A3B8 !important;
+  color: var(--color-text-muted) !important;
 }
 html.dark .text-slate-500,
 html.dark .text-gray-500 {
@@ -134,11 +151,11 @@ html.dark .text-gray-500 {
 /* Borders */
 html.dark .border-\[\#E2E8F0\],
 html.dark .border-\[\#e2e8f0\] {
-  border-color: #334155 !important;
+  border-color: var(--color-border) !important;
 }
 html.dark .border-slate-200,
 html.dark .border-gray-200 {
-  border-color: #334155 !important;
+  border-color: var(--color-border) !important;
 }
 html.dark .border-slate-100,
 html.dark .border-gray-100,
@@ -166,8 +183,8 @@ html.dark .bg-\[\#F8FAFC\].border {
 html.dark .rounded-xl.border,
 html.dark .rounded-2xl.border,
 html.dark .rounded-lg.border {
-  background-color: #1E293B !important;
-  border-color: #334155 !important;
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
 }
 html.dark .shadow-sm,
 html.dark .shadow-md,
@@ -179,19 +196,19 @@ html.dark .shadow-lg {
 html.dark .border-t,
 html.dark .border-b,
 html.dark .border-y {
-  border-color: #334155 !important;
+  border-color: var(--color-border) !important;
 }
 
 /* Footer & stats bar */
 html.dark footer {
-  background-color: #1E293B !important;
-  border-color: #334155 !important;
-  color: #94A3B8 !important;
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-muted) !important;
 }
 
 /* Min-h-screen wrappers */
 html.dark .min-h-screen {
-  background-color: #0F172A !important;
+  background-color: var(--color-bg-app) !important;
 }
 
 /* Blog rich text content — .blog-content và .prose-g-deutsch đều áp dụng */

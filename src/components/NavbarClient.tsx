@@ -19,6 +19,8 @@ const navLinks = [
   { href: '/store', label: 'Sách', icon: ShoppingBag },
 ]
 
+// isActive: trang chủ chỉ active khi pathname === '/', các trang khác check startsWith
+
 function useDarkMode() {
   const [dark, setDark] = useState(false)
   useEffect(() => {
@@ -98,12 +100,41 @@ export default function NavbarClient({ user }: NavbarClientProps) {
     window.location.href = '/'
   }
 
-  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href))
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    return pathname === href || pathname.startsWith(href)
+  }
 
   return (
-    <div ref={menuRef}>
-      {/* Desktop right side */}
-      <div className="hidden md:flex items-center gap-3">
+    <div className="flex items-center justify-between w-full" ref={menuRef}>
+      {/* Left: Logo + desktop nav */}
+      <div className="flex items-center gap-6">
+        <Link href="/" className={`font-bold text-lg transition-colors ${isActive('/') ? 'text-[#2563EB]' : 'text-[#2563EB] hover:text-blue-700'}`}>
+          G-Deutsch
+        </Link>
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-1">
+          {navLinks.map(link => {
+            const active = isActive(link.href)
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  active
+                    ? 'text-[#2563EB] bg-blue-50'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-border)]'
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Right: actions */}
+      <div className="flex items-center gap-2">
         {canNativeInstall && (
           <button onClick={install} title="Cài đặt ứng dụng"
             className="flex items-center gap-1.5 text-sm text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded-full hover:bg-[#2563EB] hover:text-white transition-colors font-medium">
@@ -166,7 +197,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             <Link href="/register" className="bg-[#2563EB] text-white text-sm px-4 py-1.5 rounded-full hover:bg-[#2563EB]/90 transition-colors">Đăng ký</Link>
           </>
         )}
-      </div>
+      </div>{/* end right actions */}
 
       {/* Mobile hamburger */}
       <button

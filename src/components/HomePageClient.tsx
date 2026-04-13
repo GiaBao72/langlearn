@@ -128,13 +128,8 @@ function StarRating({ n }: { n: number }) {
   )
 }
 
-export default function HomePageClient() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+export default function HomePageClient({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const { displayed: typedLine2, done: typingDone } = useTypewriter('Giỏi ngay tiếng Đức', 80)
-
-  useEffect(() => {
-    fetch('/api/auth/me').then(r => { if (r.ok) setIsLoggedIn(true) }).catch(() => {})
-  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-[#F8FAFC]">
@@ -152,7 +147,8 @@ export default function HomePageClient() {
           </p>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#1E293B] leading-tight mb-4">
             <span className="block">5 phút mỗi ngày.</span>
-            <span className="text-[#2563EB] inline-block min-h-[1.2em]">
+            {/* Fix CLS: reserve chiều cao trước khi typewriter chạy */}
+            <span className="text-[#2563EB] inline-block min-h-[1.2em] w-full">
               {typedLine2}
               {!typingDone && <span className="animate-pulse">|</span>}
             </span>

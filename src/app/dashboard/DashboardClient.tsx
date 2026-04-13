@@ -73,16 +73,36 @@ function Heatmap({ days }: { days: HeatmapDay[] }) {
     }
   }
 
+  // Nhóm theo tuần (mỗi hàng 7 ngày) — tính từ ngày đầu tiên
+  const weeks: HeatmapDay[][] = []
+  for (let i = 0; i < days.length; i += 7) {
+    weeks.push(days.slice(i, i + 7))
+  }
+  const dayLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+
   return (
-    <div className="overflow-x-auto pb-1"><div className="grid gap-1 min-w-[280px]" style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}>
-      {days.map((day) => (
-        <div
-          key={day.date}
-          title={day.count === 0 ? formatDate(day.date) : `${formatDate(day.date)}: ${day.count} bài`}
-          className={`aspect-square rounded-sm cursor-default transition-opacity hover:opacity-80 ${getColor(day.count)}`}
-        />
-      ))}
-    </div></div>
+    <div className="overflow-x-auto pb-1">
+      {/* Day-of-week labels */}
+      <div className="grid gap-1 mb-1 min-w-[240px]" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
+        {dayLabels.map(d => (
+          <div key={d} className="text-center text-[10px] text-[#94A3B8] font-medium">{d}</div>
+        ))}
+      </div>
+      {/* Heatmap grid — mỗi hàng là 1 tuần */}
+      <div className="space-y-1 min-w-[240px]">
+        {weeks.map((week, wi) => (
+          <div key={wi} className="grid gap-1" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
+            {week.map((day) => (
+              <div
+                key={day.date}
+                title={day.count === 0 ? formatDate(day.date) : `${formatDate(day.date)}: ${day.count} bài`}
+                className={`aspect-square rounded-sm cursor-default transition-opacity hover:opacity-80 ${getColor(day.count)}`}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -230,7 +250,20 @@ export default function DashboardClient() {
             </div>
             <div className="text-2xl font-bold text-[#334155] mb-0.5">{animatedStreak}</div>
             <div className="text-[#64748B] text-sm">Ngày streak</div>
-            <Progress value={Math.min(100, data.streak * 10)} className="mt-2 h-1.5" />
+            {/* Streak milestone: target 7 ngày */}
+            {(() => {
+              const target = data.streak < 7 ? 7 : data.streak < 30 ? 30 : 100
+              const pct = Math.min(100, Math.round((data.streak / target) * 100))
+              return (
+                <div className="mt-2">
+                  <Progress value={pct} className="h-1.5" />
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] text-[#94A3B8]">0</span>
+                    <span className="text-[10px] text-[#94A3B8] font-medium">Mục tiêu: {target} ngày</span>
+                  </div>
+                </div>
+              )
+            })()}
           </CardContent>
         </Card>
       </div>
