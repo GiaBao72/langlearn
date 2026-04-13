@@ -1,25 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-
-const LOTTIE_URL = 'https://lottie.host/eccea632-a01d-4f0f-a64f-e19fee566301/5xTW7sGdyf.lottie'
-
-// Mount dotlottie-wc một lần duy nhất — không re-render khi parent state thay đổi
-function LottieDog() {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const lottie = document.createElement('dotlottie-wc')
-    lottie.setAttribute('src', LOTTIE_URL)
-    lottie.setAttribute('autoplay', '')
-    lottie.setAttribute('loop', '')
-    lottie.style.cssText = 'width:72px;height:72px;display:block'
-    el.appendChild(lottie)
-    return () => { el.innerHTML = '' }
-  }, [])
-  return <div ref={ref} style={{ width: 72, height: 72 }} />
-}
+import Lottie from 'lottie-react'
 
 const SPEED    = 0.9
 const MARGIN   = 20
@@ -35,10 +17,11 @@ const BUBBLES = [
 ]
 
 export default function Mascot() {
-  const [x, setX]           = useState(150)
-  const [flip, setFlip]     = useState(true)
-  const [bubble, setBubble] = useState<string | null>(null)
+  const [x, setX]             = useState(150)
+  const [flip, setFlip]       = useState(true)
+  const [bubble, setBubble]   = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
+  const [animData, setAnimData] = useState<object | null>(null)
 
   const xRef   = useRef(x)
   const dirRef = useRef(1)
@@ -48,6 +31,14 @@ export default function Mascot() {
   const pauseTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   xRef.current = x
+
+  // Load animation JSON một lần
+  useEffect(() => {
+    fetch('/lottie/dog.json')
+      .then(r => r.json())
+      .then(d => setAnimData(d))
+      .catch(() => {}) // fail silently — mascot sẽ không hiện nếu lỗi
+  }, [])
 
   function showBubble() {
     const msg = BUBBLES[Math.floor(Math.random() * BUBBLES.length)]
@@ -101,7 +92,7 @@ export default function Mascot() {
     showBubble()
   }
 
-  if (!visible) return null
+  if (!visible || !animData) return null
 
   return (
     <div
@@ -159,9 +150,17 @@ export default function Mascot() {
           pointerEvents: 'auto',
           display: 'inline-block',
           transform: flip ? 'scaleX(-1)' : 'scaleX(1)',
+          width: 72,
+          height: 72,
         }}
       >
-        <LottieDog />
+        <Lottie
+          animationData={animData}
+          loop
+          autoplay
+          style={{ width: 72, height: 72 }}
+          rendererSettings={{ preserveAspectRatio: 'xMidYMid slice' }}
+        />
       </div>
 
       <button
