@@ -5,7 +5,7 @@ import Lottie from 'lottie-react'
 
 const SPEED    = 0.9
 const MARGIN   = 20
-const DOG_W    = 72
+const DOG_W    = 36
 const PAUSE_MS = { min: 800, max: 1800 }
 
 const BUBBLES = [
@@ -150,15 +150,15 @@ export default function Mascot() {
           pointerEvents: 'auto',
           display: 'inline-block',
           transform: flip ? 'scaleX(-1)' : 'scaleX(1)',
-          width: 72,
-          height: 72,
+          width: 36,
+          height: 36,
         }}
       >
         <Lottie
           animationData={animData}
           loop
           autoplay
-          style={{ width: 72, height: 72 }}
+          style={{ width: 36, height: 36 }}
           rendererSettings={{ preserveAspectRatio: 'xMidYMid slice' }}
         />
       </div>

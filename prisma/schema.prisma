@@ -83,6 +83,7 @@ model Lesson {
   title     String
   order     Int
   section  String?
+  imageUrl String?
   content   String?
   published Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -108,6 +109,7 @@ model LessonFile {
   downloadPolicy String   @default("logged_in")
   order          Int      @default(0)
   section  String?
+  imageUrl String?
   createdAt      DateTime @default(now())
 
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -125,6 +127,7 @@ model Exercise {
   points   Int          @default(10)
   order    Int          @default(0)
   section  String?
+  imageUrl String?
 
   lesson   Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   progress UserProgress[]
@@ -200,6 +203,7 @@ model Exam {
   published    Boolean  @default(false)
   order        Int      @default(0)
   section  String?
+  imageUrl String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -219,6 +223,7 @@ model ExamQuestion {
   points   Int          @default(1)
   order    Int          @default(0)
   section  String?
+  imageUrl String?
 
   exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
 

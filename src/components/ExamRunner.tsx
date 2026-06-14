@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 type ExerciseType = 'MULTIPLE_CHOICE' | 'MULTIPLE_CHOICE_PARTIAL' | 'MULTIPLE_CHOICE_ALL' | 'FILL_BLANK' | 'FLASHCARD' | 'DICTATION' | 'SORT_WORDS'
 
 interface ExamQuestion {
-  id: string; type: ExerciseType; question: string; data: Record<string, unknown>; points: number; order: number
+  id: string; type: ExerciseType; question: string; data: Record<string, unknown>; points: number; order: number; imageUrl?: string | null
 }
 
 interface GradedAnswer {
@@ -297,6 +297,16 @@ export default function ExamRunner({
                 <p className="font-medium text-[#334155]">{q.question}</p>
                 <span className="ml-auto text-xs text-[#94A3B8] shrink-0">{q.points}đ</span>
               </div>
+
+              {q.imageUrl && (
+                <div className="mb-4 flex justify-center">
+                  <img
+                    src={q.imageUrl}
+                    alt="Hình minh hoạ"
+                    className="max-h-48 max-w-full rounded-xl object-contain border border-[#E2E8F0]"
+                  />
+                </div>
+              )}
 
               {(q.type === 'MULTIPLE_CHOICE') && (() => {
                 const opts = q.data.options as string[] ?? []

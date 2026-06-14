@@ -19,6 +19,7 @@ export async function PATCH(
   if ('data' in body) data.data = body.data
   if ('points' in body) data.points = body.points
   if ('order' in body) data.order = body.order
+  if ('imageUrl' in body) data.imageUrl = body.imageUrl
   const q = await prisma.examQuestion.update({ where: { id: qid }, data })
   return NextResponse.json(q)
 }

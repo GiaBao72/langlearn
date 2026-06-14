@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { Trash2, ChevronDown, ChevronUp, Upload, Download } from 'lucide-react'
 import LessonFilesTab from '@/components/LessonFilesTab'
+import ImageUploader from '@/components/admin/ImageUploader'
 
 type ExerciseType = 'MULTIPLE_CHOICE' | 'MULTIPLE_CHOICE_PARTIAL' | 'MULTIPLE_CHOICE_ALL' | 'FILL_BLANK' | 'FLASHCARD' | 'DICTATION' | 'SORT_WORDS'
 
@@ -14,6 +15,7 @@ interface Exercise {
   data: unknown
   points: number
   order: number
+  imageUrl?: string | null
 }
 
 interface LessonFile {
@@ -54,6 +56,7 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
   const [audioText, setAudioText] = useState('')
   const [pronunciation, setPronunciation] = useState('')
   const [points, setPoints] = useState(1)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -65,6 +68,7 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
     setAudioText(''); setPronunciation('')
     setOptions(['', '', '', '']); setWords(['', '', '', '', ''])
     setMultiAnswers([])
+    setImageUrl(null)
     setError(''); setSuccess(false)
   }
 
@@ -118,7 +122,7 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
       const res = await fetch(`/api/admin/lessons/${lessonId}/exercises`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, question: type === 'DICTATION' ? audioText : question, data: buildData(), points }),
+        body: JSON.stringify({ type, question: type === 'DICTATION' ? audioText : question, data: buildData(), points, imageUrl }),
       })
       if (!res.ok) throw new Error(await res.text())
       // Reset
@@ -126,7 +130,7 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
       setAudioText(''); setPronunciation('')
       setOptions(['', '', '', '']); setWords(['', '', '', '', ''])
       setMultiAnswers([])
-      setPoints(1); setSuccess(true)
+      setImageUrl(null); setPoints(1); setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
       onCreated()
     } catch (err) {
@@ -149,6 +153,9 @@ function ExerciseForm({ lessonId, onCreated }: { lessonId: string; onCreated: ()
             {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
+
+        {/* Hinh anh */}
+        <ImageUploader imageUrl={imageUrl} onImageChange={setImageUrl} disabled={saving} />
 
         {/* FLASHCARD */}
         {type === 'FLASHCARD' && <>

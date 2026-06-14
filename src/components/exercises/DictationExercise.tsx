@@ -71,6 +71,7 @@ export default function DictationExercise({
   submitted,
   correct,
   onChange,
+  imageUrl,
 }: {
   question: string
   data: DictationData
@@ -78,6 +79,7 @@ export default function DictationExercise({
   submitted: boolean
   correct?: boolean
   onChange: (v: string) => void
+  imageUrl?: string | null
 }) {
   const audioText    = data.audio_text ?? data.sentence ?? ''
   const hint         = data.hint ?? ''
@@ -148,6 +150,15 @@ export default function DictationExercise({
 
   return (
     <div className="max-w-lg mx-auto">
+      {imageUrl && (
+        <div className="mb-4 flex justify-center">
+          <img
+            src={imageUrl}
+            alt="Hình minh hoạ"
+            className="max-h-48 max-w-full rounded-xl object-contain border border-[#E2E8F0]"
+          />
+        </div>
+      )}
       {/* Hidden audio element for mp3 playback */}
       {audioSrc && (
         <audio

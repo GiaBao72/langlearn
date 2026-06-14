@@ -9,11 +9,12 @@ interface FlashcardData {
 }
 
 interface Props {
+  imageUrl?: string | null
   data: Record<string, unknown>
   onAnswer: (answer: string) => void
 }
 
-export default function FlashcardExercise({ data, onAnswer }: Props) {
+export default function FlashcardExercise({ data, onAnswer, imageUrl }: Props) {
   const [flipped, setFlipped] = useState(false)
   const d = data as unknown as FlashcardData
 
@@ -24,6 +25,16 @@ export default function FlashcardExercise({ data, onAnswer }: Props) {
 
   return (
     <div className="text-center">
+      {imageUrl && (
+        <div className="mb-4 flex justify-center">
+          <img
+            src={imageUrl}
+            alt="Hình minh hoạ"
+            className="max-h-48 max-w-full rounded-xl object-contain border border-[#E2E8F0]"
+          />
+        </div>
+      )}
+
       <style>{`
         .flashcard-scene { perspective: 1000px; }
         .flashcard-card {

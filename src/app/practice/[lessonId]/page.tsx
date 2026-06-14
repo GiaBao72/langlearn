@@ -158,6 +158,7 @@ export default async function PracticePage({ params, searchParams }: {
               question: e.question,
               data: e.data as Record<string, unknown>,
               points: e.points,
+              imageUrl: e.imageUrl,
             }))}
             lessonId={lessonId}
             courseId={lesson.course.id}

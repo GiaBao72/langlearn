@@ -18,11 +18,12 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import ImageUploader from '@/components/admin/ImageUploader'
 
 type ExerciseType = 'MULTIPLE_CHOICE' | 'MULTIPLE_CHOICE_PARTIAL' | 'MULTIPLE_CHOICE_ALL' | 'FILL_BLANK' | 'DICTATION' | 'SORT_WORDS'
 
 interface ExamQuestion {
-  id: string; type: ExerciseType; question: string; data: unknown; points: number; order: number
+  id: string; type: ExerciseType; question: string; data: unknown; points: number; order: number; imageUrl?: string | null
 }
 
 interface Exam {
@@ -84,6 +85,7 @@ export default function ExamEditClient({ exam: initial }: { exam: Exam }) {
   const [qMultiAnswers, setQMultiAnswers] = useState<string[]>([])
   const [qHint, setQHint] = useState('')
   const [qPoints, setQPoints] = useState(1)
+  const [qImageUrl, setQImageUrl] = useState<string | null>(null)
   const [qSaving, setQSaving] = useState(false)
   const [qError, setQError] = useState('')
 
@@ -141,7 +143,7 @@ export default function ExamEditClient({ exam: initial }: { exam: Exam }) {
   }, [questions, exam.id])
 
   function resetQForm() {
-    setQQuestion(''); setQOptions(['', '', '', '']); setQAnswer(''); setQMultiAnswers([]); setQHint(''); setQPoints(1); setQError('')
+    setQQuestion(''); setQOptions(['', '', '', '']); setQAnswer(''); setQMultiAnswers([]); setQHint(''); setQPoints(1); setQError(''); setQImageUrl(null)
   }
 
   function buildQData(): Record<string, unknown> {
@@ -179,7 +181,7 @@ export default function ExamEditClient({ exam: initial }: { exam: Exam }) {
     setQSaving(true); setQError('')
     const res = await fetch(`/api/admin/exams/${exam.id}/questions`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: qType, question: qQuestion.trim(), data: buildQData(), points: qPoints }),
+      body: JSON.stringify({ type: qType, question: qQuestion.trim(), data: buildQData(), points: qPoints, imageUrl: qImageUrl }),
     })
     setQSaving(false)
     if (res.ok) { resetQForm(); await reload(); setAddOpen(false) }
@@ -406,6 +408,10 @@ export default function ExamEditClient({ exam: initial }: { exam: Exam }) {
                   {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
+
+              {/* Hinh anh */}
+              <ImageUploader imageUrl={qImageUrl} onImageChange={setQImageUrl} disabled={qSaving} />
+
               <div>
                 <label className="text-xs font-medium text-[#64748B] mb-1 block">Câu hỏi</label>
                 <input value={qQuestion} onChange={e => setQQuestion(e.target.value)} className={inp} placeholder="Nhập câu hỏi..." required />

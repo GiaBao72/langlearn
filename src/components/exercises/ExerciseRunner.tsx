@@ -20,6 +20,7 @@ interface Exercise {
   question: string
   points: number
   data: ExerciseData
+  imageUrl?: string | null
 }
 
 interface Props {

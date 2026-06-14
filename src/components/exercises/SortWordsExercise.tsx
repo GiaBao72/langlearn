@@ -8,6 +8,7 @@ interface SortWordsData {
 }
 
 interface Props {
+  imageUrl?: string | null
   question: string
   data: Record<string, unknown>
   value: string
@@ -17,7 +18,7 @@ interface Props {
   exerciseId?: string
 }
 
-export default function SortWordsExercise({ question, data, value, onChange, submitted, correct, exerciseId }: Props) {
+export default function SortWordsExercise({ question, data, value, onChange, submitted, correct, exerciseId, imageUrl}: Props) {
   const d = data as unknown as SortWordsData
 
   const shuffleWords = (words: string[]) => {
@@ -66,6 +67,15 @@ export default function SortWordsExercise({ question, data, value, onChange, sub
 
   return (
     <div className="max-w-lg mx-auto">
+      {imageUrl && (
+    <div className="mb-4 flex justify-center">
+      <img
+        src={imageUrl}
+        alt="Hình minh hoạ"
+        className="max-h-48 max-w-full rounded-xl object-contain border border-[#E2E8F0]"
+      />
+    </div>
+  )}
       <p className="text-xl font-semibold text-[#334155] mb-6 text-center leading-relaxed">
         {question}
       </p>

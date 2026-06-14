@@ -28,7 +28,7 @@ export async function POST(
   if (!user || user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id: lessonId } = await params
-  const { type, question, data, points, order } = (await req.json().catch(() => null) ?? {}) as any;
+  const { type, question, data, points, order, imageUrl } = (await req.json().catch(() => null) ?? {}) as any;
 
   if (!type || !question || !data) {
     return NextResponse.json({ error: 'type, question, data are required' }, { status: 400 })
@@ -48,6 +48,7 @@ export async function POST(
       data,
       points: points ?? 10,
       order: order ?? (lastEx ? lastEx.order + 1 : 1),
+      imageUrl: imageUrl ?? null,
     },
   })
 

@@ -53,7 +53,7 @@ export default async function ExamStartPage({ params }: { params: Promise<{ id: 
     const data = q.data as Record<string, unknown>
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { answer, answers, audio_text, correctIndex, ...rest } = data
-    return { id: q.id, type: q.type as Parameters<typeof ExamRunner>[0]['questions'][0]['type'], question: q.question, data: rest, points: q.points, order: q.order }
+    return { id: q.id, type: q.type as Parameters<typeof ExamRunner>[0]['questions'][0]['type'], question: q.question, data: rest, points: q.points, order: q.order, imageUrl: q.imageUrl }
   })
 
   return (

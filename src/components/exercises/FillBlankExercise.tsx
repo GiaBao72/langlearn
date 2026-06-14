@@ -7,6 +7,7 @@ interface FillBlankData {
 }
 
 interface Props {
+  imageUrl?: string | null
   question: string
   data: Record<string, unknown>
   value: string
@@ -16,7 +17,7 @@ interface Props {
   correct: boolean
 }
 
-export default function FillBlankExercise({ question, data, value, onChange, onSubmit, submitted, correct }: Props) {
+export default function FillBlankExercise({ question, data, value, onChange, onSubmit, submitted, correct, imageUrl}: Props) {
   const d = data as unknown as FillBlankData
   const parts = question.split('___')
 
@@ -26,6 +27,15 @@ export default function FillBlankExercise({ question, data, value, onChange, onS
 
   return (
     <div className="max-w-lg mx-auto">
+      {imageUrl && (
+    <div className="mb-4 flex justify-center">
+      <img
+        src={imageUrl}
+        alt="Hình minh hoạ"
+        className="max-h-48 max-w-full rounded-xl object-contain border border-[#E2E8F0]"
+      />
+    </div>
+  )}
       <p className="text-lg font-medium text-[#334155] mb-6 text-center leading-relaxed">
         {parts.length > 1 ? (
           <>

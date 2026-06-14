@@ -29,7 +29,7 @@ export async function PATCH(
   let body: Record<string, unknown>
 
   try { body = await req.json().catch(() => null) } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }) }
-  const allowed = ['type', 'question', 'data', 'points', 'order']
+  const allowed = ['type', 'question', 'data', 'points', 'order', 'imageUrl']
   const data: Record<string, unknown> = {}
   for (const key of allowed) { if (key in body) data[key] = body[key] }
   if (!Object.keys(data).length) return NextResponse.json({ error: 'No valid fields' }, { status: 400 })

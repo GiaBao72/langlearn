@@ -26,11 +26,11 @@ export async function POST(
   let body: any
 
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
-  const { type, question, data, points } = body
+  const { type, question, data, points, imageUrl } = body
   if (!type || !question) return NextResponse.json({ error: 'type and question required' }, { status: 400 })
   const count = await prisma.examQuestion.count({ where: { examId } })
   const q = await prisma.examQuestion.create({
-    data: { examId, type, question, data: data ?? {}, points: points ?? 1, order: count },
+    data: { examId, type, question, data: data ?? {}, points: points ?? 1, order: count, imageUrl: imageUrl ?? null },
   })
   return NextResponse.json(q, { status: 201 })
 }
