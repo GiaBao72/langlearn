@@ -589,13 +589,14 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
           )}
 
           {exercise.type === 'FLASHCARD' && (
-            <FlashcardExercise data={exercise.data} onAnswer={handleFlashcardAnswer} />
+            <FlashcardExercise data={exercise.data} onAnswer={handleFlashcardAnswer} imageUrl={exercise.imageUrl} />
           )}
           {exercise.type === 'FILL_BLANK' && (
             <FillBlankExercise
               question={exercise.question} data={exercise.data}
               value={userAnswer} onChange={setUserAnswer}
               onSubmit={checkAnswer} submitted={submitted} correct={correct}
+              imageUrl={exercise.imageUrl}
             />
           )}
           {exercise.type === 'MULTIPLE_CHOICE' && (
@@ -603,6 +604,7 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
               question={exercise.question} data={exercise.data}
               value={userAnswer} onChange={setUserAnswer}
               submitted={submitted} correct={correct}
+              imageUrl={exercise.imageUrl}
             />
           )}
           {(exercise.type === 'MULTIPLE_CHOICE_PARTIAL' || exercise.type === 'MULTIPLE_CHOICE_ALL') && (
@@ -611,6 +613,7 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
               value={userAnswer} onChange={setUserAnswer}
               submitted={submitted} correct={correct}
               scoreMode={exercise.type === 'MULTIPLE_CHOICE_PARTIAL' ? 'partial' : 'all'}
+              imageUrl={exercise.imageUrl}
             />
           )}
           {exercise.type === 'DICTATION' && (
@@ -618,6 +621,7 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
               question={exercise.question} data={exercise.data as {audio_text?: string; sentence?: string; answer: string; hint?: string}}
               value={userAnswer} onChange={setUserAnswer}
               submitted={submitted} correct={correct}
+              imageUrl={exercise.imageUrl}
             />
           )}
           {exercise.type === 'SORT_WORDS' && (
@@ -626,6 +630,7 @@ export default function ExerciseRunner({ exercises: rawExercises, lessonId, cour
               value={userAnswer} onChange={setUserAnswer}
               submitted={submitted} correct={correct}
               exerciseId={exercise.id}
+              imageUrl={exercise.imageUrl}
             />
           )}
         </motion.div>
