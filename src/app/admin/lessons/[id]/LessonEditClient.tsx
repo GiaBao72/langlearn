@@ -464,12 +464,17 @@ function EditExerciseForm({ exercise, onSaved, onCancel }: {
     Array.isArray(data.words) ? data.words as string[] : ['', '', '', '']
   )
   const [audioText, setAudioText] = useState(String(data.audio_text ?? ''))
+  const [imageUrl, setImageUrl] = useState<string | null>(exercise.imageUrl ?? null)
+  const [multiAnswers, setMultiAnswers] = useState<string[]>(
+    Array.isArray(data.answers) ? data.answers as string[] : []
+  )
   const [saving, setSaving] = useState(false)
 
   function buildData() {
     const t = exercise.type
     if (t === 'FILL_BLANK') return { sentence, answer, hint }
     if (t === 'MULTIPLE_CHOICE') return { options: options.filter(o => o.trim()), answer, explanation: hint }
+    if (t === 'MULTIPLE_CHOICE_PARTIAL' || t === 'MULTIPLE_CHOICE_ALL') return { options: options.filter(o => o.trim()), answers: multiAnswers, explanation: hint }
     if (t === 'FLASHCARD') return { front, back: answer, pronunciation }
     if (t === 'SORT_WORDS') return { words: options.filter(o => o.trim()), answer }
     if (t === 'DICTATION') return { audio_text: audioText, answer, hint }
@@ -481,7 +486,7 @@ function EditExerciseForm({ exercise, onSaved, onCancel }: {
     await fetch(`/api/admin/exercises/${exercise.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, points, data: buildData() }),
+      body: JSON.stringify({ question, points, data: buildData(), imageUrl }),
     })
     setSaving(false)
     onSaved()
@@ -490,6 +495,7 @@ function EditExerciseForm({ exercise, onSaved, onCancel }: {
   return (
     <div className="mt-3 border-t border-[#E2E8F0] pt-3 space-y-3">
       <p className="text-xs font-semibold text-[#2563EB] uppercase tracking-wider">Chỉnh sửa</p>
+      <ImageUploader imageUrl={imageUrl} onImageChange={setImageUrl} disabled={saving} />
       <div>
         <label className="text-xs text-[#64748B] mb-1 block">Câu hỏi</label>
         <input value={question} onChange={e => setQuestion(e.target.value)}
@@ -532,6 +538,31 @@ function EditExerciseForm({ exercise, onSaved, onCancel }: {
             <input value={hint} onChange={e => setHint(e.target.value)}
               className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
           </div>
+        </div>
+      </>}
+      {(exercise.type === 'MULTIPLE_CHOICE_PARTIAL' || exercise.type === 'MULTIPLE_CHOICE_ALL') && <>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Các lựa chọn</label>
+          {options.map((o, i) => (
+            <div key={i} className="flex gap-2 mb-1.5 items-center">
+              <input value={o} onChange={e => { const n=[...options]; n[i]=e.target.value; setOptions(n) }}
+                className="flex-1 border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]"
+                placeholder={`Lựa chọn ${i+1}`} />
+              <button type="button" onClick={() => {
+                const t = o.trim(); if (!t) return
+                setMultiAnswers(ma => ma.includes(t) ? ma.filter(a => a !== t) : [...ma, t])
+              }}
+                className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center text-sm shrink-0 transition-colors ${
+                  multiAnswers.includes(o.trim()) && o.trim() ? 'border-green-500 bg-green-50 text-green-600' : 'border-[#E2E8F0] text-[#94A3B8]'
+                }`}>✓</button>
+            </div>
+          ))}
+          <button type="button" onClick={() => setOptions([...options, ''])} className="text-xs text-[#2563EB] hover:underline mt-1">+ Thêm</button>
+        </div>
+        <div>
+          <label className="text-xs text-[#64748B] mb-1 block">Giải thích <span className="font-normal">(tuỳ chọn)</span></label>
+          <input value={hint} onChange={e => setHint(e.target.value)}
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]" />
         </div>
       </>}
       {exercise.type === 'FLASHCARD' && <>
