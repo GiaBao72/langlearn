@@ -32,11 +32,7 @@ export async function GET(
   const headers: Record<string, string> = {
     'Content-Type': record.mimeType,
     'Content-Length': String(record.sizeBytes),
-  }
-  if (record.downloadPolicy === 'view_only') {
-    headers['Content-Disposition'] = `inline; filename="${record.displayName}"`
-  } else {
-    headers['Content-Disposition'] = `attachment; filename="${record.displayName}"`
+    'Content-Disposition': `inline; filename="${record.displayName}"`,
   }
 
   // @ts-expect-error Node.js stream to Response

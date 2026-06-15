@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Eye } from 'lucide-react'
+import { Eye, FileText, FileImage, File } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 interface LessonFile {
@@ -12,6 +12,12 @@ function formatBytes(n: number) {
   if (n < 1024) return n + ' B'
   if (n < 1048576) return (n / 1024).toFixed(1) + ' KB'
   return (n / 1048576).toFixed(1) + ' MB'
+}
+
+function FileIcon({ mimeType }: { mimeType: string }) {
+  if (mimeType.startsWith('image/')) return <FileImage className="w-4 h-4" />
+  if (mimeType === 'application/pdf' || mimeType.includes('text')) return <FileText className="w-4 h-4" />
+  return <File className="w-4 h-4" />
 }
 
 export default function LessonContent({ content, files }: { content: string | null; files: LessonFile[] }) {
@@ -43,17 +49,17 @@ export default function LessonContent({ content, files }: { content: string | nu
           </h3>
           <div className="space-y-2">
             {files.map(f => (
-              <a key={f.id} href={`/api/files/${f.id}`} target="_blank" rel="noreferrer"
+              <a key={f.id} href={`/api/files/${f.id}`} target="_blank" rel="noreferrer noopener"
                 className="flex items-center gap-3 p-3 border border-[#E2E8F0] rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all group">
                 <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-[#2563EB] shrink-0">
-                  {f.downloadPolicy === 'view_only' ? <Eye className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                  <FileIcon mimeType={f.mimeType} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[#334155] group-hover:text-[#2563EB] transition-colors truncate">{f.displayName}</p>
-                  <p className="text-xs text-[#94A3B8]">{formatBytes(f.sizeBytes)} · {f.downloadPolicy === 'view_only' ? 'Chỉ xem' : 'Tải về'}</p>
+                  <p className="text-xs text-[#94A3B8]">{formatBytes(f.sizeBytes)}</p>
                 </div>
-                <span className="text-[#CBD5E1] group-hover:text-[#2563EB] transition-colors text-sm shrink-0">
-                  {f.downloadPolicy === 'view_only' ? '👁' : '↓'}
+                <span className="flex items-center gap-1 text-xs text-[#2563EB] font-medium shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Eye className="w-3.5 h-3.5" /> Xem
                 </span>
               </a>
             ))}
