@@ -5,6 +5,8 @@ import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { randomBytes } from 'crypto'
 
+export const maxDuration = 60
+
 const UPLOAD_DIR = join(process.cwd(), 'uploads')
 
 // GET /api/admin/lessons/[id]/files — list files
